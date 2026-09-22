@@ -2,6 +2,21 @@ import type { ZodError } from 'zod';
 
 export { cn } from 'cn';
 
+/**
+ * Harga, total, and every other amount as it is written for a person: whole
+ * rupiah, grouped in thousands. The grouping is `Intl`'s, but the `Rp` prefix
+ * is added by hand — the currency style would join them with a non-breaking
+ * space, which reads as a different string to anything comparing or trimming it.
+ *
+ * Money has no decimals in this app (CONTEXT.md), so the fraction digits are
+ * dropped rather than formatted as `,00`.
+ */
+const RUPIAH_GROUPING = new Intl.NumberFormat('id-ID');
+
+export function formatRupiah(amount: number): string {
+	return `Rp ${RUPIAH_GROUPING.format(amount)}`;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type WithoutChild<T> = T extends { child?: any } ? Omit<T, 'child'> : T;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

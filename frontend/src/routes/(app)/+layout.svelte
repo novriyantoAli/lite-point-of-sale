@@ -6,14 +6,18 @@
 	let { data, children } = $props();
 
 	// The till is the first screen of #6; for now the dashboard is home. Only an
-	// Admin sees the Pengguna entry, and the route guard backs it up.
+	// Admin sees the catalogue and the Pengguna entry, and the route guard backs it
+	// up.
 	//
 	// `resolve` takes SvelteKit's route ids, which keep the group prefix — it is
 	// what turns `/(app)/pengguna` into the `/pengguna` a link needs.
 	const navigation = $derived([
 		{ href: resolve('/'), label: 'Beranda' },
 		...(data.user?.role === 'admin'
-			? [{ href: resolve('/(app)/pengguna'), label: 'Pengguna' }]
+			? [
+					{ href: resolve('/(app)/produk'), label: 'Produk' },
+					{ href: resolve('/(app)/pengguna'), label: 'Pengguna' }
+				]
 			: [])
 	]);
 </script>

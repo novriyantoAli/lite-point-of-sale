@@ -63,3 +63,72 @@ export async function createPengguna(
 	await expect(page.getByRole('status')).toContainText(username);
 	await expect(penggunaRow(page, username)).toBeVisible();
 }
+
+/**
+ * The catalogue filter bar. It shares its field labels with the Produk form
+ * below it — deliberately, because that is what each is to the person using it
+ * — so a test that types without scoping would be typing into the wrong one.
+ */
+export function produkFilter(page: Page) {
+	return page.getByRole('search', { name: 'Saring katalog' });
+}
+
+/** The Produk form, scoped for the same reason as `produkFilter`. */
+export function produkForm(page: Page) {
+	return page.getByRole('form', { name: 'Formulir Produk' });
+}
+
+/** The catalogue row of one Produk, so a test never matches a similar name. */
+export function produkRow(page: Page, name: string) {
+	return page.locator('tbody tr').filter({ has: page.getByText(name, { exact: true }) });
+}
+
+/**
+ * Adds a Produk through the Admin UI and waits for it to appear in the
+ * catalogue. Kode and Kategori are only filled when a test needs them, which
+ * keeps the "both may be left blank" rule exercised by the other tests.
+ */
+export async function createProduk(
+	page: Page,
+	{
+		name,
+		code,
+		price,
+		stock,
+		category
+	}: { name: string; code?: string; price: number; stock: number; category?: string }
+) {
+	await page.goto('/produk');
+	await page.getByRole('button', { name: 'Tambah Produk' }).click();
+
+	const form = produkForm(page);
+	await form.getByLabel('Nama').fill(name);
+	if (code !== undefined) {
+		await form.getByLabel('Kode').fill(code);
+	}
+	await form.getByLabel('Harga').fill(String(price));
+	await form.getByLabel('Stok').fill(String(stock));
+	if (category !== undefined) {
+		await form.getByLabel('Kategori').fill(category);
+	}
+
+	await page.getByRole('button', { name: 'Tambah', exact: true }).click();
+
+	// The form reports success and the new Produk shows up in the catalogue.
+	await expect(page.getByRole('status')).toContainText(name);
+	await expect(produkRow(page, name)).toBeVisible();
+}
+
+/** Fills the Produk form without submitting it, for the refusal tests. */
+export async function fillProdukForm(
+	page: Page,
+	{ name, code, price, stock }: { name: string; code?: string; price: number; stock: number }
+) {
+	const form = produkForm(page);
+	await form.getByLabel('Nama').fill(name);
+	if (code !== undefined) {
+		await form.getByLabel('Kode').fill(code);
+	}
+	await form.getByLabel('Harga').fill(String(price));
+	await form.getByLabel('Stok').fill(String(stock));
+}

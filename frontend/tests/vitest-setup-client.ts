@@ -20,3 +20,10 @@ Object.defineProperty(window, 'matchMedia', {
 
 // jsdom does not implement scrollIntoView either.
 Element.prototype.scrollIntoView = vi.fn();
+
+// Nor the pointer-capture API, which bits-ui's Select calls on pointerdown to
+// keep a drag inside the trigger. Without these, opening a Select throws before
+// an option can be picked and no component test can reach one.
+Element.prototype.hasPointerCapture = vi.fn();
+Element.prototype.setPointerCapture = vi.fn();
+Element.prototype.releasePointerCapture = vi.fn();
