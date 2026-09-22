@@ -48,8 +48,8 @@ const optionalText = z
 
 /**
  * Money and Stok arrive from a form as text while the API stores integers, so
- * the schema coerces — then enforces exactly the rules `usecase/produk` on the
- * Go side enforces, so a field error and a request error cannot disagree.
+ * the schema parses — then enforces exactly the rules `usecase/produk` on the Go
+ * side enforces, so a field error and a request error cannot disagree.
  *
  * A blank field fails instead of quietly becoming 0: an empty Harga is almost
  * always one the Admin forgot, and a Produk priced 0 by accident is worse than a
@@ -57,14 +57,33 @@ const optionalText = z
  */
 function wholeNumber(integerMessage: string, negativeMessage: string) {
 	return z.preprocess(
-		(value) => (typeof value === 'string' && value.trim() === '' ? Number.NaN : value),
+		(value) => (typeof value === 'string' ? parseIntegerLiteral(value) : value),
 		// The type check carries the same message as `.int()`: a value that is not a
 		// number at all ("seribu") and a blank one both arrive as NaN, and zod
 		// reports those from the type check — before `.int()` ever runs. Without
 		// this, the form shows zod's English default instead of the message the
 		// Admin needs to read.
-		z.coerce.number({ message: integerMessage }).int(integerMessage).nonnegative(negativeMessage)
+		z.number({ message: integerMessage }).int(integerMessage).nonnegative(negativeMessage)
 	);
+}
+
+/**
+ * Only a plain integer literal counts as a number. `z.coerce.number()` would run
+ * `Number()` first, and `Number('18.000')` is 18 — so an Admin who typed the
+ * Indonesian thousands separator would have saved a Produk at a thousandth of
+ * the Harga the list then showed back ("Rp 18.000"), with nothing to notice.
+ *
+ * Money in this app has no decimals (CONTEXT.md), so a `.` or `,` in the field
+ * is a separator this form does not take. Failing is the honest answer: the
+ * schema cannot tell whether `18.000` meant 18000 or a mistyped 18, and guessing
+ * wrong by 1000× is worse than asking again.
+ */
+const INTEGER_LITERAL = /^[+-]?\d+$/;
+
+function parseIntegerLiteral(value: string): number {
+	const trimmed = value.trim();
+
+	return INTEGER_LITERAL.test(trimmed) ? Number(trimmed) : Number.NaN;
 }
 
 /** What the form fills in to add or change a Produk. */

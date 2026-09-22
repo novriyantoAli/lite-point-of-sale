@@ -132,6 +132,42 @@ describe('ProdukInputSchema', () => {
 		expect(result.error?.issues[0]?.message).toBe('Harga harus bilangan bulat.');
 	});
 
+	it('rejects a Harga written with the Indonesian thousands separator instead of reading it as 18', () => {
+		// `Number('18.000')` is 18, so coercing would have saved this Produk at Rp 18
+		// while the list showed "Rp 18.000" back — a silent 1000× mistake.
+		const result = ProdukInputSchema.safeParse({ name: 'Kopi', price: '18.000', stock: 0 });
+
+		expect(result.success).toBe(false);
+		expect(result.error?.issues[0]?.message).toBe('Harga harus bilangan bulat.');
+	});
+
+	it('rejects a separator wherever the grouping lands', () => {
+		// "1.500" used to coerce to 1.5 and "18,000" to NaN, so the same typo failed
+		// or not depending on the digits. Money has no decimals here, so all of them
+		// have to fail the same way.
+		for (const price of ['1.500', '18,000', '1 500', '1e3']) {
+			expect(ProdukInputSchema.safeParse({ name: 'Kopi', price, stock: 0 }).success).toBe(false);
+		}
+	});
+
+	it('rejects a Stok with a separator, since it is the same rule', () => {
+		const result = ProdukInputSchema.safeParse({ name: 'Kopi', price: 1000, stock: '1.000' });
+
+		expect(result.success).toBe(false);
+		expect(result.error?.issues[0]?.message).toBe('Stok harus bilangan bulat.');
+	});
+
+	it('rejects an absent Harga instead of coercing it to 0', () => {
+		const result = ProdukInputSchema.safeParse({ name: 'Kopi', stock: 0 });
+
+		expect(result.success).toBe(false);
+		expect(result.error?.issues[0]?.message).toBe('Harga harus bilangan bulat.');
+	});
+
+	it('accepts whitespace around a whole Harga', () => {
+		expect(ProdukInputSchema.parse({ name: 'Kopi', price: ' 18000 ', stock: 0 }).price).toBe(18000);
+	});
+
 	it('accepts a Harga of 0: a free Produk is a choice, not a mistake', () => {
 		expect(ProdukInputSchema.parse({ name: 'Air', price: '0', stock: '0' }).price).toBe(0);
 	});

@@ -33,8 +33,8 @@
 	/**
 	 * The fields stay strings: a form submits text, and the schema is the one
 	 * place that turns that text into the integers the API takes (§11, and the
-	 * reason `ProdukInputSchema` coerces). Parsing here as well would be a second
-	 * set of rules to keep in step.
+	 * reason `ProdukInputSchema` owns the parsing). Parsing here as well would be a
+	 * second set of rules to keep in step.
 	 */
 	// The parent remounts this component per record, so the prop is deliberately
 	// read only once, when the fields are initialized: `untrack` states that
