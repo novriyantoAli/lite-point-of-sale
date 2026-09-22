@@ -11,3 +11,7 @@ Five canonical triage roles map to GitHub labels with default names: `needs-tria
 ### Domain docs
 
 Single-context — `CONTEXT.md` at the repo root plus `docs/adr/`. See `docs/agents/domain.md`.
+
+### Code organization
+
+Backend Go follows Clean Architecture (`domain` → `usecase` → `adapter` → `infrastructure`, dependencies point inward); SvelteKit keeps the BFF separate from the UI. See `docs/adr/0004-clean-architecture.md`.
