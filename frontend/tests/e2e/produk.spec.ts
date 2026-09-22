@@ -100,6 +100,39 @@ test('the Nama and Kode filters narrow the catalogue', async ({ page }) => {
 	await expect(produkRow(page, 'Filter Teh E2E')).toHaveCount(0);
 });
 
+test('the Kategori filter narrows the catalogue to one Kategori', async ({ page }) => {
+	await logIn(page);
+	await createProduk(page, {
+		name: 'Kategori Kopi E2E',
+		price: 1000,
+		stock: 1,
+		category: 'Minuman E2E'
+	});
+	await createProduk(page, {
+		name: 'Kategori Roti E2E',
+		price: 2000,
+		stock: 1,
+		category: 'Makanan E2E'
+	});
+
+	const filter = produkFilter(page);
+
+	// The Kategori dropdown is the same bits-ui Select as Status, but its options
+	// come from `GET /api/produk/kategori` — so this is the test that shows the
+	// Kategori in use actually reaching the browser, not just the API.
+	await filter.getByLabel('Kategori').click();
+	await page.getByRole('option', { name: 'Minuman E2E', exact: true }).click();
+
+	await expect(produkRow(page, 'Kategori Kopi E2E')).toBeVisible();
+	await expect(produkRow(page, 'Kategori Roti E2E')).toHaveCount(0);
+
+	// Back to "Semua Kategori": the sentinel is not a Kategori name, so it has to
+	// widen the catalogue again rather than filter on the literal string.
+	await filter.getByLabel('Kategori').click();
+	await page.getByRole('option', { name: 'Semua Kategori', exact: true }).click();
+	await expect(produkRow(page, 'Kategori Roti E2E')).toBeVisible();
+});
+
 test('deactivating a Produk hides it from the Aktif filter and the Nonaktif one finds it', async ({
 	page
 }) => {
