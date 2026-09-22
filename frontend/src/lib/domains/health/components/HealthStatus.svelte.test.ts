@@ -30,11 +30,12 @@ describe('HealthStatus', () => {
 		expect(await screen.findByText('DEGRADED')).toBeInTheDocument();
 	});
 
-	it('tells the user when the server cannot be reached', async () => {
-		check.mockRejectedValue(new Error('backend unreachable'));
+	it('shows the normalized error message when the check fails', async () => {
+		check.mockRejectedValue({ message: 'Tidak dapat menghubungi server.', status: 503 });
 
 		render(HealthStatus, {}, { wrapper: QueryClientHarness });
 
 		expect(await screen.findByText('Tidak dapat menghubungi server.')).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: 'Coba lagi' })).toBeInTheDocument();
 	});
 });

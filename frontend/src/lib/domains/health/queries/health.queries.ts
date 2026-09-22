@@ -1,5 +1,7 @@
 import { browser } from '$app/environment';
 import { createQuery } from '@tanstack/svelte-query';
+import type { AppError } from '$lib/api/errors';
+import type { Health } from '../schemas/health.schema';
 import { healthApi } from '../api/health.api';
 
 export const healthKeys = {
@@ -15,7 +17,7 @@ export const healthKeys = {
  * dashboard does not need SSR.
  */
 export function createHealthQuery() {
-	return createQuery(() => ({
+	return createQuery<Health, AppError>(() => ({
 		queryKey: healthKeys.status(),
 		queryFn: () => healthApi.check(),
 		enabled: browser,
