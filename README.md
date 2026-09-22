@@ -50,7 +50,7 @@ pnpm dev
 | `BACKEND_URL` | `http://localhost:8080` | base URL API Go yang diproksi BFF |
 | `SESSION_MAX_AGE_SECONDS` | `43200` (12 jam) | umur cookie sesi — setidaknya sebesar `POS_SESSION_TTL` |
 
-Buka <http://localhost:5173> — tanpa sesi kamu diarahkan ke **/login**. Login dengan `admin` / `admin123` (atau nilai `POS_ADMIN_*` yang kamu set). Setelah masuk, kartu **Status layanan** menampilkan `OK` yang berasal dari Go lewat BFF (`/api/health` → Go → SQLite), dan Admin punya menu **Pengguna** untuk menambah Kasir atau menonaktifkan akun.
+Buka <http://localhost:5173> — tanpa sesi kamu diarahkan ke **/login**. Login dengan `admin` / `admin123` (atau nilai `POS_ADMIN_*` yang kamu set). Setelah masuk, kartu **Status layanan** menampilkan `OK` yang berasal dari Go lewat BFF (`/api/health` → Go → SQLite), dan Admin punya menu **Pengguna** untuk menambah Kasir atau menonaktifkan akun serta menu **Produk** untuk mengelola katalog (tambah, ubah, Nonaktifkan, atau hapus selama belum pernah terjual).
 
 Sesi dipegang SvelteKit sebagai cookie httpOnly berisi token internal dari Go: browser tidak pernah melihat tokennya (ADR-0001, ADR-0006, ADR-0010).
 
@@ -77,6 +77,6 @@ cd frontend && pnpm test:e2e
 
 - `backend/tests/e2e` memanggil **API Go lewat HTTP** (`httptest` + SQLite nyata) — lapisan e2e piramida tes (ADR-0007). Termasuk jalur autentikasi: panggilan tanpa token ditolak, peran Kasir ditolak di rute Admin, dan Pengguna yang dinonaktifkan kehilangan sesinya.
 - Tes frontend menguji schema zod, lapisan `api`, proxy BFF (termasuk cookie sesi), penjaga rute `hooks.server.ts`, dan komponen lewat `api` palsu (ADR-0007).
-- `frontend/tests/e2e/*.spec.ts` menjalankan **browser sungguhan** ke build produksi: login/logout, batas peran, dan dashboard yang menampilkan `OK` dari Go lewat BFF (ADR-0009).
+- `frontend/tests/e2e/*.spec.ts` menjalankan **browser sungguhan** ke build produksi: login/logout, batas peran, katalog Produk (CRUD, Kode unik, Nonaktif, saring/filter), dan dashboard yang menampilkan `OK` dari Go lewat BFF (ADR-0009).
 
 CI menjalankan semuanya pada `push`/`pull_request` ke `main` — job `backend`, `frontend`, dan `e2e` (`.github/workflows/ci.yml`, ADR-0008 + ADR-0009).
