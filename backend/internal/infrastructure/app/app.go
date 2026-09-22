@@ -19,7 +19,7 @@ import (
 
 // App is a running set of adapters and use cases, ready to serve HTTP.
 type App struct {
-	handler http.Handler
+	handler  http.Handler
 	database *sql.DB
 
 	closeOnce sync.Once
