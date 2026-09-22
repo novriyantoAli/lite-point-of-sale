@@ -3,7 +3,7 @@ import { PATCH } from './[id]/+server';
 import { GET, POST } from './+server';
 
 vi.mock('$lib/config/env', () => ({
-	serverEnv: { backendUrl: 'http://backend.test' }
+	serverEnv: { backendUrl: 'http://backend.test', sessionMaxAgeSeconds: 43_200 }
 }));
 
 /** A request arriving at the BFF with a session cookie already set. */

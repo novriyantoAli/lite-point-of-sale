@@ -11,12 +11,13 @@
 	} from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
+	import { collectFieldErrors } from '$lib/utils';
 	import { createLoginMutation } from '../queries/auth.queries';
 	import { LoginInputSchema } from '../schemas/auth.schema';
 
 	let username = $state('');
 	let password = $state('');
-	let fieldErrors = $state<{ username?: string; password?: string }>({});
+	let fieldErrors = $state<Partial<Record<'username' | 'password', string>>>({});
 
 	const login = createLoginMutation();
 
@@ -28,12 +29,7 @@
 		// a field error and a request error can never disagree.
 		const parsed = LoginInputSchema.safeParse({ username, password });
 		if (!parsed.success) {
-			for (const issue of parsed.error.issues) {
-				const field = issue.path[0];
-				if (field === 'username' || field === 'password') {
-					fieldErrors[field] ??= issue.message;
-				}
-			}
+			fieldErrors = collectFieldErrors(parsed.error, ['username', 'password'] as const);
 			return;
 		}
 

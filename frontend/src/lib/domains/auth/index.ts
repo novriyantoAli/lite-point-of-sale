@@ -1,7 +1,9 @@
-// Public surface of the auth domain. `api/` and `queries/` stay internal —
-// other domains and routes import from here only (ADR-0006).
+// Public surface of the auth domain. `api/` and `state/` stay internal: the
+// query factories are exported because routes and the layout are what call them
+// (ADR-0006).
 export { default as LoginForm } from './components/LoginForm.svelte';
 export { default as PenggunaList } from './components/PenggunaList.svelte';
+export { default as RoleBadge } from './components/RoleBadge.svelte';
 export { default as SessionMenu } from './components/SessionMenu.svelte';
 
 export {
@@ -17,14 +19,16 @@ export {
 	BackendSessionSchema,
 	CreatePenggunaInputSchema,
 	LoginInputSchema,
+	PenggunaActiveInputSchema,
+	PenggunaEnvelopeSchema,
 	PenggunaListSchema,
 	PenggunaSchema,
 	RoleSchema,
-	SessionSchema,
 	MAX_PASSWORD_LENGTH,
 	MIN_PASSWORD_LENGTH,
 	type CreatePenggunaInput,
 	type LoginInput,
 	type Pengguna,
+	type PenggunaActiveInput,
 	type Role
 } from './schemas/auth.schema';

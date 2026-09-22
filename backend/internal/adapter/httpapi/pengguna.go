@@ -88,11 +88,8 @@ func setPenggunaActiveHandler(service AuthService, logger *slog.Logger) http.Han
 			return
 		}
 
-		actor, ok := currentUser(r.Context())
+		actor, ok := requireUser(w, r, logger)
 		if !ok {
-			// Reaching here means the route was wired without
-			// withAuthentication in front of it.
-			writeError(w, domainauth.ErrInvalidToken, logger)
 			return
 		}
 

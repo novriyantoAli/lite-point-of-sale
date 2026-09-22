@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
+	import RoleBadge from './RoleBadge.svelte';
 	import { createLogoutMutation } from '../queries/auth.queries';
 	import type { Pengguna } from '../schemas/auth.schema';
 
@@ -18,18 +18,20 @@
 	async function signOut() {
 		try {
 			await logout.mutateAsync();
-		} finally {
-			// Even a failed logout leaves the terminal on the login page: the
-			// cookie is cleared there, and a Kasir handing the terminal over must
-			// not be left looking at an open till.
-			await goto(resolve('/login'), { invalidateAll: true });
+		} catch {
+			// A failed logout means the BFF never saw the request, so the cookie is
+			// still there and the guard sends this navigation straight back to the
+			// dashboard — which is the truth: the session is still open. What must
+			// not happen is an unhandled rejection.
 		}
+
+		await goto(resolve('/login'), { invalidateAll: true });
 	}
 </script>
 
 <div class="flex items-center gap-2">
 	<span class="text-sm text-muted-foreground">{user.username}</span>
-	<Badge variant="secondary">{user.role === 'admin' ? 'Admin' : 'Kasir'}</Badge>
+	<RoleBadge role={user.role} />
 	<Button variant="outline" size="sm" disabled={logout.isPending} onclick={() => void signOut()}>
 		Keluar
 	</Button>

@@ -4,6 +4,8 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import * as Select from '$lib/components/ui/select';
+	import { collectFieldErrors } from '$lib/utils';
+	import RoleBadge from './RoleBadge.svelte';
 	import {
 		createPenggunaListQuery,
 		createPenggunaMutation,
@@ -25,7 +27,7 @@
 	let username = $state('');
 	let password = $state('');
 	let role = $state<Role>('kasir');
-	let fieldErrors = $state<{ username?: string; password?: string }>({});
+	let fieldErrors = $state<Partial<Record<'username' | 'password', string>>>({});
 	let notice = $state('');
 
 	async function submit(event: SubmitEvent) {
@@ -36,12 +38,7 @@
 		// The same schema the api layer parses with, so a rule is written once.
 		const parsed = CreatePenggunaInputSchema.safeParse({ username, password, role });
 		if (!parsed.success) {
-			for (const issue of parsed.error.issues) {
-				const field = issue.path[0];
-				if (field === 'username' || field === 'password') {
-					fieldErrors[field] ??= issue.message;
-				}
-			}
+			fieldErrors = collectFieldErrors(parsed.error, ['username', 'password'] as const);
 			return;
 		}
 
@@ -134,7 +131,7 @@
 				<li class="flex items-center justify-between gap-4 p-4">
 					<div class="flex items-center gap-2">
 						<span class="font-medium">{user.username}</span>
-						<Badge variant="secondary">{user.role === 'admin' ? 'Admin' : 'Kasir'}</Badge>
+						<RoleBadge role={user.role} />
 						{#if !user.active}
 							<Badge variant="outline">Nonaktif</Badge>
 						{/if}

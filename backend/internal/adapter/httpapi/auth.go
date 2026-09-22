@@ -92,11 +92,8 @@ func loginHandler(service AuthService, logger *slog.Logger) http.HandlerFunc {
 // token and never a copy of the Pengguna.
 func meHandler(logger *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		user, ok := currentUser(r.Context())
+		user, ok := requireUser(w, r, logger)
 		if !ok {
-			// Reaching here means the route was wired without
-			// withAuthentication in front of it.
-			writeError(w, domainauth.ErrInvalidToken, logger)
 			return
 		}
 

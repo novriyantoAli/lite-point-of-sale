@@ -26,6 +26,16 @@ export type Pengguna = z.infer<typeof PenggunaSchema>;
 export const MIN_PASSWORD_LENGTH = 8;
 export const MAX_PASSWORD_LENGTH = 72;
 
+/**
+ * bcrypt hashes at most 72 **bytes**, and Go compares `len()` — bytes — before
+ * hashing. zod's `.max()` counts UTF-16 code units instead, so the check is done
+ * on the encoded length: without this, a password of 40 accented characters is
+ * 80 bytes, passes here, and comes back as a 400 from the API.
+ */
+function withinBcryptLimit(password: string): boolean {
+	return new TextEncoder().encode(password).length <= MAX_PASSWORD_LENGTH;
+}
+
 export const LoginInputSchema = z.object({
 	username: z.string().trim().min(1, 'Username wajib diisi.'),
 	password: z.string().min(1, 'Password wajib diisi.')
@@ -37,10 +47,14 @@ export const CreatePenggunaInputSchema = z.object({
 	password: z
 		.string()
 		.min(MIN_PASSWORD_LENGTH, `Password minimal ${MIN_PASSWORD_LENGTH} karakter.`)
-		.max(MAX_PASSWORD_LENGTH, `Password maksimal ${MAX_PASSWORD_LENGTH} karakter.`),
+		.refine(withinBcryptLimit, { message: `Password maksimal ${MAX_PASSWORD_LENGTH} byte.` }),
 	role: RoleSchema
 });
 export type CreatePenggunaInput = z.infer<typeof CreatePenggunaInputSchema>;
+
+/** The body of a deactivation or a reactivation. */
+export const PenggunaActiveInputSchema = z.object({ active: z.boolean() });
+export type PenggunaActiveInput = z.infer<typeof PenggunaActiveInputSchema>;
 
 /**
  * Every answer that carries one Pengguna under `data.user`: login, `/auth/me`,
@@ -48,7 +62,7 @@ export type CreatePenggunaInput = z.infer<typeof CreatePenggunaInputSchema>;
  * It lives in an httpOnly cookie the browser cannot read, so no schema on this
  * side ever has a reason to describe it (ADR-0001, ADR-0006).
  */
-export const SessionSchema = z.object({
+export const PenggunaEnvelopeSchema = z.object({
 	data: z.object({ user: PenggunaSchema })
 });
 

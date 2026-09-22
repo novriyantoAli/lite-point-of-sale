@@ -2,8 +2,9 @@ import { apiClient } from '$lib/api/client';
 import {
 	CreatePenggunaInputSchema,
 	LoginInputSchema,
+	PenggunaActiveInputSchema,
+	PenggunaEnvelopeSchema,
 	PenggunaListSchema,
-	SessionSchema,
 	type CreatePenggunaInput,
 	type LoginInput,
 	type Pengguna
@@ -30,7 +31,7 @@ export const authApi: AuthApi = {
 	async login(input: LoginInput): Promise<Pengguna> {
 		const { data } = await apiClient.post('/auth/login', LoginInputSchema.parse(input));
 
-		return SessionSchema.parse(data).data.user;
+		return PenggunaEnvelopeSchema.parse(data).data.user;
 	},
 
 	async logout(): Promise<void> {
@@ -46,12 +47,13 @@ export const authApi: AuthApi = {
 	async createPengguna(input: CreatePenggunaInput): Promise<Pengguna> {
 		const { data } = await apiClient.post('/pengguna', CreatePenggunaInputSchema.parse(input));
 
-		return SessionSchema.parse(data).data.user;
+		return PenggunaEnvelopeSchema.parse(data).data.user;
 	},
 
 	async setPenggunaActive(id: number, active: boolean): Promise<Pengguna> {
-		const { data } = await apiClient.patch(`/pengguna/${id}`, { active });
+		const body = PenggunaActiveInputSchema.parse({ active });
+		const { data } = await apiClient.patch(`/pengguna/${id}`, body);
 
-		return SessionSchema.parse(data).data.user;
+		return PenggunaEnvelopeSchema.parse(data).data.user;
 	}
 };

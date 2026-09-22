@@ -1,6 +1,6 @@
 import { error, json, type RequestEvent } from '@sveltejs/kit';
 import { serverEnv } from '$lib/config/env';
-import { SessionSchema, type Pengguna } from '$lib/domains/auth';
+import { PenggunaEnvelopeSchema, type Pengguna } from '$lib/domains/auth';
 import { SESSION_COOKIE } from './session';
 
 /**
@@ -88,5 +88,5 @@ export async function readSession(event: BackendCaller): Promise<Pengguna | null
 		throw error(502, 'Tidak dapat memeriksa sesi ke API.');
 	}
 
-	return SessionSchema.parse(await response.json()).data.user;
+	return PenggunaEnvelopeSchema.parse(await response.json()).data.user;
 }

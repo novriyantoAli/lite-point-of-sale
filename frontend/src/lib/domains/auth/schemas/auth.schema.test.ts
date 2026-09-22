@@ -3,9 +3,9 @@ import {
 	BackendSessionSchema,
 	CreatePenggunaInputSchema,
 	LoginInputSchema,
+	PenggunaEnvelopeSchema,
 	PenggunaListSchema,
-	PenggunaSchema,
-	SessionSchema
+	PenggunaSchema
 } from './auth.schema';
 
 const pengguna = { id: 1, username: 'kasir1', role: 'kasir', active: true };
@@ -70,17 +70,29 @@ describe('CreatePenggunaInputSchema', () => {
 		});
 
 		expect(result.success).toBe(false);
-		expect(result.error?.issues[0]?.message).toBe('Password maksimal 72 karakter.');
+		expect(result.error?.issues[0]?.message).toBe('Password maksimal 72 byte.');
+	});
+
+	it('counts bytes, not characters, so a password Go would refuse fails here first', () => {
+		// 40 characters, 80 bytes: under the character limit, over bcrypt's.
+		const result = CreatePenggunaInputSchema.safeParse({
+			username: 'kasir1',
+			password: 'é'.repeat(40),
+			role: 'kasir'
+		});
+
+		expect(result.success).toBe(false);
+		expect(result.error?.issues[0]?.message).toBe('Password maksimal 72 byte.');
 	});
 });
 
-describe('SessionSchema', () => {
+describe('PenggunaEnvelopeSchema', () => {
 	it('reads the Pengguna the BFF answers with', () => {
-		expect(SessionSchema.parse({ data: { user: pengguna } }).data.user).toEqual(pengguna);
+		expect(PenggunaEnvelopeSchema.parse({ data: { user: pengguna } }).data.user).toEqual(pengguna);
 	});
 
 	it('has no field for a token: the browser never receives one', () => {
-		const parsed = SessionSchema.parse({ data: { token: 'rahasia', user: pengguna } });
+		const parsed = PenggunaEnvelopeSchema.parse({ data: { token: 'rahasia', user: pengguna } });
 
 		expect(parsed.data).toEqual({ user: pengguna });
 		expect(JSON.stringify(parsed)).not.toContain('rahasia');

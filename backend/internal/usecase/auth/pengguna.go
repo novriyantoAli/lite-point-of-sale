@@ -29,7 +29,7 @@ func (s *Service) CreateUser(ctx context.Context, input CreateUserInput) (domain
 	}
 	if len(input.Password) > MaxPasswordLength {
 		return domainauth.PublicUser{}, InputError{
-			Message: fmt.Sprintf("Password maksimal %d karakter.", MaxPasswordLength),
+			Message: fmt.Sprintf("Password maksimal %d byte.", MaxPasswordLength),
 		}
 	}
 	if !input.Role.Valid() {

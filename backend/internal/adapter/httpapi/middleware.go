@@ -40,11 +40,8 @@ func withAuthentication(authenticator Authenticator, logger *slog.Logger, next h
 // request is answered 401 and a wrong role 403.
 func requireRole(role domainauth.Role, logger *slog.Logger, next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		user, ok := currentUser(r.Context())
+		user, ok := requireUser(w, r, logger)
 		if !ok {
-			// Reaching here means the route was wired without
-			// withAuthentication in front of it.
-			writeError(w, domainauth.ErrInvalidToken, logger)
 			return
 		}
 
@@ -55,6 +52,20 @@ func requireRole(role domainauth.Role, logger *slog.Logger, next http.HandlerFun
 
 		next(w, r)
 	}
+}
+
+// requireUser returns the Pengguna withAuthentication put on the context, and
+// answers 401 when there is none — which means the route was wired without
+// withAuthentication in front of it. Handlers behind the middleware get the
+// acting Pengguna through here instead of each repeating the lookup.
+func requireUser(w http.ResponseWriter, r *http.Request, logger *slog.Logger) (domainauth.PublicUser, bool) {
+	user, ok := currentUser(r.Context())
+	if !ok {
+		writeError(w, domainauth.ErrInvalidToken, logger)
+		return domainauth.PublicUser{}, false
+	}
+
+	return user, true
 }
 
 // currentUser returns the Pengguna withAuthentication put on the context.

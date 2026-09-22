@@ -11,11 +11,17 @@ const admin = { id: 1, username: 'admin', role: 'admin' as const, active: true }
 const kasir = { id: 2, username: 'kasir1', role: 'kasir' as const, active: true };
 
 /** One navigation, as hooks.server sees it. */
-function navigation(pathname: string, options: { accept?: string; dataRequest?: boolean } = {}) {
+function navigation(
+	pathname: string,
+	options: { routeId?: string | null; accept?: string; dataRequest?: boolean } = {}
+) {
 	const url = new URL(`http://localhost${pathname}`);
+	// A page route has an id; a file in static/ or an unknown URL does not.
+	const routeId = options.routeId === undefined ? pathname : options.routeId;
 
 	const event = {
 		url,
+		route: { id: routeId },
 		request: new Request(url, { headers: { accept: options.accept ?? 'text/html' } }),
 		isDataRequest: options.dataRequest ?? false,
 		locals: {} as App.Locals,
@@ -97,12 +103,23 @@ describe('session guard', () => {
 
 	it('does not resolve a session for an asset, so a dead API cannot take the UI down', async () => {
 		readSession.mockClear();
-		const { event, resolve } = navigation('/favicon.svg', { accept: 'image/svg+xml' });
+		const { event, resolve } = navigation('/favicon.svg', {
+			routeId: null,
+			accept: 'image/svg+xml'
+		});
 
 		await handle({ event, resolve });
 
 		expect(resolve).toHaveBeenCalledOnce();
 		expect(readSession).not.toHaveBeenCalled();
+	});
+
+	it('guards a page even when the client asks for JSON rather than HTML', async () => {
+		readSession.mockResolvedValue(null);
+		const { event, resolve } = navigation('/(app)/pengguna', { accept: 'application/json' });
+
+		await expect(handle({ event, resolve })).rejects.toMatchObject({ location: '/login' });
+		expect(resolve).not.toHaveBeenCalled();
 	});
 
 	it('guards a client-side navigation too, not just a full page load', async () => {

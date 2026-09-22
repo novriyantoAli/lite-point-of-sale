@@ -48,6 +48,7 @@ pnpm dev
 | Env | Default | Arti |
 | --- | --- | --- |
 | `BACKEND_URL` | `http://localhost:8080` | base URL API Go yang diproksi BFF |
+| `SESSION_MAX_AGE_SECONDS` | `43200` (12 jam) | umur cookie sesi — setidaknya sebesar `POS_SESSION_TTL` |
 
 Buka <http://localhost:5173> — tanpa sesi kamu diarahkan ke **/login**. Login dengan `admin` / `admin123` (atau nilai `POS_ADMIN_*` yang kamu set). Setelah masuk, kartu **Status layanan** menampilkan `OK` yang berasal dari Go lewat BFF (`/api/health` → Go → SQLite), dan Admin punya menu **Pengguna** untuk menambah Kasir atau menonaktifkan akun.
 

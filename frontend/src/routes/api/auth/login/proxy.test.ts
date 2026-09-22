@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { POST } from './+server';
 
 vi.mock('$lib/config/env', () => ({
-	serverEnv: { backendUrl: 'http://backend.test' }
+	serverEnv: { backendUrl: 'http://backend.test', sessionMaxAgeSeconds: 43_200 }
 }));
 
 const pengguna = { id: 1, username: 'admin', role: 'admin', active: true };
@@ -46,7 +46,7 @@ describe('POST /api/auth/login (BFF proxy)', () => {
 		expect(set).toHaveBeenCalledWith(
 			'session',
 			'token-dari-go',
-			expect.objectContaining({ httpOnly: true, path: '/', sameSite: 'lax' })
+			expect.objectContaining({ httpOnly: true, path: '/', sameSite: 'lax', maxAge: 43_200 })
 		);
 	});
 

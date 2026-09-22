@@ -23,10 +23,11 @@ export const handle: Handle = async ({ event, resolve }) => {
 		return resolve(event);
 	}
 
-	// Assets and other non-document requests do not need a session, and asking
-	// Go about them would take the whole UI down with the API.
-	const wantsHtml = (event.request.headers.get('accept') ?? '').includes('text/html');
-	if (!wantsHtml && !event.isDataRequest) {
+	// Anything that is not a page — files in static/, an unknown URL — has no
+	// session to resolve and no page to guard. Deciding on the route instead of
+	// on an Accept header is what keeps this a guard rather than a suggestion:
+	// a client that asks for JSON without a session still gets turned away.
+	if (!event.route.id) {
 		return resolve(event);
 	}
 
