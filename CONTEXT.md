@@ -16,6 +16,10 @@ _Avoid_: SKU, barcode (sebagai konsep terpisah)
 Jumlah unit Produk yang tersedia. Berkurang otomatis saat Produk terjual, tidak boleh negatif, dan ditambah lewat penambahan manual.
 _Avoid_: Inventory, persediaan
 
+**Stok menipis**:
+Keadaan Produk Aktif yang Stok-nya di bawah ambang — masuk daftar yang harus ditambah Admin, urut dari yang paling sedikit. Ambang adalah Stok pertama yang masih cukup, jadi Produk tepat di angka ambang belum menipis. Stok 0 disebut **Habis** dan tetap bagian dari daftar yang sama. Ambangnya satu konstanta domain (saat ini 5), bukan pengaturan per toko — layar Pengaturan belum ada.
+_Avoid_: Low stock, stok kritis, out of stock
+
 **Struk**:
 Bukti cetak Penjualan yang diberikan ke pembeli — berisi info toko, daftar Item, total, metode bayar, dan (bila Tunai) jumlah bayar & Kembalian. Template-nya berupa blok sederhana yang isinya bisa diatur.
 _Avoid_: Nota, kuitansi, resi

@@ -58,8 +58,15 @@ func NewRouter(healthChecker HealthChecker, auth AuthService, products ProductSe
 	// Registered before the wildcard, and as a literal it wins either way: the
 	// Kategori list is not a Produk id.
 	mux.Handle("GET /api/produk/kategori", adminOnly(listCategoryHandler(products, logger)))
+	// Likewise a literal: the restock list is a report about the catalogue, not a
+	// Produk whose id happens to be "stok-menipis".
+	mux.Handle("GET /api/produk/stok-menipis", adminOnly(listLowStockHandler(products, logger)))
 	mux.Handle("POST /api/produk", adminOnly(createProductHandler(products, logger)))
 	mux.Handle("PUT /api/produk/{id}", adminOnly(updateProductHandler(products, logger)))
+	// A restock is its own verb on its own path rather than a field of the edit
+	// above: it adds to the Stok instead of replacing it, and an edit form that
+	// could overwrite a Stok would silently undo a delivery (#5).
+	mux.Handle("POST /api/produk/{id}/stok", adminOnly(addStockHandler(products, logger)))
 	mux.Handle("PATCH /api/produk/{id}", adminOnly(setProductActiveHandler(products, logger)))
 	mux.Handle("DELETE /api/produk/{id}", adminOnly(deleteProductHandler(products, logger)))
 

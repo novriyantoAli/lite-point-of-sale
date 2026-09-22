@@ -148,6 +148,48 @@ func (r *ProductRepository) Categories(ctx context.Context) ([]string, error) {
 	return categories, nil
 }
 
+// AddStock satisfies domain/produk.ProductRepository. The addition happens in
+// the UPDATE itself — `stock = stock + ?` — so it reads and writes in one
+// statement instead of the read-modify-write that would drop a restock when two
+// arrive at once. RETURNING answers the row as it now stands, so the caller does
+// not need a second query to report the new Stok.
+func (r *ProductRepository) AddStock(ctx context.Context, id int64, quantity int64) (domainproduk.Product, error) {
+	row := r.db.QueryRowContext(ctx,
+		`UPDATE produk SET stock = stock + ? WHERE id = ? RETURNING `+productColumns, quantity, id)
+
+	return scanProduct(row)
+}
+
+// ListLowStock satisfies domain/produk.ProductRepository: the Active Produk
+// below the threshold, thinnest first — the Admin's restock list. The comparison
+// is strict because the ambang is the first Stok that is still enough, so a
+// Produk sitting exactly on it is not menipis. `stock` leads the ordering because
+// the Produk that is habis is the one to act on, and the name breaks ties so the
+// order is stable between calls.
+func (r *ProductRepository) ListLowStock(ctx context.Context, threshold int64) ([]domainproduk.Product, error) {
+	rows, err := r.db.QueryContext(ctx,
+		`SELECT `+productColumns+` FROM produk WHERE active = ? AND stock < ? ORDER BY stock, name, id`,
+		true, threshold)
+	if err != nil {
+		return nil, fmt.Errorf("list low Stok: %w", err)
+	}
+	defer rows.Close()
+
+	products := []domainproduk.Product{}
+	for rows.Next() {
+		product, err := scanProduct(rows)
+		if err != nil {
+			return nil, err
+		}
+		products = append(products, product)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("read low Stok rows: %w", err)
+	}
+
+	return products, nil
+}
+
 // SetActive satisfies domain/produk.ProductRepository. A Produk that is not
 // there is reported as such instead of passing silently.
 func (r *ProductRepository) SetActive(ctx context.Context, id int64, active bool) error {

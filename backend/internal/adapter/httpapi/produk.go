@@ -18,6 +18,8 @@ type ProductService interface {
 	Create(ctx context.Context, input usecaseproduk.ProductInput) (domainproduk.Product, error)
 	Update(ctx context.Context, id int64, input usecaseproduk.ProductInput) (domainproduk.Product, error)
 	List(ctx context.Context, filter domainproduk.Filter) ([]domainproduk.Product, error)
+	AddStock(ctx context.Context, id int64, quantity int64) (domainproduk.Product, error)
+	LowStock(ctx context.Context) ([]domainproduk.Product, error)
 	SetActive(ctx context.Context, id int64, active bool) (domainproduk.Product, error)
 	Delete(ctx context.Context, id int64) error
 	Categories(ctx context.Context) ([]string, error)
@@ -53,6 +55,23 @@ func (r productRequest) input() usecaseproduk.ProductInput {
 // being read as "deactivate".
 type setProductActiveRequest struct {
 	Active *bool `json:"active"`
+}
+
+// addStockRequest is the body of a restock: how many units arrived. It is not
+// a pointer, unlike the other optional fields: a body that forgot the quantity
+// arrives as 0, and 0 is not a restock either way — so the use case's own rule
+// answers it instead of this struct keeping a second copy of that rule.
+type addStockRequest struct {
+	Quantity int64 `json:"quantity"`
+}
+
+// lowStockResponse is what the restock list answers. The threshold travels with
+// the Produk because it is the rule that decided the list: the UI shows the
+// Admin "Stok menipis ≤ 5", and a threshold the frontend held separately would
+// be a second copy of the rule that could drift from this one.
+type lowStockResponse struct {
+	Threshold int64             `json:"threshold"`
+	Products  []productResponse `json:"products"`
 }
 
 // productResponse is the JSON view of a Produk. `sold` is answered so the UI can
@@ -203,6 +222,52 @@ func setProductActiveHandler(service ProductService, logger *slog.Logger) http.H
 
 		writeJSON(w, http.StatusOK, dataResponse{Data: productEnvelope{
 			Product: newProductResponse(updated),
+		}}, logger)
+	}
+}
+
+// addStockHandler records a restock: the units an Admin received for one Produk
+// (CONTEXT.md, Stok). It is Admin-only, like the rest of the catalogue — the
+// Kasir's Stok only ever moves through a Penjualan (#6).
+func addStockHandler(service ProductService, logger *slog.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id, ok := productID(w, r, logger)
+		if !ok {
+			return
+		}
+
+		var request addStockRequest
+		if !decodeJSON(w, r, &request, logger) {
+			return
+		}
+
+		updated, err := service.AddStock(r.Context(), id, request.Quantity)
+		if err != nil {
+			writeError(w, err, logger)
+			return
+		}
+
+		writeJSON(w, http.StatusOK, dataResponse{Data: productEnvelope{
+			Product: newProductResponse(updated),
+		}}, logger)
+	}
+}
+
+// listLowStockHandler answers the Produk an Admin has to restock: the ones whose
+// Stok is menipis or habis, thinnest first. What counts as menipis is the
+// domain's rule, so the threshold is answered alongside the list rather than
+// asked for.
+func listLowStockHandler(service ProductService, logger *slog.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		products, err := service.LowStock(r.Context())
+		if err != nil {
+			writeError(w, err, logger)
+			return
+		}
+
+		writeJSON(w, http.StatusOK, dataResponse{Data: lowStockResponse{
+			Threshold: domainproduk.LowStockThreshold,
+			Products:  newProductResponses(products),
 		}}, logger)
 	}
 }

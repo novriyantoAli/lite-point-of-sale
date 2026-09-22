@@ -3,14 +3,17 @@
 // (ADR-0006).
 export { default as ProdukForm } from './components/ProdukForm.svelte';
 export { default as ProdukList } from './components/ProdukList.svelte';
+export { default as StokList } from './components/StokList.svelte';
 
 export {
 	produkKeys,
 	createProdukListQuery,
 	createKategoriListQuery,
+	createStokMenipisQuery,
 	createProdukMutation,
 	createUpdateProdukMutation,
 	createSetProdukActiveMutation,
+	createAddStokMutation,
 	createDeleteProdukMutation
 } from './queries/produk.queries';
 
@@ -22,8 +25,12 @@ export {
 	ProdukListSchema,
 	KategoriListSchema,
 	SetActiveInputSchema,
+	TambahStokInputSchema,
+	StokMenipisSchema,
 	type Produk,
 	type ProdukInput,
 	type ProdukFilter,
-	type SetActiveInput
+	type SetActiveInput,
+	type TambahStokInput,
+	type StokMenipis
 } from './schemas/produk.schema';

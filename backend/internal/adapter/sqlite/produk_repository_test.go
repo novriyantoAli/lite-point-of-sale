@@ -335,6 +335,85 @@ func TestProductRepositorySetActiveAndDelete(t *testing.T) {
 	}
 }
 
+func TestProductRepositoryAddStockAddsToTheStoredStok(t *testing.T) {
+	repository, _, ctx := newProductRepository(t)
+
+	created := seedProduct(t, repository, ctx, domainproduk.Product{Name: "Kopi", Price: 18000, Stock: 10, Active: true})
+
+	updated, err := repository.AddStock(ctx, created.ID, 3)
+	if err != nil {
+		t.Fatalf("add Stok: %v", err)
+	}
+	if updated.Stock != 13 {
+		t.Errorf("add Stok: got %d, want 13", updated.Stock)
+	}
+
+	// It adds rather than replaces: the Stok the row holds is what the next
+	// restock — and the next sale — builds on.
+	if _, err := repository.AddStock(ctx, created.ID, 2); err != nil {
+		t.Fatalf("add Stok again: %v", err)
+	}
+
+	stored, err := repository.FindByID(ctx, created.ID)
+	if err != nil {
+		t.Fatalf("find after restock: %v", err)
+	}
+	if stored.Stock != 15 {
+		t.Errorf("stored stock: got %d, want 15", stored.Stock)
+	}
+
+	// The rest of the Produk comes back untouched.
+	if stored.Name != "Kopi" || stored.Price != 18000 || !stored.Active {
+		t.Errorf("stored Produk: got %+v, want the seeded name, price and status", stored)
+	}
+}
+
+func TestProductRepositoryListLowStockAnswersActiveOnesThinnestFirst(t *testing.T) {
+	repository, _, ctx := newProductRepository(t)
+
+	habis := seedProduct(t, repository, ctx, domainproduk.Product{Name: "Habis", Stock: 0, Active: true})
+	satu := seedProduct(t, repository, ctx, domainproduk.Product{Name: "Satu", Stock: 1, Active: true})
+	menipis := seedProduct(t, repository, ctx, domainproduk.Product{Name: "Menipis", Stock: 2, Active: true})
+	seedProduct(t, repository, ctx, domainproduk.Product{Name: "Di Ambang", Stock: 5, Active: true})
+	seedProduct(t, repository, ctx, domainproduk.Product{Name: "Aman", Stock: 6, Active: true})
+	seedProduct(t, repository, ctx, domainproduk.Product{Name: "Nonaktif", Stock: 0, Active: false})
+
+	low, err := repository.ListLowStock(ctx, 5)
+	if err != nil {
+		t.Fatalf("low Stok: %v", err)
+	}
+
+	want := []int64{habis.ID, satu.ID, menipis.ID}
+	if len(low) != len(want) {
+		t.Fatalf("low Stok: got %d Produk, want %d", len(low), len(want))
+	}
+	for i, id := range want {
+		if low[i].ID != id {
+			t.Errorf("low Stok[%d]: got id %d (%s, stock %d), want %d", i, low[i].ID, low[i].Name, low[i].Stock, id)
+		}
+	}
+
+	// The comparison is strict: at a threshold of 2 the Produk that sits exactly
+	// on it is not below it, so only the two thinnest answer.
+	belowTwo, err := repository.ListLowStock(ctx, 2)
+	if err != nil {
+		t.Fatalf("low Stok at two: %v", err)
+	}
+	if len(belowTwo) != 2 || belowTwo[0].ID != habis.ID || belowTwo[1].ID != satu.ID {
+		t.Errorf("low Stok at two: got %+v, want the Produk with stock 0 and 1", belowTwo)
+	}
+
+	// An empty answer is an empty list, not a nil one: the API answers `[]`, not
+	// `null`, and the UI reads a list either way.
+	empty, err := repository.ListLowStock(ctx, 0)
+	if err != nil {
+		t.Fatalf("low Stok below zero: %v", err)
+	}
+	if empty == nil || len(empty) != 0 {
+		t.Errorf("low Stok below zero: got %v, want an empty list", empty)
+	}
+}
+
 func TestProductRepositoryReportsAMissingProduk(t *testing.T) {
 	repository, _, ctx := newProductRepository(t)
 
@@ -346,6 +425,9 @@ func TestProductRepositoryReportsAMissingProduk(t *testing.T) {
 	}
 	if _, err := repository.Update(ctx, domainproduk.Product{ID: 404, Name: "Hantu"}); !errors.Is(err, domainproduk.ErrProductNotFound) {
 		t.Errorf("update: got error %v, want %v", err, domainproduk.ErrProductNotFound)
+	}
+	if _, err := repository.AddStock(ctx, 404, 1); !errors.Is(err, domainproduk.ErrProductNotFound) {
+		t.Errorf("add Stok: got error %v, want %v", err, domainproduk.ErrProductNotFound)
 	}
 	if err := repository.SetActive(ctx, 404, false); !errors.Is(err, domainproduk.ErrProductNotFound) {
 		t.Errorf("set active: got error %v, want %v", err, domainproduk.ErrProductNotFound)

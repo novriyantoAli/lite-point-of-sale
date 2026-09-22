@@ -16,6 +16,7 @@
 		...(data.user?.role === 'admin'
 			? [
 					{ href: resolve('/(app)/produk'), label: 'Produk' },
+					{ href: resolve('/(app)/stok'), label: 'Stok' },
 					{ href: resolve('/(app)/pengguna'), label: 'Pengguna' }
 				]
 			: [])

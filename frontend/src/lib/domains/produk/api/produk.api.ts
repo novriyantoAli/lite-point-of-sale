@@ -6,9 +6,12 @@ import {
 	ProdukInputSchema,
 	ProdukListSchema,
 	SetActiveInputSchema,
+	StokMenipisSchema,
+	TambahStokInputSchema,
 	type Produk,
 	type ProdukFilter,
-	type ProdukInput
+	type ProdukInput,
+	type StokMenipis
 } from '../schemas/produk.schema';
 
 /**
@@ -26,6 +29,14 @@ export interface ProdukApi {
 	create(input: ProdukInput): Promise<Produk>;
 	update(id: number, input: ProdukInput): Promise<Produk>;
 	setActive(id: number, active: boolean): Promise<Produk>;
+	/**
+	 * Records a restock: adds `quantity` units to one Produk's Stok. It adds rather
+	 * than sets, so two deliveries cannot overwrite each other — the Stok already
+	 * on the Produk is the API's to know, and this never sends a total.
+	 */
+	addStock(id: number, quantity: number): Promise<Produk>;
+	/** The Produk to restock, with the threshold that selected them. */
+	lowStock(): Promise<StokMenipis>;
 	remove(id: number): Promise<void>;
 }
 
@@ -59,6 +70,21 @@ export const produkApi: ProdukApi = {
 		const { data } = await apiClient.patch(`/produk/${id}`, SetActiveInputSchema.parse({ active }));
 
 		return ProdukEnvelopeSchema.parse(data).data.product;
+	},
+
+	async addStock(id: number, quantity: number): Promise<Produk> {
+		const { data } = await apiClient.post(
+			`/produk/${id}/stok`,
+			TambahStokInputSchema.parse({ quantity })
+		);
+
+		return ProdukEnvelopeSchema.parse(data).data.product;
+	},
+
+	async lowStock(): Promise<StokMenipis> {
+		const { data } = await apiClient.get('/produk/stok-menipis');
+
+		return StokMenipisSchema.parse(data).data;
 	},
 
 	async remove(id: number): Promise<void> {

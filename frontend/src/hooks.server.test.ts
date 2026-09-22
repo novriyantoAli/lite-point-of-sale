@@ -91,6 +91,19 @@ describe('session guard', () => {
 		expect(resolve).toHaveBeenCalledOnce();
 	});
 
+	it('sends a Kasir away from the Stok page, which is an Admin screen too', async () => {
+		// Restocking is catalogue management: the Kasir's Stok only ever moves
+		// through a Penjualan (#6), so the guard covers this page as well.
+		readSession.mockResolvedValue(kasir);
+		const { event, resolve } = navigation('/stok');
+
+		await expect(handle({ event, resolve })).rejects.toMatchObject({
+			status: 303,
+			location: '/'
+		});
+		expect(resolve).not.toHaveBeenCalled();
+	});
+
 	it('does not resolve a session for the BFF routes: Go answers those', async () => {
 		readSession.mockClear();
 		const { event, resolve } = navigation('/api/pengguna');

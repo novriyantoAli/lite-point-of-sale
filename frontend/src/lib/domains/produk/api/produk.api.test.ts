@@ -200,6 +200,87 @@ describe('produkApi.setActive', () => {
 	});
 });
 
+describe('produkApi.addStock', () => {
+	it('posts the quantity to the Produk the path names and returns the stored one', async () => {
+		mock.onPost('/produk/1/stok').reply(200, { data: { product: { ...produk, stock: 15 } } });
+
+		const updated = await produkApi.addStock(1, 3);
+
+		expect(updated.stock).toBe(15);
+		// Only the quantity crosses the boundary, never a new total: sending the
+		// total would let two restocks overwrite each other, since the Stok already
+		// on the Produk is the API's to add to.
+		expect(JSON.parse(mock.history.post[0]!.data as string)).toEqual({ quantity: 3 });
+	});
+
+	it('rejects a quantity of zero before any request is made', async () => {
+		await expect(produkApi.addStock(1, 0)).rejects.toThrow();
+		expect(mock.history.post).toHaveLength(0);
+	});
+
+	it('rejects a negative quantity before any request is made', async () => {
+		await expect(produkApi.addStock(1, -3)).rejects.toThrow();
+		expect(mock.history.post).toHaveLength(0);
+	});
+
+	it('surfaces a missing Produk as a normalized AppError', async () => {
+		mock.onPost('/produk/404/stok').reply(404, {
+			message: 'Produk tidak ditemukan.',
+			error: 'product_not_found'
+		});
+
+		await expect(produkApi.addStock(404, 1)).rejects.toMatchObject({
+			status: 404,
+			code: 'product_not_found'
+		});
+	});
+
+	it('fails loudly when the answer is not a Produk', async () => {
+		mock
+			.onPost('/produk/1/stok')
+			.reply(200, { data: { product: { ...produk, stock: 'tiga belas' } } });
+
+		await expect(produkApi.addStock(1, 3)).rejects.toThrow();
+	});
+});
+
+describe('produkApi.lowStock', () => {
+	it('returns the threshold with the Produk it selected', async () => {
+		mock
+			.onGet('/produk/stok-menipis')
+			.reply(200, { data: { threshold: 5, products: [{ ...produk, stock: 2 }] } });
+
+		const low = await produkApi.lowStock();
+
+		expect(low.threshold).toBe(5);
+		expect(low.products).toHaveLength(1);
+		expect(low.products[0]!.stock).toBe(2);
+	});
+
+	it('reads a restocked store as an empty list', async () => {
+		mock.onGet('/produk/stok-menipis').reply(200, { data: { threshold: 5, products: [] } });
+
+		await expect(produkApi.lowStock()).resolves.toEqual({ threshold: 5, products: [] });
+	});
+
+	it('fails loudly when the answer carries no threshold', async () => {
+		// Without the rule that selected the list the UI would have to invent one,
+		// and the badge it showed would disagree with the list underneath it.
+		mock.onGet('/produk/stok-menipis').reply(200, { data: { products: [] } });
+
+		await expect(produkApi.lowStock()).rejects.toThrow();
+	});
+
+	it('surfaces a refused Peran as a normalized AppError', async () => {
+		mock.onGet('/produk/stok-menipis').reply(403, {
+			message: 'Anda tidak berhak melakukan tindakan ini.',
+			error: 'forbidden'
+		});
+
+		await expect(produkApi.lowStock()).rejects.toMatchObject({ status: 403, code: 'forbidden' });
+	});
+});
+
 describe('produkApi.remove', () => {
 	it('asks the BFF to delete the Produk', async () => {
 		mock.onDelete('/produk/1').reply(204);
