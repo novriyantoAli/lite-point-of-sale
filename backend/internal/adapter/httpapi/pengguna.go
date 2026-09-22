@@ -81,10 +81,7 @@ func setPenggunaActiveHandler(service AuthService, logger *slog.Logger) http.Han
 			return
 		}
 		if request.Active == nil {
-			writeJSON(w, invalidInputFailure.status, errorResponse{
-				Message: "Field active wajib diisi.",
-				Error:   invalidInputFailure.code,
-			}, logger)
+			writeInvalidInput(w, "Field active wajib diisi.", logger)
 			return
 		}
 
@@ -110,10 +107,7 @@ func setPenggunaActiveHandler(service AuthService, logger *slog.Logger) http.Han
 func penggunaID(w http.ResponseWriter, r *http.Request, logger *slog.Logger) (int64, bool) {
 	id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
 	if err != nil || id <= 0 {
-		writeJSON(w, invalidInputFailure.status, errorResponse{
-			Message: "Id Pengguna tidak valid.",
-			Error:   invalidInputFailure.code,
-		}, logger)
+		writeInvalidInput(w, "Id Pengguna tidak valid.", logger)
 		return 0, false
 	}
 

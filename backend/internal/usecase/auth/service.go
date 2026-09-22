@@ -25,6 +25,10 @@ type InputError struct {
 
 func (e InputError) Error() string { return e.Message }
 
+// InputMessage is what the HTTP adapter reads. Each usecase package declares
+// its own InputError; this method is the shape they share.
+func (e InputError) InputMessage() string { return e.Message }
+
 // Unwrap makes errors.Is(err, domainauth.ErrInvalidInput) true.
 func (e InputError) Unwrap() error { return domainauth.ErrInvalidInput }
 

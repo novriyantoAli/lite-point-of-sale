@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	domainauth "github.com/novriyantoAli/lite-point-of-sale/backend/internal/domain/auth"
-	usecaseauth "github.com/novriyantoAli/lite-point-of-sale/backend/internal/usecase/auth"
+	domainproduk "github.com/novriyantoAli/lite-point-of-sale/backend/internal/domain/produk"
 )
 
 // dataResponse is the envelope of every successful answer of this API: the
@@ -39,6 +39,16 @@ var invalidInputFailure = failure{
 	status:  http.StatusBadRequest,
 	code:    "invalid_input",
 	message: "Permintaan tidak valid.",
+}
+
+// inputError is how a use case reports a validation failure: the message is
+// written for the person filling in the form, and the type unwraps to its own
+// domain's ErrInvalidInput so the status code is still picked by errors.Is.
+// Every usecase package declares its own InputError; this is the shape they
+// share, so this adapter does not have to know each of them.
+type inputError interface {
+	error
+	InputMessage() string
 }
 
 // failures maps the domain's sentinel errors to HTTP. It is an ordered list,
@@ -99,18 +109,43 @@ var failures = []struct {
 		cause: domainauth.ErrInvalidInput,
 		as:    invalidInputFailure,
 	},
+	{
+		cause: domainproduk.ErrProductNotFound,
+		as: failure{
+			status:  http.StatusNotFound,
+			code:    "product_not_found",
+			message: "Produk tidak ditemukan.",
+		},
+	},
+	{
+		cause: domainproduk.ErrCodeTaken,
+		as: failure{
+			status:  http.StatusConflict,
+			code:    "code_taken",
+			message: "Kode sudah dipakai Produk lain.",
+		},
+	},
+	{
+		cause: domainproduk.ErrProductHasSales,
+		as: failure{
+			status:  http.StatusConflict,
+			code:    "product_has_sales",
+			message: "Produk yang sudah pernah terjual hanya bisa dinonaktifkan.",
+		},
+	},
+	{
+		cause: domainproduk.ErrInvalidInput,
+		as:    invalidInputFailure,
+	},
 }
 
 // writeError answers a use case failure. A validation error keeps its own
 // message, because it is written for the person filling in the form; anything
 // unrecognized is a 500 whose detail stays in the log.
 func writeError(w http.ResponseWriter, err error, logger *slog.Logger) {
-	var inputErr usecaseauth.InputError
-	if errors.As(err, &inputErr) && inputErr.Message != "" {
-		writeJSON(w, invalidInputFailure.status, errorResponse{
-			Message: inputErr.Message,
-			Error:   invalidInputFailure.code,
-		}, logger)
+	var inputErr inputError
+	if errors.As(err, &inputErr) && inputErr.InputMessage() != "" {
+		writeInvalidInput(w, inputErr.InputMessage(), logger)
 		return
 	}
 
@@ -128,6 +163,17 @@ func writeError(w http.ResponseWriter, err error, logger *slog.Logger) {
 	writeJSON(w, http.StatusInternalServerError, errorResponse{
 		Message: "Terjadi kesalahan pada server.",
 		Error:   "internal_error",
+	}, logger)
+}
+
+// writeInvalidInput answers a 400 whose message is written for the person using
+// the form. It is the path for input that never reaches a use case — a body
+// that will not parse, a path that is not an id, a query parameter that is not
+// a boolean — and for the InputError a use case returns.
+func writeInvalidInput(w http.ResponseWriter, message string, logger *slog.Logger) {
+	writeJSON(w, invalidInputFailure.status, errorResponse{
+		Message: message,
+		Error:   invalidInputFailure.code,
 	}, logger)
 }
 

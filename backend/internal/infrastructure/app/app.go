@@ -19,6 +19,7 @@ import (
 	"github.com/novriyantoAli/lite-point-of-sale/backend/internal/infrastructure/sqlite"
 	usecaseauth "github.com/novriyantoAli/lite-point-of-sale/backend/internal/usecase/auth"
 	usecasehealth "github.com/novriyantoAli/lite-point-of-sale/backend/internal/usecase/health"
+	usecaseproduk "github.com/novriyantoAli/lite-point-of-sale/backend/internal/usecase/produk"
 )
 
 // App is a running set of adapters and use cases, ready to serve HTTP.
@@ -74,8 +75,10 @@ func New(ctx context.Context, cfg config.Config, logger *slog.Logger) (*App, err
 
 	healthChecker := usecasehealth.NewChecker(adaptersqlite.NewDatabaseChecker(db))
 
+	productService := usecaseproduk.NewService(adaptersqlite.NewProductRepository(db))
+
 	return &App{
-		handler:  httpapi.NewRouter(healthChecker, authService, logger),
+		handler:  httpapi.NewRouter(healthChecker, authService, productService, logger),
 		database: db,
 	}, nil
 }

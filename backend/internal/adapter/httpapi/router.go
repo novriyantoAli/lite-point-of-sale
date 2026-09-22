@@ -27,7 +27,7 @@ type HealthChecker interface {
 }
 
 // NewRouter returns the API router with every route the service exposes.
-func NewRouter(healthChecker HealthChecker, auth AuthService, logger *slog.Logger) http.Handler {
+func NewRouter(healthChecker HealthChecker, auth AuthService, products ProductService, logger *slog.Logger) http.Handler {
 	mux := http.NewServeMux()
 
 	// Public: a liveness and readiness probe, and the one route the UI reads
@@ -49,6 +49,19 @@ func NewRouter(healthChecker HealthChecker, auth AuthService, logger *slog.Logge
 	mux.Handle("POST /api/pengguna", adminOnly(createPenggunaHandler(auth, logger)))
 	mux.Handle("GET /api/pengguna", adminOnly(listPenggunaHandler(auth, logger)))
 	mux.Handle("PATCH /api/pengguna/{id}", adminOnly(setPenggunaActiveHandler(auth, logger)))
+
+	// The catalogue is an Admin's to manage, so every Produk route sits behind
+	// the same role guard. The kasir lookup of #6 is a read this API already
+	// supports (`GET /api/produk?active=true`) — it will relax the guard on that
+	// one route when the till needs it.
+	mux.Handle("GET /api/produk", adminOnly(listProductHandler(products, logger)))
+	// Registered before the wildcard, and as a literal it wins either way: the
+	// Kategori list is not a Produk id.
+	mux.Handle("GET /api/produk/kategori", adminOnly(listKategoriHandler(products, logger)))
+	mux.Handle("POST /api/produk", adminOnly(createProductHandler(products, logger)))
+	mux.Handle("PUT /api/produk/{id}", adminOnly(updateProductHandler(products, logger)))
+	mux.Handle("PATCH /api/produk/{id}", adminOnly(setProductActiveHandler(products, logger)))
+	mux.Handle("DELETE /api/produk/{id}", adminOnly(deleteProductHandler(products, logger)))
 
 	return mux
 }
