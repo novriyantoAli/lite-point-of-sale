@@ -38,26 +38,31 @@
 
 	/**
 	 * The empty string the filter state uses is not a value a Select can hold, so
-	 * "Semua Kategori" is a sentinel that is mapped back to '' on the way in.
+	 * "Semua Kategori" is a sentinel. These two lines are the only place it is
+	 * translated, in either direction, so they cannot drift apart.
 	 */
 	const SEMUA_KATEGORI = 'semua';
 	const kategoriValue = $derived(produkFilterState.category || SEMUA_KATEGORI);
 
-	/** Status is three states, not two: "Semua" is not the same as "Aktif". */
+	/**
+	 * Status is three states, not two: "Semua" is not the same as "Aktif". One
+	 * table holds the whole mapping — the label the trigger shows, and the filter
+	 * the state keeps — so the Select's value and the state cannot disagree about
+	 * what "nonaktif" means.
+	 */
 	const STATUS_OPTIONS = [
-		{ value: 'semua', label: 'Semua' },
-		{ value: 'aktif', label: 'Aktif' },
-		{ value: 'nonaktif', label: 'Nonaktif' }
+		{ value: 'semua', label: 'Semua', filter: null },
+		{ value: 'aktif', label: 'Aktif', filter: true },
+		{ value: 'nonaktif', label: 'Nonaktif', filter: false }
 	] as const;
 
 	type StatusValue = (typeof STATUS_OPTIONS)[number]['value'];
 
-	const statusValue = $derived<StatusValue>(
-		produkFilterState.active === null ? 'semua' : produkFilterState.active ? 'aktif' : 'nonaktif'
+	const statusOption = $derived(
+		STATUS_OPTIONS.find((option) => option.filter === produkFilterState.active) ?? STATUS_OPTIONS[0]
 	);
-	const statusLabel = $derived(
-		STATUS_OPTIONS.find((option) => option.value === statusValue)?.label ?? 'Semua'
-	);
+	const statusValue: StatusValue = $derived(statusOption.value);
+	const statusLabel = $derived(statusOption.label);
 
 	/**
 	 * Whether the Admin narrowed anything. It decides which empty state to show:
@@ -73,7 +78,8 @@
 	);
 
 	function setStatus(value: string) {
-		produkFilterState.active = value === 'aktif' ? true : value === 'nonaktif' ? false : null;
+		produkFilterState.active =
+			STATUS_OPTIONS.find((option) => option.value === value)?.filter ?? null;
 	}
 
 	function setKategori(value: string) {
