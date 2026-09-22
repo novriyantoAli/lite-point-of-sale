@@ -10,3 +10,8 @@ bun.lockb
 
 # shadcn-svelte generated primitives — updated by the CLI, not by hand
 /src/lib/components/ui/
+
+# Playwright output
+/test-results/
+/playwright-report/
+/blob-report/

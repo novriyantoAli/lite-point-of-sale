@@ -1,5 +1,7 @@
 # CI: GitHub Actions, satu workflow dua job
 
+> Status: job ketiga `e2e` (Playwright) ditambahkan oleh ADR-0009 — syarat "saat ada halaman nyata" sudah terpenuhi. Sisa keputusan di bawah tetap berlaku.
+
 CI memakai **GitHub Actions** dengan satu workflow `.github/workflows/ci.yml` berisi dua job sesuai monorepo (ADR 0005): `backend` (Go) dan `frontend` (SvelteKit). Trigger `push` + `pull_request` ke `main`.
 
 ## Job backend
@@ -13,7 +15,7 @@ CI memakai **GitHub Actions** dengan satu workflow `.github/workflows/ci.yml` be
 ## Considered Options
 
 - **CI terpisah per sisi / multi-workflow** — ditunda: satu workflow cukup, lebih mudah dibaca; dipecah bila sudah besar.
-- **E2E Playwright di CI sejak awal** — ditunda: butuh instalasi browser & lebih lambat; dimasukkan saat ada halaman nyata (fase lanjut ADR 0007).
+- **E2E Playwright di CI sejak awal** — ditunda: butuh instalasi browser & lebih lambat; dimasukkan saat ada halaman nyata (fase lanjut ADR 0007) — *dipenuhi ADR-0009*.
 
 ## Consequences
 

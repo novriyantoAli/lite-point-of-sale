@@ -1,6 +1,7 @@
 name: CI
 
-# One workflow, two jobs — one per side of the monorepo (ADR-0008).
+# One workflow: a job per side of the monorepo plus the end-to-end job that
+# needs both (ADR-0008, ADR-0009).
 on:
   push:
     branches: [main]
@@ -64,3 +65,37 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+  e2e:
+    name: E2E (Playwright)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      # This job drives both real processes, so it sets up both toolchains.
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Install browser
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Test
+        run: pnpm test:e2e
