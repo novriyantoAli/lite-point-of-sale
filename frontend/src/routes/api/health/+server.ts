@@ -1,12 +1,7 @@
 import { json } from '@sveltejs/kit';
 import { serverEnv } from '$lib/config/env';
+import { BACKEND_UNREACHABLE, forward } from '$lib/server/backend';
 import type { RequestHandler } from './$types';
-
-/** The app's error envelope: `{ message, error }`, normalized by `lib/api/errors`. */
-const BACKEND_UNREACHABLE = {
-	message: 'Tidak dapat menghubungi server.',
-	error: 'backend_unreachable'
-} as const;
 
 /**
  * BFF proxy for the health endpoint. The browser calls `/api/health` on this
@@ -15,14 +10,7 @@ const BACKEND_UNREACHABLE = {
  */
 export const GET: RequestHandler = async ({ fetch }) => {
 	try {
-		const response = await fetch(`${serverEnv.backendUrl}/api/health`);
-
-		return new Response(response.body, {
-			status: response.status,
-			headers: {
-				'content-type': response.headers.get('content-type') ?? 'application/json'
-			}
-		});
+		return forward(await fetch(`${serverEnv.backendUrl}/api/health`));
 	} catch {
 		// This is the only layer that knows Go is unreachable — answer with the
 		// app's error envelope instead of letting SvelteKit's generic 500 through.
