@@ -18,9 +18,10 @@ pnpm format     # prettier --write
 
 ## Konfigurasi
 
-| Env           | Default                 | Arti                                                                    |
-| ------------- | ----------------------- | ----------------------------------------------------------------------- |
-| `BACKEND_URL` | `http://localhost:8080` | base URL API Go yang diproksi BFF (server-only, `$env/dynamic/private`) |
+| Env                       | Default                 | Arti                                                                        |
+| ------------------------- | ----------------------- | --------------------------------------------------------------------------- |
+| `BACKEND_URL`             | `http://localhost:8080` | base URL API Go yang diproksi BFF (server-only, `$env/dynamic/private`)     |
+| `SESSION_MAX_AGE_SECONDS` | `43200` (12 jam)        | umur cookie sesi — setidaknya sebesar `POS_SESSION_TTL` di Go (server-only) |
 
 Variabel client-side harus ber-prefix `PUBLIC_` dan dibaca lewat `src/lib/config/env.ts` — jangan pakai `import.meta.env` langsung di kode domain.
 

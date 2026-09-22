@@ -28,6 +28,9 @@ func (r Role) Valid() bool {
 // User is the persisted Pengguna: username plus a password hash and a single
 // Peran. PasswordHash must never cross the HTTP boundary — public views use
 // PublicUser instead.
+//
+// The Go identifier is User while the domain term stays Pengguna, so the name
+// is a boundary rather than drift; ADR-0011 records where the line sits.
 type User struct {
 	ID           int64
 	Username     string

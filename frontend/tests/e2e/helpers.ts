@@ -3,8 +3,8 @@ import { expect, type Page } from '@playwright/test';
 /**
  * The credentials of the seeded Admin Pengguna, matching the
  * POS_ADMIN_USERNAME/POS_ADMIN_PASSWORD the Go API is started with in
- * playwright.config.ts. The store is wiped by global-setup.ts first, so the
- * seed runs on every E2E run with exactly these credentials.
+ * playwright.config.ts. Every run gets its own empty store (`e2e-<pid>.db`),
+ * so the seed runs on every E2E run with exactly these credentials.
  */
 export const ADMIN = { username: 'admin', password: 'rahasia-admin' };
 

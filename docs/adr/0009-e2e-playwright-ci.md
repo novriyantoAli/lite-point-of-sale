@@ -8,7 +8,7 @@ ADR-0008 menunda "E2E Playwright di CI sejak awal" karena butuh instalasi browse
 
 ## Keputusan
 
-- `frontend/playwright.config.ts` menyalakan kedua proses lewat `webServer` (array), masing-masing dengan database sendiri (`POS_DB_PATH=./data/e2e.db`) supaya tidak menyentuh data dev.
+- `frontend/playwright.config.ts` menyalakan kedua proses lewat `webServer` (array), masing-masing dengan store-nya sendiri yang unik per run (poin berikutnya) supaya tidak menyentuh data dev.
 - Karena slice autentikasi (#3) semua halaman butuh sesi, konfigurasi itu juga menetapkan `POS_TOKEN_SECRET` dan kredensial Admin seed (`POS_ADMIN_*`) secara eksplisit — suite tidak bergantung pada default pengembangan.
 - Store e2e **unik per run** (`backend/data/e2e-<pid>.db`, dihapus `global-teardown.ts` sesudahnya): Go hanya menyemai Admin pada store kosong, jadi file sisa dari run lama bisa memuat kredensial yang tidak lagi dikenal suite.
 - `reuseExistingServer: false` untuk kedua proses. Playwright menyalakan `webServer` **sebelum** global setup, sehingga menghapus database dari setup hook justru menghapus file yang sudah dipegang server — suite lalu berjalan di store run sebelumnya. Server Go juga membawa state, dan server SvelteKit adalah build: memakai ulang keduanya berarti menguji sesuatu selain yang baru dibangun, jadi port yang sudah terpakai lebih baik gagal terang-terangan.
