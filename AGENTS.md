@@ -10,7 +10,11 @@ Five canonical triage roles map to GitHub labels with default names: `needs-tria
 
 ### Domain docs
 
-Single-context — `CONTEXT.md` at the repo root plus `docs/adr/`. See `docs/agents/domain.md`.
+Single-context — `CONTEXT.md` at the repo root plus `docs/adr/`. See `docs/agents/domain.md`. Domain vocabulary lives in `CONTEXT.md` — **do not create `CONCEPTS.md`**; if a skill asks for vocabulary capture, write it into `CONTEXT.md`. See `docs/adr/0013-single-glossary-context-md.md`.
+
+### Documented solutions
+
+`docs/solutions/` — catatan solusi masalah yang sudah lewat (bug, praktik, pola alur kerja), diorganisir per kategori dengan YAML frontmatter (`module`, `tags`, `problem_type`). Relevan saat mengimplementasi atau men-debug di area yang sudah terdokumentasi.
 
 ### Documented solutions
 
