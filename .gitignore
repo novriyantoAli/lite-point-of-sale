@@ -1,0 +1,24 @@
+# Go
+backend/data/
+backend/bin/
+backend/server
+
+# Node / SvelteKit
+node_modules/
+frontend/.svelte-kit/
+frontend/build/
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+frontend/test-results/
+frontend/playwright-report/
+
+# SQLite
+*.db
+*.db-shm
+*.db-wal
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
