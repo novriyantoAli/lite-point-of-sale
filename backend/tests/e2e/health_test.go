@@ -1,20 +1,10 @@
-// Package e2e exercises the Go API at its HTTP seam: a real server, a real
-// SQLite file, and a real client. Nothing below the HTTP boundary is touched
-// (ADR-0007, e2e layer).
 package e2e
 
 import (
-	"context"
 	"encoding/json"
-	"log/slog"
 	"net/http"
-	"net/http/httptest"
 	"os"
-	"path/filepath"
 	"testing"
-
-	"github.com/novriyantoAli/lite-point-of-sale/backend/internal/infrastructure/app"
-	"github.com/novriyantoAli/lite-point-of-sale/backend/internal/infrastructure/config"
 )
 
 type healthResponse struct {
@@ -23,23 +13,14 @@ type healthResponse struct {
 }
 
 func TestHealthEndpointReflectsDatabaseState(t *testing.T) {
-	dbPath := filepath.Join(t.TempDir(), "pos.db")
+	cfg := newTestConfig(t)
+	server, baseURL := startAPI(t, cfg)
 
-	server, err := app.New(context.Background(), config.Config{HTTPAddr: ":0", DBPath: dbPath}, slog.New(slog.DiscardHandler))
-	if err != nil {
-		t.Fatalf("start app: %v", err)
-	}
-	// Second call is a no-op; keeps the test safe on early failure.
-	defer server.Close()
-
-	if _, err := os.Stat(dbPath); err != nil {
-		t.Fatalf("expected SQLite file at %s after startup: %v", dbPath, err)
+	if _, err := os.Stat(cfg.DBPath); err != nil {
+		t.Fatalf("expected SQLite file at %s after startup: %v", cfg.DBPath, err)
 	}
 
-	httpServer := httptest.NewServer(server.Handler())
-	defer httpServer.Close()
-
-	status, health := getHealth(t, httpServer.URL+"/api/health")
+	status, health := getHealth(t, baseURL+"/api/health")
 	if status != http.StatusOK {
 		t.Fatalf("healthy database: got status %d, want %d", status, http.StatusOK)
 	}
@@ -53,7 +34,7 @@ func TestHealthEndpointReflectsDatabaseState(t *testing.T) {
 		t.Fatalf("close app: %v", err)
 	}
 
-	status, health = getHealth(t, httpServer.URL+"/api/health")
+	status, health = getHealth(t, baseURL+"/api/health")
 	if status != http.StatusServiceUnavailable {
 		t.Fatalf("unreachable database: got status %d, want %d", status, http.StatusServiceUnavailable)
 	}
