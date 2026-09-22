@@ -5,6 +5,7 @@ import {
 	ProdukFilterSchema,
 	ProdukInputSchema,
 	ProdukListSchema,
+	SetActiveInputSchema,
 	type Produk,
 	type ProdukFilter,
 	type ProdukInput
@@ -55,7 +56,7 @@ export const produkApi: ProdukApi = {
 	},
 
 	async setActive(id: number, active: boolean): Promise<Produk> {
-		const { data } = await apiClient.patch(`/produk/${id}`, { active });
+		const { data } = await apiClient.patch(`/produk/${id}`, SetActiveInputSchema.parse({ active }));
 
 		return ProdukEnvelopeSchema.parse(data).data.product;
 	},

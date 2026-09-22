@@ -97,6 +97,18 @@ export const ProdukInputSchema = z.object({
 export type ProdukInput = z.infer<typeof ProdukInputSchema>;
 
 /**
+ * What the Aktifkan/Nonaktifkan button posts. It is a body of its own rather than
+ * a field on `ProdukInputSchema`, because Status is not an edit-form decision —
+ * `usecase/produk` keeps a Produk's existing Active on update — and because it
+ * crosses the HTTP boundary like every other body, so it is parsed like every
+ * other body instead of being handed to axios as a bare object.
+ */
+export const SetActiveInputSchema = z.object({
+	active: z.boolean()
+});
+export type SetActiveInput = z.infer<typeof SetActiveInputSchema>;
+
+/**
  * The catalogue filters. Every field is optional: an empty one means "do not
  * filter on this", which is why they are trimmed here rather than at the URL.
  */

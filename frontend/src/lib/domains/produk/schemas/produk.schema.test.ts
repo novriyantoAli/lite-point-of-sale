@@ -5,7 +5,8 @@ import {
 	ProdukFilterSchema,
 	ProdukInputSchema,
 	ProdukListSchema,
-	ProdukSchema
+	ProdukSchema,
+	SetActiveInputSchema
 } from './produk.schema';
 
 const produk = {
@@ -170,6 +171,23 @@ describe('ProdukInputSchema', () => {
 
 	it('accepts a Harga of 0: a free Produk is a choice, not a mistake', () => {
 		expect(ProdukInputSchema.parse({ name: 'Air', price: '0', stock: '0' }).price).toBe(0);
+	});
+});
+
+describe('SetActiveInputSchema', () => {
+	it('takes the Status the button posts', () => {
+		expect(SetActiveInputSchema.parse({ active: false })).toEqual({ active: false });
+		expect(SetActiveInputSchema.parse({ active: true })).toEqual({ active: true });
+	});
+
+	it('rejects a body that forgot the Status', () => {
+		expect(() => SetActiveInputSchema.parse({})).toThrow();
+	});
+
+	it('rejects a Status that arrived as a string', () => {
+		// A checkbox or a query string can hand over "false", which is truthy to
+		// anything that only asks whether it is empty.
+		expect(() => SetActiveInputSchema.parse({ active: 'false' })).toThrow();
 	});
 });
 

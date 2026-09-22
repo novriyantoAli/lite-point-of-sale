@@ -168,6 +168,14 @@ describe('produkApi.setActive', () => {
 		expect(updated.active).toBe(false);
 		expect(JSON.parse(mock.history.patch[0]!.data as string)).toEqual({ active: false });
 	});
+
+	it('refuses a Status that is not a boolean instead of posting it', async () => {
+		// The body crosses the HTTP boundary like every other one, so it is parsed
+		// like every other one: `{ active: 'false' }` would reach Go as a string and
+		// come back a 400 the UI could not explain.
+		await expect(produkApi.setActive(1, 'false' as unknown as boolean)).rejects.toThrow();
+		expect(mock.history.patch).toHaveLength(0);
+	});
 });
 
 describe('produkApi.remove', () => {

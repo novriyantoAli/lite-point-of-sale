@@ -21,7 +21,9 @@ export {
 	ProdukEnvelopeSchema,
 	ProdukListSchema,
 	KategoriListSchema,
+	SetActiveInputSchema,
 	type Produk,
 	type ProdukInput,
-	type ProdukFilter
+	type ProdukFilter,
+	type SetActiveInput
 } from './schemas/produk.schema';
