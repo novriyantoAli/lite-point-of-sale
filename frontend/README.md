@@ -12,6 +12,7 @@ pnpm build      # build produksi (adapter-node, output: build/)
 pnpm check      # svelte-check (TypeScript strict)
 pnpm lint       # prettier --check + eslint
 pnpm test       # vitest (unit + komponen)
+pnpm test:e2e   # Playwright: build produksi + dua proses nyata (Go + SQLite)
 pnpm format     # prettier --write
 ```
 

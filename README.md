@@ -60,7 +60,14 @@ cd backend && go vet ./... && go build ./... && go test ./...
 cd frontend && pnpm check && pnpm lint && pnpm test && pnpm build
 ```
 
-- `backend/tests/e2e` memanggil **API Go lewat HTTP** (`httptest` + SQLite nyata) — lapisan e2e piramida tes (ADR-0007).
-- Tes frontend menguji schema zod, lapisan `api`, dan komponen lewat `api` palsu (ADR-0007).
+End-to-end (Playwright menyalakan sendiri kedua proses — butuh Go + Node terpasang):
 
-CI menjalankan keduanya pada `push`/`pull_request` ke `main` (`.github/workflows/ci.yml`, ADR-0008).
+```sh
+cd frontend && pnpm test:e2e
+```
+
+- `backend/tests/e2e` memanggil **API Go lewat HTTP** (`httptest` + SQLite nyata) — lapisan e2e piramida tes (ADR-0007).
+- Tes frontend menguji schema zod, lapisan `api`, proxy BFF, dan komponen lewat `api` palsu (ADR-0007).
+- `frontend/tests/e2e/health.spec.ts` menjalankan **browser sungguhan** ke build produksi: dashboard harus menampilkan `OK` yang datang dari Go lewat BFF (ADR-0009).
+
+CI menjalankan semuanya pada `push`/`pull_request` ke `main` — job `backend`, `frontend`, dan `e2e` (`.github/workflows/ci.yml`, ADR-0008 + ADR-0009).
