@@ -11,12 +11,17 @@ import (
 // fields serve both: an edit replaces the whole editable record, and Stok is
 // part of it — the dedicated "tambah Stok" flow of #5 arrives on top of this,
 // not instead of it.
+//
+// Active is a pointer because only Create reads it. A new Produk is Aktif unless
+// the Admin says otherwise, and Update keeps the Produk's existing status —
+// deactivating is its own action, not an edit-form decision.
 type ProductInput struct {
 	Name     string
 	Code     string
 	Price    int64
 	Category string
 	Stock    int64
+	Active   *bool
 }
 
 // InputError is a validation failure that carries a message fit for the API

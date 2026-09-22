@@ -160,15 +160,44 @@ test('deactivating a Produk hides it from the Aktif filter and the Nonaktif one 
 	await expect(produkRow(page, 'Status E2E')).toBeVisible();
 });
 
+test('a Produk may be added straight as Nonaktif', async ({ page }) => {
+	await logIn(page);
+	await page.goto('/produk');
+	await page.getByRole('button', { name: 'Tambah Produk' }).click();
+
+	const form = produkForm(page);
+	await form.getByLabel('Nama').fill('Belum Dijual E2E');
+	await form.getByLabel('Harga').fill('2500');
+	await form.getByLabel('Stok').fill('1');
+
+	// The Status Select is bits-ui, like the filter's — its open transition does
+	// not run under jsdom, so this is where it is driven for real.
+	await form.getByLabel('Status').click();
+	await page.getByRole('option', { name: 'Nonaktif', exact: true }).click();
+
+	await page.getByRole('button', { name: 'Tambah', exact: true }).click();
+
+	const row = produkRow(page, 'Belum Dijual E2E');
+	await expect(row).toContainText('Nonaktif');
+
+	// The Aktif filter does not offer it; the catalogue unfiltered still shows it.
+	const filter = produkFilter(page);
+	await filter.getByLabel('Status').click();
+	await page.getByRole('option', { name: 'Aktif', exact: true }).click();
+	await expect(row).toHaveCount(0);
+});
+
 test('the Admin changes a Harga from the row of the Produk', async ({ page }) => {
 	await logIn(page);
 	await createProduk(page, { name: 'Ubah E2E', price: 18000, stock: 5 });
 
 	await produkRow(page, 'Ubah E2E').getByRole('button', { name: 'Ubah' }).click();
 
-	// The form opens pre-filled with the record being changed.
+	// The form opens pre-filled with the record being changed, and without a
+	// Status field: an edit keeps the Produk's status.
 	const form = produkForm(page);
 	await expect(form.getByLabel('Harga')).toHaveValue('18000');
+	await expect(form.getByLabel('Status')).toHaveCount(0);
 	await form.getByLabel('Harga').fill('22000');
 	await page.getByRole('button', { name: 'Simpan Perubahan' }).click();
 

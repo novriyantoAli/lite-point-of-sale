@@ -117,6 +117,28 @@ describe('produkApi.create', () => {
 		});
 	});
 
+	it('posts the Status a new Produk was given', async () => {
+		mock.onPost('/produk').reply(201, { data: { product: { ...produk, active: false } } });
+
+		await produkApi.create({
+			name: 'Belum Dijual',
+			code: null,
+			price: 1000,
+			category: null,
+			stock: 1,
+			active: false
+		});
+
+		expect(JSON.parse(mock.history.post[0]!.data as string)).toEqual({
+			name: 'Belum Dijual',
+			code: null,
+			price: 1000,
+			category: null,
+			stock: 1,
+			active: false
+		});
+	});
+
 	it('rejects an input the schema refuses before any request is made', async () => {
 		await expect(
 			produkApi.create({ name: 'Kopi', code: null, price: -1, category: null, stock: 0 })

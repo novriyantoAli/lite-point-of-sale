@@ -32,6 +32,9 @@ type productRequest struct {
 	Price    int64   `json:"price"`
 	Category *string `json:"category"`
 	Stock    int64   `json:"stock"`
+	// Active is a pointer so an edit that omits it is not read as "deactivate".
+	// Only Create reads it, and an absent value means Aktif.
+	Active *bool `json:"active"`
 }
 
 func (r productRequest) input() usecaseproduk.ProductInput {
@@ -41,6 +44,7 @@ func (r productRequest) input() usecaseproduk.ProductInput {
 		Price:    r.Price,
 		Category: derefText(r.Category),
 		Stock:    r.Stock,
+		Active:   r.Active,
 	}
 }
 

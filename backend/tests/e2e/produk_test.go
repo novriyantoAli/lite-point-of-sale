@@ -16,6 +16,8 @@ type produkPayload struct {
 	Price    int64   `json:"price"`
 	Category *string `json:"category"`
 	Stock    int64   `json:"stock"`
+	// Active is only read on create; leaving it out means Aktif.
+	Active *bool `json:"active"`
 }
 
 // productPayload is one Produk as the API answers it.
@@ -116,10 +118,38 @@ func TestCreateProdukWithEveryField(t *testing.T) {
 		t.Errorf("price/stock: got %d/%d, want 18000/12", created.Price, created.Stock)
 	}
 	if !created.Active {
-		t.Error("active: got false, want a new Produk to be active")
+		t.Error("active: got false, want a new Produk with no Status asked for to be active")
 	}
 	if created.Sold {
 		t.Error("sold: got true, want a new Produk to have no sales")
+	}
+}
+
+func TestCreateProdukCanArriveNonaktif(t *testing.T) {
+	baseURL, token := newAdminToken(t)
+
+	// An Admin entering something not yet for sale does not have to add it and
+	// then deactivate it.
+	inactive := false
+	created := createProduk(t, baseURL, token, produkPayload{
+		Name:   "Belum Dijual",
+		Price:  1000,
+		Stock:  1,
+		Active: &inactive,
+	})
+
+	if created.Active {
+		t.Error("active: got true, want the Nonaktif the Admin asked for")
+	}
+
+	// The catalogue screen asks for everything and still sees it…
+	if all := listProduk(t, baseURL, token, ""); len(all) != 1 {
+		t.Errorf("list all: got %d Produk, want 1", len(all))
+	}
+
+	// …while `active=true` — the kasir lookup of #6 — does not.
+	if active := listProduk(t, baseURL, token, "active=true"); len(active) != 0 {
+		t.Errorf("list active: got %d Produk, want none", len(active))
 	}
 }
 

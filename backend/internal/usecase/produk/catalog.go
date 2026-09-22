@@ -121,8 +121,19 @@ func validate(input ProductInput) (domainproduk.Product, error) {
 		Price:    input.Price,
 		Category: optionalText(input.Category),
 		Stock:    input.Stock,
-		Active:   true,
+		Active:   activeOrTrue(input.Active),
 	}, nil
+}
+
+// activeOrTrue reads the Status a create asked for. An absent one means Aktif:
+// adding a Produk is how an Admin puts something on sale, so the default has to
+// be the status the kasir lookup of #6 shows.
+func activeOrTrue(active *bool) bool {
+	if active == nil {
+		return true
+	}
+
+	return *active
 }
 
 // optionalText turns blank or whitespace-only text into nil, so "no Kode" is

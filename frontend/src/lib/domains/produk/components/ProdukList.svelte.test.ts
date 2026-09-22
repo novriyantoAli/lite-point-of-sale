@@ -137,13 +137,15 @@ describe('ProdukList', () => {
 		await user.type(form().getByLabelText('Stok'), '12');
 		await user.click(screen.getByRole('button', { name: 'Tambah' }));
 
-		// A blank Kode and Kategori are normalized to null, the value the API stores.
+		// A blank Kode and Kategori are normalized to null, the value the API stores,
+		// and a new Produk carries the Status it starts with.
 		expect(create).toHaveBeenCalledWith({
 			name: 'Kopi Susu',
 			code: null,
 			price: 18000,
 			category: null,
-			stock: 12
+			stock: 12,
+			active: true
 		});
 		expect(await screen.findByRole('status')).toHaveTextContent('Produk Kopi Susu disimpan.');
 	});
@@ -190,6 +192,10 @@ describe('ProdukList', () => {
 
 		const harga = form().getByLabelText('Harga');
 		expect(harga).toHaveValue('18000');
+
+		// Status is not an edit-form field: changing it is the Aktifkan/Nonaktifkan
+		// button's job, and an update must not carry a Status it cannot decide.
+		expect(form().queryByLabelText('Status')).toBeNull();
 
 		await user.clear(harga);
 		await user.type(harga, '22000');

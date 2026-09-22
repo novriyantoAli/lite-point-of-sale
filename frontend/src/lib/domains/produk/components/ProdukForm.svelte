@@ -3,6 +3,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
+	import * as Select from '$lib/components/ui/select';
 	import { collectFieldErrors } from '$lib/utils';
 	import { createProdukMutation, createUpdateProdukMutation } from '../queries/produk.queries';
 	import { ProdukInputSchema, type Produk } from '../schemas/produk.schema';
@@ -46,6 +47,31 @@
 	let stock = $state(untrack(() => (produk === undefined ? '' : String(produk.stock))));
 	let fieldErrors = $state<Partial<Record<'name' | 'price' | 'stock', string>>>({});
 
+	/**
+	 * The Status a new Produk starts with. Aktif is the default because adding a
+	 * Produk is how an Admin puts something on sale; Nonaktif is for entering
+	 * something that is not for sale yet.
+	 *
+	 * The field is offered only when adding. An edit keeps the Produk's Status —
+	 * changing it is what the Aktifkan/Nonaktifkan button in the catalogue is for —
+	 * so this form never sends a Status it would not be allowed to decide.
+	 */
+	const STATUS_OPTIONS = [
+		{ value: 'aktif', label: 'Aktif', active: true },
+		{ value: 'nonaktif', label: 'Nonaktif', active: false }
+	] as const;
+
+	type StatusValue = (typeof STATUS_OPTIONS)[number]['value'];
+
+	let status = $state<StatusValue>('aktif');
+	const statusOption = $derived(
+		STATUS_OPTIONS.find((option) => option.value === status) ?? STATUS_OPTIONS[0]
+	);
+
+	function setStatus(value: string) {
+		status = STATUS_OPTIONS.find((option) => option.value === value)?.value ?? 'aktif';
+	}
+
 	/** The fields a person can get wrong; Kode and Kategori accept anything. */
 	const fields = ['name', 'price', 'stock'] as const;
 
@@ -57,7 +83,16 @@
 		event.preventDefault();
 		fieldErrors = {};
 
-		const parsed = ProdukInputSchema.safeParse({ name, code, price, category, stock });
+		const parsed = ProdukInputSchema.safeParse({
+			name,
+			code,
+			price,
+			category,
+			stock,
+			// Status is a create-only decision, so an edit leaves the field out
+			// entirely rather than sending a value the API would ignore.
+			...(editing ? {} : { active: statusOption.active })
+		});
 		if (!parsed.success) {
 			fieldErrors = collectFieldErrors(parsed.error, fields);
 			return;
@@ -143,6 +178,28 @@
 				Opsional, satu tingkat. Hanya untuk pengelompokan.
 			</p>
 		</div>
+
+		{#if !editing}
+			<div class="space-y-2">
+				<Label for="produk-status">Status</Label>
+				<Select.Root type="single" value={status} onValueChange={setStatus}>
+					<Select.Trigger id="produk-status" class="w-full">
+						<!-- Written here rather than left to `Select.Value`: the label
+						     registry is filled as items mount, and the content mounts
+						     lazily, so the trigger would show the raw value first. -->
+						<span data-slot="select-value">{statusOption.label}</span>
+					</Select.Trigger>
+					<Select.Content>
+						{#each STATUS_OPTIONS as option (option.value)}
+							<Select.Item value={option.value} label={option.label}>
+								{option.label}
+							</Select.Item>
+						{/each}
+					</Select.Content>
+				</Select.Root>
+				<p class="text-sm text-muted-foreground">Produk Nonaktif tidak muncul di lookup kasir.</p>
+			</div>
+		{/if}
 	</div>
 
 	{#if error}

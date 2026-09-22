@@ -120,6 +120,34 @@ func TestCreateAllowsManyProdukWithoutAKode(t *testing.T) {
 	}
 }
 
+func TestCreateHonoursTheStatusItWasGiven(t *testing.T) {
+	products := newFakeProducts()
+	service := newTestService(products)
+
+	// An absent Status means Aktif: adding a Produk is how an Admin puts it on
+	// sale, and the kasir lookup of #6 asks for Aktif only.
+	defaulted, err := service.Create(context.Background(), validInput())
+	if err != nil {
+		t.Fatalf("create: %v", err)
+	}
+	if !defaulted.Active {
+		t.Error("active: got false, want true when the Admin chose no Status")
+	}
+
+	inactive := false
+	created, err := service.Create(context.Background(), ProductInput{
+		Name:   "Belum Dijual",
+		Price:  1000,
+		Active: &inactive,
+	})
+	if err != nil {
+		t.Fatalf("create: %v", err)
+	}
+	if created.Active {
+		t.Error("active: got true, want the Nonaktif the Admin asked for")
+	}
+}
+
 func TestUpdateReplacesTheEditableFields(t *testing.T) {
 	products := newFakeProducts()
 	id := products.seed(domainproduk.Product{
@@ -196,9 +224,13 @@ func TestUpdateNeverTouchesActiveOrSold(t *testing.T) {
 	products := newFakeProducts()
 	id := products.seed(domainproduk.Product{Name: "Kopi", Active: false, Sold: true, Price: 1000})
 
+	// The input asks for Aktif, which an edit is not allowed to decide — the
+	// Aktifkan/Nonaktifkan button is the one action that does.
+	active := true
 	updated, err := newTestService(products).Update(context.Background(), id, ProductInput{
-		Name:  "Kopi Susu",
-		Price: 2000,
+		Name:   "Kopi Susu",
+		Price:  2000,
+		Active: &active,
 	})
 	if err != nil {
 		t.Fatalf("update: %v", err)

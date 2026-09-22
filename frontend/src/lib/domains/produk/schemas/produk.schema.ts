@@ -92,7 +92,15 @@ export const ProdukInputSchema = z.object({
 	code: optionalText,
 	price: wholeNumber('Harga harus bilangan bulat.', 'Harga tidak boleh negatif.'),
 	category: optionalText,
-	stock: wholeNumber('Stok harus bilangan bulat.', 'Stok tidak boleh negatif.')
+	stock: wholeNumber('Stok harus bilangan bulat.', 'Stok tidak boleh negatif.'),
+	/**
+	 * The Status a new Produk starts with. It is optional because only create reads
+	 * it: `usecase/produk` keeps a Produk's existing Active on update, so an edit
+	 * that left the field out must not read as "deactivate". An absent value means
+	 * Aktif — that default belongs to the Go side, and the form sends the field
+	 * only when adding.
+	 */
+	active: z.boolean().optional()
 });
 export type ProdukInput = z.infer<typeof ProdukInputSchema>;
 

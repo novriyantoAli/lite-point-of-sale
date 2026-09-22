@@ -172,6 +172,28 @@ describe('ProdukInputSchema', () => {
 	it('accepts a Harga of 0: a free Produk is a choice, not a mistake', () => {
 		expect(ProdukInputSchema.parse({ name: 'Air', price: '0', stock: '0' }).price).toBe(0);
 	});
+
+	it('carries the Status a new Produk was given', () => {
+		expect(
+			ProdukInputSchema.parse({ name: 'Kopi', price: 1000, stock: 0, active: false }).active
+		).toBe(false);
+	});
+
+	it('leaves the Status out when it was not asked for, so an edit cannot deactivate', () => {
+		// An absent key is what keeps an update body free of `active` entirely:
+		// `usecase/produk` keeps a Produk's Status on update, so a field it would
+		// ignore must not be sent at all.
+		const parsed = ProdukInputSchema.parse({ name: 'Kopi', price: 1000, stock: 0 });
+
+		expect('active' in parsed).toBe(false);
+		expect(JSON.stringify(parsed)).not.toContain('active');
+	});
+
+	it('rejects a Status that arrived as a string', () => {
+		expect(() =>
+			ProdukInputSchema.parse({ name: 'Kopi', price: 1000, stock: 0, active: 'true' })
+		).toThrow();
+	});
 });
 
 describe('SetActiveInputSchema', () => {
