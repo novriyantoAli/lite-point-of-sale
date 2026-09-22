@@ -9,27 +9,27 @@ import (
 	usecaseauth "github.com/novriyantoAli/lite-point-of-sale/backend/internal/usecase/auth"
 )
 
-// createPenggunaRequest is what an Admin posts to add a Pengguna. The Peran
+// createUserRequest is what an Admin posts to add a Pengguna. The Peran
 // arrives as a string and is validated by the use case, so an unknown value is
 // invalid input rather than a decoding error.
-type createPenggunaRequest struct {
+type createUserRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 	Role     string `json:"role"`
 }
 
-// setPenggunaActiveRequest is the body of a deactivation or a reactivation. The
+// setUserActiveRequest is the body of a deactivation or a reactivation. The
 // field is a pointer so that a body which forgot it is rejected instead of
 // being read as "deactivate".
-type setPenggunaActiveRequest struct {
+type setUserActiveRequest struct {
 	Active *bool `json:"active"`
 }
 
-// createPenggunaHandler adds a Pengguna. It is Admin-only: the router puts the
+// createUserHandler adds a Pengguna. It is Admin-only: the router puts the
 // role guard in front of it.
-func createPenggunaHandler(service AuthService, logger *slog.Logger) http.HandlerFunc {
+func createUserHandler(service AuthService, logger *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var request createPenggunaRequest
+		var request createUserRequest
 		if !decodeJSON(w, r, &request, logger) {
 			return
 		}
@@ -50,9 +50,9 @@ func createPenggunaHandler(service AuthService, logger *slog.Logger) http.Handle
 	}
 }
 
-// listPenggunaHandler answers every Pengguna of the store: the staff list an
+// listUserHandler answers every Pengguna of the store: the staff list an
 // Admin manages.
-func listPenggunaHandler(service AuthService, logger *slog.Logger) http.HandlerFunc {
+func listUserHandler(service AuthService, logger *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		users, err := service.ListUsers(r.Context())
 		if err != nil {
@@ -64,19 +64,19 @@ func listPenggunaHandler(service AuthService, logger *slog.Logger) http.HandlerF
 	}
 }
 
-// setPenggunaActiveHandler activates or deactivates a Pengguna: a resigned
+// setUserActiveHandler activates or deactivates a Pengguna: a resigned
 // Kasir keeps their history but can no longer log in (CONTEXT.md, Nonaktif).
 //
 // The acting Admin is passed along, because deactivating your own account is
 // how a single-Admin store locks itself out.
-func setPenggunaActiveHandler(service AuthService, logger *slog.Logger) http.HandlerFunc {
+func setUserActiveHandler(service AuthService, logger *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		targetID, ok := penggunaID(w, r, logger)
+		targetID, ok := userID(w, r, logger)
 		if !ok {
 			return
 		}
 
-		var request setPenggunaActiveRequest
+		var request setUserActiveRequest
 		if !decodeJSON(w, r, &request, logger) {
 			return
 		}
@@ -102,9 +102,9 @@ func setPenggunaActiveHandler(service AuthService, logger *slog.Logger) http.Han
 	}
 }
 
-// penggunaID reads the {id} of the route. A path that is not an id at all is
+// userID reads the {id} of the route. A path that is not an id at all is
 // invalid input, not a missing Pengguna.
-func penggunaID(w http.ResponseWriter, r *http.Request, logger *slog.Logger) (int64, bool) {
+func userID(w http.ResponseWriter, r *http.Request, logger *slog.Logger) (int64, bool) {
 	id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
 	if err != nil || id <= 0 {
 		writeInvalidInput(w, "Id Pengguna tidak valid.", logger)

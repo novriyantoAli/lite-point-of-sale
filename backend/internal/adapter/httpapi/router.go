@@ -46,9 +46,9 @@ func NewRouter(healthChecker HealthChecker, auth AuthService, products ProductSe
 	}
 
 	mux.Handle("GET /api/auth/me", authenticated(meHandler(logger)))
-	mux.Handle("POST /api/pengguna", adminOnly(createPenggunaHandler(auth, logger)))
-	mux.Handle("GET /api/pengguna", adminOnly(listPenggunaHandler(auth, logger)))
-	mux.Handle("PATCH /api/pengguna/{id}", adminOnly(setPenggunaActiveHandler(auth, logger)))
+	mux.Handle("POST /api/pengguna", adminOnly(createUserHandler(auth, logger)))
+	mux.Handle("GET /api/pengguna", adminOnly(listUserHandler(auth, logger)))
+	mux.Handle("PATCH /api/pengguna/{id}", adminOnly(setUserActiveHandler(auth, logger)))
 
 	// The catalogue is an Admin's to manage, so every Produk route sits behind
 	// the same role guard. The kasir lookup of #6 is a read this API already
@@ -57,7 +57,7 @@ func NewRouter(healthChecker HealthChecker, auth AuthService, products ProductSe
 	mux.Handle("GET /api/produk", adminOnly(listProductHandler(products, logger)))
 	// Registered before the wildcard, and as a literal it wins either way: the
 	// Kategori list is not a Produk id.
-	mux.Handle("GET /api/produk/kategori", adminOnly(listKategoriHandler(products, logger)))
+	mux.Handle("GET /api/produk/kategori", adminOnly(listCategoryHandler(products, logger)))
 	mux.Handle("POST /api/produk", adminOnly(createProductHandler(products, logger)))
 	mux.Handle("PUT /api/produk/{id}", adminOnly(updateProductHandler(products, logger)))
 	mux.Handle("PATCH /api/produk/{id}", adminOnly(setProductActiveHandler(products, logger)))

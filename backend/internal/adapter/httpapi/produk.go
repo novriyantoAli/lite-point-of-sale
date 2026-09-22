@@ -158,9 +158,9 @@ func listProductHandler(service ProductService, logger *slog.Logger) http.Handle
 	}
 }
 
-// listKategoriHandler answers the Kategori in use, so the filter offers the ones
+// listCategoryHandler answers the Kategori in use, so the filter offers the ones
 // that exist instead of a list the frontend would have to maintain.
-func listKategoriHandler(service ProductService, logger *slog.Logger) http.HandlerFunc {
+func listCategoryHandler(service ProductService, logger *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		categories, err := service.Categories(r.Context())
 		if err != nil {
