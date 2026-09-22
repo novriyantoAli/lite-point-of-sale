@@ -14,4 +14,4 @@ Single-context — `CONTEXT.md` at the repo root plus `docs/adr/`. See `docs/age
 
 ### Code organization
 
-Backend Go follows Clean Architecture (`domain` → `usecase` → `adapter` → `infrastructure`, dependencies point inward); SvelteKit keeps the BFF separate from the UI. See `docs/adr/0004-clean-architecture.md`.
+Backend Go follows Clean Architecture (`domain` → `usecase` → `adapter` → `infrastructure`, dependencies point inward); SvelteKit keeps the BFF separate from the UI. Monorepo: `backend/` (Go) + `frontend/` (SvelteKit). See `docs/adr/0004-clean-architecture.md`, `0005-monorepo-repo-structure.md`, `0006-frontend-domain-slices.md`, `0007-testing-strategy.md`.
