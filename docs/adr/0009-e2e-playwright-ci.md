@@ -8,10 +8,14 @@ ADR-0008 menunda "E2E Playwright di CI sejak awal" karena butuh instalasi browse
 
 ## Keputusan
 
-- `frontend/playwright.config.ts` menyalakan kedua proses lewat `webServer` (array), masing-masing dengan database sendiri (`POS_DB_PATH=./data/e2e.db`) supaya tidak menyentuh data dev.
+- `frontend/playwright.config.ts` menyalakan kedua proses lewat `webServer` (array), masing-masing dengan store-nya sendiri yang unik per run (poin berikutnya) supaya tidak menyentuh data dev.
+- Karena slice autentikasi (#3) semua halaman butuh sesi, konfigurasi itu juga menetapkan `POS_TOKEN_SECRET` dan kredensial Admin seed (`POS_ADMIN_*`) secara eksplisit — suite tidak bergantung pada default pengembangan.
+- Store e2e **unik per run** (`backend/data/e2e-<pid>.db`, dihapus `global-teardown.ts` sesudahnya): Go hanya menyemai Admin pada store kosong, jadi file sisa dari run lama bisa memuat kredensial yang tidak lagi dikenal suite.
+- `reuseExistingServer: false` untuk kedua proses. Playwright menyalakan `webServer` **sebelum** global setup, sehingga menghapus database dari setup hook justru menghapus file yang sudah dipegang server — suite lalu berjalan di store run sebelumnya. Server Go juga membawa state, dan server SvelteKit adalah build: memakai ulang keduanya berarti menguji sesuatu selain yang baru dibangun, jadi port yang sudah terpakai lebih baik gagal terang-terangan.
 - `pnpm test:e2e` = `pnpm build && playwright test` — yang diuji adalah build produksi, bukan dev server.
 - Job `e2e` di `.github/workflows/ci.yml` memakai **kedua toolchain** (Go + Node/pnpm): `pnpm install --frozen-lockfile` → `pnpm exec playwright install --with-deps chromium` → `pnpm test:e2e`.
 - Satu happy-path per domain (ADR-0007): dashboard memuat `OK` + `Basis data: ok` dari Go.
+- Halaman yang butuh sesi membuat spec-nya login dulu lewat formulir sungguhan (`tests/e2e/helpers.ts`), bukan dengan menyuntik cookie — jalur login itu sendiri bagian dari yang diuji.
 
 ## Considered Options
 

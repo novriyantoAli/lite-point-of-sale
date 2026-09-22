@@ -42,7 +42,7 @@ _Avoid_: Change
 
 **Pengguna**:
 Akun login (username + password) yang memakai aplikasi; punya satu Peran.
-_Avoid_: User, staff, operator
+_Avoid_: staff, operator
 
 **Kasir**:
 Peran Pengguna yang boleh menjual — buka keranjang, checkout, cetak Struk. Namanya tercetak di Struk.

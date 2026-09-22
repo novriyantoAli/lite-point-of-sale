@@ -6,7 +6,7 @@ Prinsip: tes mengunci perilaku lewat batas interface (seam), bukan detail intern
 
 - Unit `domain`: aturan murni (stok ≥ 0, kembalian, Penjualan final) — tanpa mock.
 - Unit `usecase`: fake repository in-memory (implement interface), tanpa SQLite.
-- Integration `adapter`: repository melawan SQLite `:memory:`.
+- Integration `adapter`: repository melawan SQLite nyata — `:memory:` atau file sementara di `t.TempDir()`. Tes repository memakai file sementara, karena `sqlite.Open` menyetel WAL dan satu koneksi tulis, dan dua hal itu hanya bermakna pada database berfile.
 - e2e HTTP: `httptest` untuk handler.
 
 ## Frontend (SvelteKit)
