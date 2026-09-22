@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Badge } from '$lib/components/ui/badge';
+	import { Button } from '$lib/components/ui/button';
 	import {
 		Card,
 		CardContent,
@@ -22,6 +23,11 @@
 	<CardContent>
 		{#if health.isPending}
 			<p class="text-sm text-muted-foreground">Memeriksa…</p>
+		{:else if health.error}
+			<div class="space-y-3">
+				<p class="text-sm text-destructive">{health.error.message}</p>
+				<Button variant="outline" size="sm" onclick={() => void health.refetch()}>Coba lagi</Button>
+			</div>
 		{:else if health.data}
 			<div class="flex items-center gap-3">
 				<Badge variant={isHealthy ? 'default' : 'destructive'}>
@@ -31,8 +37,6 @@
 					Basis data: {health.data.database}
 				</span>
 			</div>
-		{:else}
-			<p class="text-sm text-destructive">Tidak dapat menghubungi server.</p>
 		{/if}
 	</CardContent>
 </Card>
