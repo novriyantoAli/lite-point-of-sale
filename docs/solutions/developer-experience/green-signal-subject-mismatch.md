@@ -1,6 +1,7 @@
 ---
 title: "Sinyal hijau, subjek salah: squash merge PR bertumpuk dan file yang tak pernah diperiksa"
 date: 2026-09-23
+last_updated: 2026-09-24
 category: developer-experience
 module: quality-gates
 problem_type: developer_experience
@@ -110,7 +111,7 @@ $ grep -c "^### Documented solutions" AGENTS.md
 1
 ```
 
-### 4. Jangan percaya nomor di badan PR
+### 4. Jangan percaya klaim di badan PR — angka maupun mekanisme
 
 Angka tes yang diklaim di badan PR adalah klaim, bukan pengukuran. Ambil angkanya dari commit yang benar-benar akan di-merge:
 
@@ -119,6 +120,23 @@ git fetch origin
 git rev-parse HEAD origin/<branch>     # head lokal vs head remote
 git log --oneline origin/<branch>..HEAD  # commit yang belum ter-push
 ```
+
+Hal yang sama berlaku untuk **klaim tentang mekanisme**, dan itu lebih mudah lolos karena tidak ada angka yang bisa dicurigai. Di PR #23 (penyelamatan #6) badan PR-nya mengatakan:
+
+> `ci.yml` hanya terpicu `pull_request: branches: [main]` sehingga tidak ada satu job CI pun yang pernah melihatnya
+
+Itu salah. `.github/workflows/ci.yml` terpicu `push: branches: [main]` **dan** `pull_request: branches: [main]` — ADR-0008 baris 5 menyebutnya eksplisit, dan daftar run CI menunjukkan job `push / main` jalan untuk setiap merge. Alasan sebenarnya #6 tak pernah dilihat CI: commit itu **tidak pernah di-push**. Mekanismenya disebut dari ingatan, bukan dari membaca workflow-nya.
+
+Biaya klaim mekanisme yang salah lebih besar daripada angka yang salah. Angka yang salah membuat satu laporan tidak akurat; mekanisme yang salah **mengajarkan model mental yang keliru**. Siapa pun yang mempercayai kalimat di atas akan menyimpulkan bahwa commit di `main` tidak pernah diperiksa CI — padahal justru sebaliknya, `push` ke `main` adalah salah satu pemicunya.
+
+Bila sebuah badan PR menjelaskan *mengapa* sesuatu terjadi, kalimat itu sama wajibnya untuk diverifikasi:
+
+```bash
+grep -n -A3 "^on:" .github/workflows/ci.yml                    # apa pemicunya, sungguh?
+gh run list --limit 10 --json event,headBranch,conclusion       # pemicu mana yang benar-benar jalan?
+```
+
+Badan PR bisa disunting setelah merge; commit message tidak. Perbaiki di badan PR, dan bila klaimnya sudah masuk commit message, catat koreksinya di tempat yang bisa dibaca — bukan dengan menulis ulang history.
 
 ## Why This Matters
 
@@ -132,6 +150,8 @@ Perlu ditegaskan juga: learning ini **memperluas**, bukan menggantikan, learning
 
 **Bentuk yang menghubungkan keduanya: "hijau yang tidak membuktikan apa pun tentang objek yang Anda maksud."** Di #16 subjek sinyalnya adalah commit yang berbeda dari commit yang di-merge; di #18/#19 subjek sinyalnya adalah himpunan file yang tidak mencakup file yang cacat. Dalam kedua kasus tidak ada kegagalan yang perlu dibaca — hanya jarak antara "apa yang diperiksa" dan "apa yang saya pikir diperiksa". Dan dalam kedua kasus biayanya nyata: #16 hampir merge kode yang badan PR-nya berbohong tentang isinya, #18 menaruh cacat di file yang dibaca setiap agen di setiap sesi.
 
+**Bentuk yang sama muncul lagi di PR #23, kali ini di dalam badan PR itu sendiri.** Klaim bahwa `ci.yml` hanya terpicu `pull_request` salah (lihat "Jangan percaya klaim di badan PR"). Yang membedakannya dari dua kasus di atas: tidak ada sinyal apa pun yang perlu dibaca salah — yang salah adalah **pernyataan tentang mekanismenya**, dan pernyataan itu masuk ke catatan permanen yang dibaca agen berikutnya. Sebuah badan PR adalah artefak yang dipercaya; menulis di dalamnya berarti menulis dokumentasi, dan dokumentasi yang salah tentang mekanisme lebih mahal daripada dokumentasi yang salah tentang angka.
+
 Untuk repo ini khususnya, biayanya asimetris: cacat di `AGENTS.md` bukan cacat kosmetik. File itu adalah instruksi yang dibaca agen sebelum bekerja **dan** salah satu input korpus review dua-sumbu, jadi duplikat di dalamnya berarti setiap sesi berikutnya membaca konfigurasi yang berbeda dari yang dimaksud — tanpa satu pun perintah yang bisa memberitahu.
 
 ## When to Apply
@@ -141,6 +161,7 @@ Untuk repo ini khususnya, biayanya asimetris: cacat di `AGENTS.md` bukan cacat k
 - Setelah merge apa pun yang menyentuh file di luar `frontend/**` dan `backend/**` (`AGENTS.md`, `README.md`, `CONTEXT.md`, `docs/**`, `.github/**`), karena §12 dan CI tidak memeriksa wilayah itu.
 - Kapan pun sebuah PR hijau dan Anda hendak menyimpulkan "aman", tanpa bisa menyebut perintah mana yang membaca file yang diubah.
 - Kapan pun Anda mengutip angka tes atau status CI: pastikan dulu SHA yang diukur sama dengan SHA yang akan di-merge (`git rev-parse HEAD origin/<branch>`).
+- Kapan pun sebuah badan PR — termasuk milik Anda sendiri — menjelaskan **mekanisme** (pemicu CI, perilaku merge/diff, perilaku tooling) dan kalimat itu akan dipakai sebagai dasar keputusan: buka sumbernya lebih dulu. Klaim mekanisme yang salah tidak punya angka untuk membuatnya mencurigakan, dan ia mengajarkan model mental yang keliru kepada setiap pembaca berikutnya.
 - Kapan pun Anda membuat prediksi tentang perilaku merge/diff/tooling dan prediksi itu belum diverifikasi — catat prediksinya sebelum menjalankannya.
 
 ## Examples
@@ -234,7 +255,8 @@ git diff --name-only origin/main...HEAD
 
 ## Related
 
-- `docs/solutions/developer-experience/definition-of-done-verification.md` — learning pertama repo ini; tentang salah **membaca** sinyal yang ada (exit code vs teks output). Dokumen ini adalah kelanjutannya, bukan penggantinya: sinyal yang **tidak ada**. Tabel kelas cacat di sana menyebut `pnpm lint` tanpa kualifikasi jangkauan, dan dokumen ini yang melengkapinya.
+- `docs/solutions/developer-experience/definition-of-done-verification.md` — learning pertama repo ini; tentang salah **membaca** sinyal yang ada (exit code vs teks output). Dokumen ini adalah kelanjutannya, bukan penggantinya: sinyal yang **tidak ada**. Tabel kelas cacat di sana menyebut `pnpm lint` tanpa kualifikasi jangkauan, dan dokumen ini yang melengkapinya. Dokumen itu juga memuat mode kegagalan ketiga — exit code terbaca benar lalu dikesampingkan oleh pengecekan ulang yang lebih lemah (#22/PR #24).
+- PR #23 — penyelamatan #6 dari `main` lokal; badannya memuat klaim pemicu CI yang salah, yang dikoreksi setelah PR ini.
 - `docs/adr/0008-ci-github-actions.md` — satu workflow, satu job per sisi monorepo; kriteria selesainya ("semua job hijau di push/pull_request") adalah kriteria yang secara literal terpenuhi di main sementara duplikatnya ada. Pemicu `pull_request: branches: [main]` di ADR ini juga yang membuat PR bertumpuk kehilangan CI.
 - `docs/adr/0009-e2e-playwright-ci.md` — job `e2e` di CI dan mengapa ia menjalankan proses sungguhan.
 - `docs/adr/0007-testing-strategy.md` — piramida per sisi; tidak ada lapisannya yang menyentuh file non-kode.

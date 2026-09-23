@@ -1,6 +1,7 @@
 ---
 title: "Definition of Done §12 — check hijau bukan bukti"
 date: 2026-09-22
+last_updated: 2026-09-24
 category: developer-experience
 module: quality-gates
 problem_type: developer_experience
@@ -62,6 +63,21 @@ Simpan output ke file, cetak exit code, baru baca file bila ada yang bukan nol. 
 
 Untuk backend, padanannya: `gofmt -l .` (harus kosong), `go vet ./...`, `go test ./...`.
 
+### Jangan turunkan mutu metode saat memverifikasi ulang
+
+Pola di atas menutup "salah membaca sinyal". Ia tidak menutup kebalikannya: **sinyal dibaca benar, lalu dikesampingkan oleh pengecekan ulang yang lebih buruk.**
+
+Kejadian di #22/PR #24: harness DoD mencatat `pnpm lint` **exit=1**. Alih-alih membuka file output yang sudah ada, saya menjalankan ulang secara ad-hoc dan mencocokkan teksnya:
+
+```bash
+pnpm lint 2>&1 | tail -15; echo "exit=$?"   # mencetak 0 — tetapi itu exit code `tail`
+```
+`$?` setelah pipeline adalah status perintah **terakhir** di pipeline, bukan status `pnpm lint`. Dan `tail -15` hanya menyisakan 15 baris terakhir, sementara peringatan prettier ada di bagian awal output.
+
+Yang bisa dipastikan: harness DoD mencatat `exit=1`, dan prettier memang gagal — tiga kali dijalankan ulang dengan hasil yang sama, dengan mtime kedua file tidak berubah sejak sebelum pengecekan. Yang **tidak** bisa saya jelaskan sampai sekarang: mengapa output pengecekan ulang itu terlihat bersih. Saya sempat mempercayai pengecekan ulang yang lebih lemah daripada harness yang benar, dan bagian yang tidak bisa dijelaskan itulah alasan aturannya berbunyi "jangan turunkan mutu metode", bukan "waspadai output ini" — daftar output yang harus diwaspadai tidak akan pernah lengkap.
+
+Aturannya: **pengecekan ulang tidak boleh lebih lemah daripada pengecekan yang sedang diragukan.** Bila sebuah gate merah, buka file output yang sudah ada. Jangan menjalankan ulang dengan bentuk perintah yang berbeda lalu membaca proksi dari hasilnya (status pipeline, potongan teks, atau baris terakhir output).
+
 ## Why This Matters
 
 Tanpa keduanya, dua hal terjadi dan keduanya sudah pernah terjadi di repo ini:
@@ -74,6 +90,7 @@ Ada alasan struktural mengapa ini penting khusus untuk agen: agen cenderung menj
 ## When to Apply
 
 - Sebelum menandai issue selesai, sebelum commit, dan sebelum membuka PR.
+- Kapan pun sebuah gate merah dan Anda hendak menjalankan ulang untuk "memastikan": jalankan perintah yang sama dengan cara yang sama, atau baca file output yang sudah ada — jangan menggantinya dengan pipeline (`| tail`, `| head`) yang mengubah subjek exit code-nya.
 - Setelah mengambil alih pohon kerja yang belum di-commit — terutama bila tidak jelas perintah apa yang sudah dijalankan. Jalankan seluruh §12 dari awal; jangan percaya keadaan "sepertinya sudah jalan".
 - Kapan pun sebuah perintah hijau tetapi perilakunya belum pernah benar-benar dijalankan.
 - Kapan pun output perintah melewati tool yang memotong, meringkas, atau membungkusnya.
@@ -122,9 +139,12 @@ CHECK EXIT=1
 
 Perhatikan bahwa `pnpm lint` adalah `prettier --check . && eslint .` — ketika prettier gagal, **eslint tidak pernah dijalankan**. Jadi output "ESLint: No issues found" yang terlihat itu bahkan bukan hasil dari perintah yang sama.
 
+Kejadian ini terulang lagi di #22/PR #24, dalam bentuk yang sedikit berbeda: kali ini exit code-nya **tidak** hilang — harness DoD mencatatnya (`exit=1`) — tetapi dikesampingkan oleh pengecekan ulang yang lebih lemah. Lihat "Jangan turunkan mutu metode saat memverifikasi ulang" di atas.
+
 ## Related
 
-- Issue #4 (`Produk: kelola katalog`) dan PR #16.
+- Issue #4 (`Produk: kelola katalog`) dan PR #16 — kejadian yang melahirkan dokumen ini.
+- Issue #22 dan PR #24 — kejadian yang melahirkan bagian "Jangan turunkan mutu metode saat memverifikasi ulang": exit code-nya terbaca benar, lalu dikesampingkan oleh pengecekan ulang yang lebih lemah.
 - Skill `frontend-ddd-sveltekit` §12 — daftar perintah DoD yang jadi rujukan tabel di atas.
 - `docs/adr/0007-testing-strategy.md` — pembagian tanggung jawab antara tes unit dan e2e.
 - `docs/adr/0009-e2e-playwright-ci.md` — job `e2e` di CI dan mengapa ia menjalankan proses sungguhan.
