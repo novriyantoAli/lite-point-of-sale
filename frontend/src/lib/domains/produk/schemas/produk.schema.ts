@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { positiveWholeNumber, wholeNumber } from '$lib/utils';
 
 /**
  * Contract of the produk domain, mirroring the Go DTOs of `adapter/httpapi` 1:1
@@ -55,49 +56,10 @@ const optionalText = z
  * always one the Admin forgot, and a Produk priced 0 by accident is worse than a
  * form that asks again.
  *
- * The parsing is one function and the rule about how large the number may be is
- * another, because the two fields that carry a whole number disagree about the
- * rule — a Harga may be 0, a restock may not — and must not disagree about how
- * "18.000" is read.
+ * The parsing itself lives in `$lib/utils` alongside `collectFieldErrors`: the
+ * penjualan domain parses a payment amount the same way, and a second copy of
+ * "what does 18.000 mean" is exactly the kind of rule that drifts.
  */
-function wholeNumberField(integerMessage: string, rule: (schema: z.ZodNumber) => z.ZodNumber) {
-	return z.preprocess(
-		(value) => (typeof value === 'string' ? parseIntegerLiteral(value) : value),
-		// The type check carries the same message as `.int()`: a value that is not a
-		// number at all ("seribu") and a blank one both arrive as NaN, and zod
-		// reports those from the type check — before `.int()` ever runs. Without
-		// this, the form shows zod's English default instead of the message the
-		// Admin needs to read.
-		rule(z.number({ message: integerMessage }).int(integerMessage))
-	);
-}
-
-function wholeNumber(integerMessage: string, negativeMessage: string) {
-	return wholeNumberField(integerMessage, (schema) => schema.nonnegative(negativeMessage));
-}
-
-function positiveWholeNumber(integerMessage: string, positiveMessage: string) {
-	return wholeNumberField(integerMessage, (schema) => schema.positive(positiveMessage));
-}
-
-/**
- * Only a plain integer literal counts as a number. `z.coerce.number()` would run
- * `Number()` first, and `Number('18.000')` is 18 — so an Admin who typed the
- * Indonesian thousands separator would have saved a Produk at a thousandth of
- * the Harga the list then showed back ("Rp 18.000"), with nothing to notice.
- *
- * Money in this app has no decimals (CONTEXT.md), so a `.` or `,` in the field
- * is a separator this form does not take. Failing is the honest answer: the
- * schema cannot tell whether `18.000` meant 18000 or a mistyped 18, and guessing
- * wrong by 1000× is worse than asking again.
- */
-const INTEGER_LITERAL = /^[+-]?\d+$/;
-
-function parseIntegerLiteral(value: string): number {
-	const trimmed = value.trim();
-
-	return INTEGER_LITERAL.test(trimmed) ? Number(trimmed) : Number.NaN;
-}
 
 /** What the form fills in to add or change a Produk. */
 export const ProdukInputSchema = z.object({

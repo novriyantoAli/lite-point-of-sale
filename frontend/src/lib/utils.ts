@@ -1,4 +1,4 @@
-import type { ZodError } from 'zod';
+import { z, type ZodError } from 'zod';
 
 export { cn } from 'cn';
 
@@ -44,4 +44,55 @@ export function collectFieldErrors<T extends string>(
 	}
 
 	return errors;
+}
+
+/**
+ * Only a plain integer literal counts as a number. `z.coerce.number()` would run
+ * `Number()` first, and `Number('18.000')` is 18 — so somebody who typed the
+ * Indonesian thousands separator would save a price at a thousandth of the
+ * amount the list then showed back ("Rp 18.000"), with nothing to notice.
+ *
+ * Money in this app has no decimals (CONTEXT.md), so a `.` or `,` in the field is
+ * a separator these forms do not take. Failing is the honest answer: the schema
+ * cannot tell whether `18.000` meant 18000 or a mistyped 18, and guessing wrong
+ * by 1000× is worse than asking again.
+ */
+const INTEGER_LITERAL = /^[+-]?\d+$/;
+
+function parseIntegerLiteral(value: string): number {
+	const trimmed = value.trim();
+
+	return INTEGER_LITERAL.test(trimmed) ? Number(trimmed) : Number.NaN;
+}
+
+/**
+ * A whole-number field of a form, accepting the text a form submits or a number
+ * already parsed. Money and quantities arrive as text while the API stores
+ * integers, so the field parses — and the rule about how large the number may be
+ * is a separate argument, because the fields disagree about the rule (a price may
+ * be 0, a quantity may not) and must not disagree about how "18.000" is read.
+ *
+ * Shared by the domains rather than copied into each schema: a second copy of
+ * this parsing is a second answer to what `18.000` means.
+ */
+function wholeNumberField(integerMessage: string, rule: (schema: z.ZodNumber) => z.ZodNumber) {
+	return z.preprocess(
+		(value) => (typeof value === 'string' ? parseIntegerLiteral(value) : value),
+		// The type check carries the same message as `.int()`: a value that is not a
+		// number at all ("seribu") and a blank one both arrive as NaN, and zod
+		// reports those from the type check — before `.int()` ever runs. Without
+		// this, the form shows zod's English default instead of the message the
+		// person needs to read.
+		rule(z.number({ message: integerMessage }).int(integerMessage))
+	);
+}
+
+/** A whole number that may be zero. */
+export function wholeNumber(integerMessage: string, negativeMessage: string) {
+	return wholeNumberField(integerMessage, (schema) => schema.nonnegative(negativeMessage));
+}
+
+/** A whole number that must be more than zero. */
+export function positiveWholeNumber(integerMessage: string, positiveMessage: string) {
+	return wholeNumberField(integerMessage, (schema) => schema.positive(positiveMessage));
 }

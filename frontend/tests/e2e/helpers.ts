@@ -169,3 +169,73 @@ export async function addStok(page: Page, name: string, quantity: number) {
 
 	await expect(page.getByRole('status')).toContainText(`Stok ${name} sekarang`);
 }
+
+/** The till's Produk lookup results. */
+export function kasirHasil(page: Page) {
+	return page.getByRole('list', { name: 'Hasil pencarian Produk' });
+}
+
+/**
+ * The till's Kode field — what a barcode scanner types into. It is matched by
+ * role and exactly, because `getByLabel` reads the `Tambah <nama> ke keranjang`
+ * buttons' labels as a substring match too.
+ */
+export function kasirKode(page: Page) {
+	return page.getByRole('textbox', { name: 'Kode', exact: true });
+}
+
+/** The till's name search field. */
+export function kasirNama(page: Page) {
+	return page.getByRole('textbox', { name: 'Nama', exact: true });
+}
+
+/** The keranjang section of the till. */
+export function keranjang(page: Page) {
+	return page.getByRole('region', { name: 'Keranjang' });
+}
+
+/** The quantity field of one keranjang line. */
+export function jumlahItem(page: Page, name: string) {
+	return keranjang(page).getByRole('spinbutton', { name: `Jumlah ${name}` });
+}
+
+/** The Tunai payment form of the till. */
+export function pembayaran(page: Page) {
+	return page.getByRole('form', { name: 'Pembayaran Tunai' });
+}
+
+/** The recorded-Penjualan panel that replaces the till once a sale is stored. */
+export function strukPenjualan(page: Page) {
+	return page.getByRole('region', { name: 'Penjualan tercatat' });
+}
+
+/** Opens the till. */
+export async function bukaKasir(page: Page) {
+	await page.goto('/kasir');
+}
+
+/** Adds a Produk from the till's lookup to the keranjang. */
+export async function tambahProduk(page: Page, name: string) {
+	await page.getByRole('button', { name: `Tambah ${name} ke keranjang` }).click();
+}
+
+/**
+ * Pays the keranjang with a Tunai amount and waits for the recorded Penjualan.
+ * The amount is what the buyer handed over, never the total — the Kembalian is
+ * the API's to work out.
+ */
+export async function bayarTunai(page: Page, amount: number) {
+	await pembayaran(page).getByRole('textbox', { name: 'Jumlah bayar' }).fill(String(amount));
+	await pembayaran(page).getByRole('button', { name: 'Bayar & Simpan Penjualan' }).click();
+
+	await expect(strukPenjualan(page)).toBeVisible();
+}
+
+/** The Nomor Struk the recorded-Penjualan panel is showing. */
+export async function nomorStruk(page: Page): Promise<number> {
+	const text = await strukPenjualan(page)
+		.getByText(/Nomor Struk/)
+		.textContent();
+
+	return Number(/Nomor Struk\s+(\d+)/.exec(text ?? '')?.[1]);
+}

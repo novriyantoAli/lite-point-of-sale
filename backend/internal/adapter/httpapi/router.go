@@ -27,7 +27,7 @@ type HealthChecker interface {
 }
 
 // NewRouter returns the API router with every route the service exposes.
-func NewRouter(healthChecker HealthChecker, auth AuthService, products ProductService, logger *slog.Logger) http.Handler {
+func NewRouter(healthChecker HealthChecker, auth AuthService, products ProductService, sales SaleService, logger *slog.Logger) http.Handler {
 	mux := http.NewServeMux()
 
 	// Public: a liveness and readiness probe, and the one route the UI reads
@@ -50,11 +50,13 @@ func NewRouter(healthChecker HealthChecker, auth AuthService, products ProductSe
 	mux.Handle("GET /api/pengguna", adminOnly(listUserHandler(auth, logger)))
 	mux.Handle("PATCH /api/pengguna/{id}", adminOnly(setUserActiveHandler(auth, logger)))
 
-	// The catalogue is an Admin's to manage, so every Produk route sits behind
-	// the same role guard. The kasir lookup of #6 is a read this API already
-	// supports (`GET /api/produk?active=true`) — it will relax the guard on that
-	// one route when the till needs it.
-	mux.Handle("GET /api/produk", adminOnly(listProductHandler(products, logger)))
+	// The catalogue is an Admin's to manage, so every Produk *write* sits behind
+	// the Admin role guard. The read serves two screens: the Admin's management
+	// list (no `active` filter, Nonaktif included) and the Kasir's till lookup
+	// (`active=true`, #6). Opening the read to the Kasir is what lets the till
+	// find a Produk without a second endpoint over the same table; the Kategori
+	// and Stok-menipis reports below stay Admin-only.
+	mux.Handle("GET /api/produk", authenticated(listProductHandler(products, logger)))
 	// Registered before the wildcard, and as a literal it wins either way: the
 	// Kategori list is not a Produk id.
 	mux.Handle("GET /api/produk/kategori", adminOnly(listCategoryHandler(products, logger)))
@@ -69,6 +71,12 @@ func NewRouter(healthChecker HealthChecker, auth AuthService, products ProductSe
 	mux.Handle("POST /api/produk/{id}/stok", adminOnly(addStockHandler(products, logger)))
 	mux.Handle("PATCH /api/produk/{id}", adminOnly(setProductActiveHandler(products, logger)))
 	mux.Handle("DELETE /api/produk/{id}", adminOnly(deleteProductHandler(products, logger)))
+
+	// The till: turning a cart into a Penjualan, and reading one back by its
+	// Nomor Struk. Both Peran sell at a one-terminal store, so this is the one
+	// part of the API behind the token check but no role guard.
+	mux.Handle("POST /api/penjualan", authenticated(checkoutHandler(sales, logger)))
+	mux.Handle("GET /api/penjualan/{receiptNumber}", authenticated(saleHandler(sales, logger)))
 
 	return mux
 }

@@ -1,11 +1,8 @@
 package e2e
 
 import (
-	"context"
 	"net/http"
 	"testing"
-
-	"github.com/novriyantoAli/lite-point-of-sale/backend/internal/infrastructure/sqlite"
 )
 
 // produkPayload is the body an Admin posts to add or change a Produk. Code and
@@ -53,14 +50,18 @@ func TestProdukRequiresAnAdmin(t *testing.T) {
 	createPengguna(t, baseURL, adminToken, "kasir1", kasirPassword, "kasir")
 	kasirToken := logIn(t, baseURL, "kasir1", kasirPassword)
 
+	// The catalogue *read* is not in this list: the till of #6 looks a Produk up
+	// through it, so it is open to any signed-in Pengguna
+	// (TestListProdukIsOpenToTheKasir). Every write, and both catalogue reports,
+	// stay Admin-only.
 	tests := []struct {
 		name   string
 		method string
 		path   string
 		body   any
 	}{
-		{name: "list the catalogue", method: http.MethodGet, path: "/api/produk"},
 		{name: "list Kategori", method: http.MethodGet, path: "/api/produk/kategori"},
+		{name: "list Stok menipis", method: http.MethodGet, path: "/api/produk/stok-menipis"},
 		{name: "create a Produk", method: http.MethodPost, path: "/api/produk", body: produkPayload{Name: "Kopi", Price: 18000}},
 		{name: "change a Produk", method: http.MethodPut, path: "/api/produk/1", body: produkPayload{Name: "Kopi", Price: 19000}},
 		{name: "deactivate a Produk", method: http.MethodPatch, path: "/api/produk/1", body: activePayload{Active: false}},
@@ -91,6 +92,46 @@ func TestProdukRequiresAnAdmin(t *testing.T) {
 				t.Errorf("got code %q, want %q", failure.Error, "forbidden")
 			}
 		})
+	}
+}
+
+func TestListProdukIsOpenToTheKasir(t *testing.T) {
+	baseURL, adminToken := newAdminToken(t)
+
+	// Anonymous is still turned away: the read is open to the Kasir, not to
+	// everybody.
+	var failure errorPayload
+	if status := apiCall(t, http.MethodGet, baseURL+"/api/produk?active=true", "", nil, &failure); status != http.StatusUnauthorized {
+		t.Errorf("list Produk anonymously: got status %d, want %d", status, http.StatusUnauthorized)
+	}
+
+	createProduk(t, baseURL, adminToken, produkPayload{Name: "Kopi Susu", Code: strPtr("KOPI-01"), Price: 18000, Stock: 10})
+	// A Produk that is not for sale: the till lookup must not offer it.
+	sold := createProduk(t, baseURL, adminToken, produkPayload{Name: "Roti Bakar", Price: 15000, Stock: 4})
+	var deactivated dataEnvelope[productEnvelope]
+	if status := apiCall(t, http.MethodPatch, baseURL+"/api/produk/"+itoa(sold.ID), adminToken, activePayload{Active: false}, &deactivated); status != http.StatusOK {
+		t.Fatalf("deactivate: got status %d, want %d", status, http.StatusOK)
+	}
+
+	createPengguna(t, baseURL, adminToken, "kasir1", kasirPassword, "kasir")
+	kasirToken := logIn(t, baseURL, "kasir1", kasirPassword)
+
+	// The till finds a Produk by Kode…
+	byCode := listProduk(t, baseURL, kasirToken, "code=KOPI-01&active=true")
+	if len(byCode) != 1 || byCode[0].Name != "Kopi Susu" {
+		t.Errorf("lookup by Kode as Kasir: got %+v, want Kopi Susu", byCode)
+	}
+
+	// …and by name…
+	byName := listProduk(t, baseURL, kasirToken, "name=Roti&active=true")
+	if len(byName) != 0 {
+		t.Errorf("lookup by name as Kasir: got %+v, want the Nonaktif Produk left out", byName)
+	}
+
+	// …and `active=true` is what keeps a Nonaktif Produk out of the till.
+	active := listProduk(t, baseURL, kasirToken, "active=true")
+	if len(active) != 1 || active[0].Name != "Kopi Susu" {
+		t.Errorf("active lookup as Kasir: got %+v, want only the Aktif Produk", active)
 	}
 }
 
@@ -321,12 +362,12 @@ func TestDeleteProdukRemovesOneThatNeverSold(t *testing.T) {
 }
 
 func TestDeleteProdukIsRefusedOnceItSold(t *testing.T) {
-	cfg := newTestConfig(t)
-	_, baseURL := startAPI(t, cfg)
-	token := logIn(t, baseURL, seededAdmin, testAdminPassword)
+	baseURL, token := newAdminToken(t)
 
-	created := createProduk(t, baseURL, token, produkPayload{Name: "Kopi", Price: 18000})
-	markSold(t, cfg.DBPath, created.ID)
+	created := createProduk(t, baseURL, token, produkPayload{Name: "Kopi", Price: 18000, Stock: 1})
+	// A finished Penjualan is what makes a Produk "pernah terjual" (#6): there is
+	// no other route that sets it.
+	checkout(t, baseURL, token, tunai(created.ID, 1, 18000))
 
 	var failure errorPayload
 	status := apiCall(t, http.MethodDelete, baseURL+"/api/produk/"+itoa(created.ID), token, nil, &failure)
@@ -496,23 +537,4 @@ func listProduk(t *testing.T, baseURL, token, query string) []productPayload {
 	}
 
 	return listed.Data
-}
-
-// markSold plants the state only a finished Penjualan will set (#6): the API has
-// no route that sells a Produk yet, and the refusal it must answer with is worth
-// exercising at the HTTP seam today rather than when the till lands.
-func markSold(t *testing.T, dbPath string, id int64) {
-	t.Helper()
-
-	ctx := context.Background()
-
-	db, err := sqlite.Open(ctx, dbPath)
-	if err != nil {
-		t.Fatalf("open database to mark a Produk sold: %v", err)
-	}
-	defer db.Close()
-
-	if _, err := db.ExecContext(ctx, `UPDATE produk SET sold = 1 WHERE id = ?`, id); err != nil {
-		t.Fatalf("mark Produk %d sold: %v", id, err)
-	}
 }
