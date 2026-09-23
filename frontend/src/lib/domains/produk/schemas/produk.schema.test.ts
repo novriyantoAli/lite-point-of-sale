@@ -6,7 +6,9 @@ import {
 	ProdukInputSchema,
 	ProdukListSchema,
 	ProdukSchema,
-	SetActiveInputSchema
+	SetActiveInputSchema,
+	StokMenipisSchema,
+	TambahStokInputSchema
 } from './produk.schema';
 
 const produk = {
@@ -261,5 +263,73 @@ describe('KategoriListSchema', () => {
 
 	it('reads a store with no Kategori yet as an empty list', () => {
 		expect(KategoriListSchema.parse({ data: [] }).data).toEqual([]);
+	});
+});
+
+describe('TambahStokInputSchema', () => {
+	it('reads the quantity a form submits as text', () => {
+		expect(TambahStokInputSchema.parse({ quantity: '5' })).toEqual({ quantity: 5 });
+		expect(TambahStokInputSchema.parse({ quantity: 5 })).toEqual({ quantity: 5 });
+	});
+
+	it('accepts whitespace around a whole quantity', () => {
+		expect(TambahStokInputSchema.parse({ quantity: ' 12 ' })).toEqual({ quantity: 12 });
+	});
+
+	it('rejects a quantity of zero with a message fit for the form', () => {
+		// A restock of nothing is not a restock: it would record an event that did
+		// not happen, so the form asks again instead of accepting it.
+		expect(() => TambahStokInputSchema.parse({ quantity: '0' })).toThrow(
+			'Jumlah Stok harus lebih dari nol.'
+		);
+	});
+
+	it('rejects a negative quantity: Stok leaves through a Penjualan, not a form', () => {
+		expect(() => TambahStokInputSchema.parse({ quantity: '-3' })).toThrow(
+			'Jumlah Stok harus lebih dari nol.'
+		);
+	});
+
+	it('rejects a blank quantity instead of reading it as 0', () => {
+		expect(() => TambahStokInputSchema.parse({ quantity: '' })).toThrow();
+	});
+
+	it('rejects an absent quantity', () => {
+		expect(() => TambahStokInputSchema.parse({})).toThrow();
+	});
+
+	it('rejects a fractional quantity: Stok is whole units', () => {
+		expect(() => TambahStokInputSchema.parse({ quantity: '2.5' })).toThrow(
+			'Jumlah Stok harus bilangan bulat.'
+		);
+	});
+
+	it('rejects the Indonesian thousands separator, the same rule as Harga', () => {
+		// `Number('1.000')` is 1, so coercing would restock a thousandth of what
+		// the Admin typed and show the mistake nowhere.
+		expect(() => TambahStokInputSchema.parse({ quantity: '1.000' })).toThrow(
+			'Jumlah Stok harus bilangan bulat.'
+		);
+	});
+});
+
+describe('StokMenipisSchema', () => {
+	it('reads the threshold together with the Produk it selected', () => {
+		const parsed = StokMenipisSchema.parse({ data: { threshold: 5, products: [produk] } });
+
+		expect(parsed.data.threshold).toBe(5);
+		expect(parsed.data.products).toEqual([produk]);
+	});
+
+	it('reads a restocked store as an empty list', () => {
+		expect(StokMenipisSchema.parse({ data: { threshold: 5, products: [] } }).data.products).toEqual(
+			[]
+		);
+	});
+
+	it('rejects an answer without the threshold it selected by', () => {
+		// The rule that decided the list is part of the answer: without it the UI
+		// would have to invent one, and the badge it showed would be a second rule.
+		expect(() => StokMenipisSchema.parse({ data: { products: [] } })).toThrow();
 	});
 });

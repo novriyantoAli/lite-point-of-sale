@@ -114,6 +114,51 @@ func (f *fakeProducts) List(_ context.Context, filter domainproduk.Filter) ([]do
 	return products, nil
 }
 
+// AddStock mirrors the SQL `stock = stock + ?`: it adds to whatever is stored
+// rather than replacing it, and reports a Produk that is not there.
+func (f *fakeProducts) AddStock(_ context.Context, id int64, quantity int64) (domainproduk.Product, error) {
+	if f.err != nil {
+		return domainproduk.Product{}, f.err
+	}
+
+	product, ok := f.products[id]
+	if !ok {
+		return domainproduk.Product{}, domainproduk.ErrProductNotFound
+	}
+
+	product.Stock += quantity
+	f.products[id] = product
+
+	return product, nil
+}
+
+// ListLowStock mirrors the SQL the real repository builds: Active Produk below
+// the threshold, thinnest first.
+func (f *fakeProducts) ListLowStock(_ context.Context, threshold int64) ([]domainproduk.Product, error) {
+	if f.err != nil {
+		return nil, f.err
+	}
+
+	low := []domainproduk.Product{}
+	for id := int64(1); id <= f.nextID; id++ {
+		product, ok := f.products[id]
+		if !ok || !product.Active || product.Stock >= threshold {
+			continue
+		}
+		low = append(low, product)
+	}
+
+	sort.Slice(low, func(i, j int) bool {
+		if low[i].Stock != low[j].Stock {
+			return low[i].Stock < low[j].Stock
+		}
+
+		return low[i].Name < low[j].Name
+	})
+
+	return low, nil
+}
+
 func (f *fakeProducts) Categories(context.Context) ([]string, error) {
 	if f.err != nil {
 		return nil, f.err

@@ -30,6 +30,14 @@ type Product struct {
 	Sold bool
 }
 
+// LowStockThreshold is the Stok below which a Produk counts as menipis: the
+// Admin is told to restock it (CONTEXT.md, Stok). "Below", not "at or below" —
+// the ambang is the first Stok that is still enough. It is a constant rather
+// than a stored setting because there is nowhere to store one yet — the
+// Pengaturan screen arrives with the Struk template in #8, and this moves there
+// when it does.
+const LowStockThreshold int64 = 5
+
 // Filter narrows a catalogue listing. Every field is optional: an empty string
 // (or a nil Active) means "do not filter on this".
 //
@@ -63,6 +71,16 @@ type ProductRepository interface {
 	FindByID(ctx context.Context, id int64) (Product, error)
 	FindByCode(ctx context.Context, code string) (Product, error)
 	List(ctx context.Context, filter Filter) ([]Product, error)
+	// AddStock adds quantity units to a Produk's Stok and answers the Produk as
+	// it now stands. It adds rather than sets, so two restocks arriving at once
+	// cannot lose one of the two — the read-modify-write that would is exactly
+	// what this method exists to avoid.
+	AddStock(ctx context.Context, id int64, quantity int64) (Product, error)
+	// ListLowStock answers the Active Produk whose Stok is below threshold,
+	// thinnest first, so the Admin reads what to restock before what can wait.
+	// A Nonaktif Produk is left out: it is not for sale, so its Stok cannot run
+	// out in a way that matters (CONTEXT.md, Nonaktif).
+	ListLowStock(ctx context.Context, threshold int64) ([]Product, error)
 	// Categories returns every distinct Kategori in use, sorted, so the UI can
 	// offer the ones that exist instead of a hand-maintained list.
 	Categories(ctx context.Context) ([]string, error)

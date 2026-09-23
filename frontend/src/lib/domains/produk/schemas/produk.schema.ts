@@ -54,8 +54,13 @@ const optionalText = z
  * A blank field fails instead of quietly becoming 0: an empty Harga is almost
  * always one the Admin forgot, and a Produk priced 0 by accident is worse than a
  * form that asks again.
+ *
+ * The parsing is one function and the rule about how large the number may be is
+ * another, because the two fields that carry a whole number disagree about the
+ * rule — a Harga may be 0, a restock may not — and must not disagree about how
+ * "18.000" is read.
  */
-function wholeNumber(integerMessage: string, negativeMessage: string) {
+function wholeNumberField(integerMessage: string, rule: (schema: z.ZodNumber) => z.ZodNumber) {
 	return z.preprocess(
 		(value) => (typeof value === 'string' ? parseIntegerLiteral(value) : value),
 		// The type check carries the same message as `.int()`: a value that is not a
@@ -63,8 +68,16 @@ function wholeNumber(integerMessage: string, negativeMessage: string) {
 		// reports those from the type check — before `.int()` ever runs. Without
 		// this, the form shows zod's English default instead of the message the
 		// Admin needs to read.
-		z.number({ message: integerMessage }).int(integerMessage).nonnegative(negativeMessage)
+		rule(z.number({ message: integerMessage }).int(integerMessage))
 	);
+}
+
+function wholeNumber(integerMessage: string, negativeMessage: string) {
+	return wholeNumberField(integerMessage, (schema) => schema.nonnegative(negativeMessage));
+}
+
+function positiveWholeNumber(integerMessage: string, positiveMessage: string) {
+	return wholeNumberField(integerMessage, (schema) => schema.positive(positiveMessage));
 }
 
 /**
@@ -117,6 +130,25 @@ export const SetActiveInputSchema = z.object({
 export type SetActiveInput = z.infer<typeof SetActiveInputSchema>;
 
 /**
+ * What the restock form posts: how many units arrived for one Produk. It carries
+ * the quantity, never the new total — the Stok already on the Produk is the
+ * API's to know, and sending a total would let two restocks overwrite each other
+ * (`usecase/produk.AddStock`).
+ *
+ * A quantity of zero is refused for the same reason it is on the Go side: it
+ * records a delivery that did not happen. A negative one is refused harder —
+ * Stok leaves the catalogue through a Penjualan, which is the transaction that
+ * keeps it non-negative (#6), not through an Admin's form.
+ */
+export const TambahStokInputSchema = z.object({
+	quantity: positiveWholeNumber(
+		'Jumlah Stok harus bilangan bulat.',
+		'Jumlah Stok harus lebih dari nol.'
+	)
+});
+export type TambahStokInput = z.infer<typeof TambahStokInputSchema>;
+
+/**
  * The catalogue filters. Every field is optional: an empty one means "do not
  * filter on this", which is why they are trimmed here rather than at the URL.
  */
@@ -143,3 +175,18 @@ export const ProdukListSchema = z.object({
 export const KategoriListSchema = z.object({
 	data: z.array(z.string())
 });
+
+/**
+ * The restock list: the Produk whose Stok is menipis or habis, and the threshold
+ * that decided which ones those are. The threshold is required rather than
+ * defaulted — it is the rule the list was selected by, and a UI that invented
+ * its own would show the Admin a badge that disagrees with the list underneath
+ * it.
+ */
+export const StokMenipisSchema = z.object({
+	data: z.object({
+		threshold: z.number().int(),
+		products: z.array(ProdukSchema)
+	})
+});
+export type StokMenipis = z.infer<typeof StokMenipisSchema>['data'];

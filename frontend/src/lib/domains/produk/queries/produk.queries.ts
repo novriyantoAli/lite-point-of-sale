@@ -2,7 +2,7 @@ import { browser } from '$app/environment';
 import { createMutation, createQuery, useQueryClient } from '@tanstack/svelte-query';
 import type { AppError } from '$lib/api/errors';
 import { produkApi } from '../api/produk.api';
-import type { Produk, ProdukFilter, ProdukInput } from '../schemas/produk.schema';
+import type { Produk, ProdukFilter, ProdukInput, StokMenipis } from '../schemas/produk.schema';
 
 /**
  * The cache keys of the Produk domain, in the one scheme every domain shares:
@@ -13,7 +13,8 @@ import type { Produk, ProdukFilter, ProdukInput } from '../schemas/produk.schema
 export const produkKeys = {
 	all: ['produk'] as const,
 	list: (filter: ProdukFilter) => [...produkKeys.all, 'list', filter] as const,
-	kategori: () => [...produkKeys.all, 'kategori'] as const
+	kategori: () => [...produkKeys.all, 'kategori'] as const,
+	stokMenipis: () => [...produkKeys.all, 'stok-menipis'] as const
 };
 
 /**
@@ -41,6 +42,20 @@ export function createKategoriListQuery() {
 	return createQuery<string[], AppError>(() => ({
 		queryKey: produkKeys.kategori(),
 		queryFn: () => produkApi.categories(),
+		enabled: browser
+	}));
+}
+
+/**
+ * The Produk to restock, with the threshold that selected them. It is a query of
+ * its own rather than a filter on the list because the rule that decides it is
+ * the domain's (`LowStockThreshold` in Go), not a filter the Admin sets — and
+ * because the answer carries that rule back, so the screen can show it.
+ */
+export function createStokMenipisQuery() {
+	return createQuery<StokMenipis, AppError>(() => ({
+		queryKey: produkKeys.stokMenipis(),
+		queryFn: () => produkApi.lowStock(),
 		enabled: browser
 	}));
 }
@@ -85,6 +100,22 @@ export function createDeleteProdukMutation() {
 
 	return createMutation<void, AppError, number>(() => ({
 		mutationFn: (id: number) => produkApi.remove(id),
+		onSuccess: () => queryClient.invalidateQueries({ queryKey: produkKeys.all })
+	}));
+}
+
+/**
+ * Records a restock. It invalidates the whole `produk` subtree for the same
+ * reason the other mutations do — and one more: a restock changes both the
+ * catalogue's Stok column and the restock list, and the Produk it lifts above
+ * the threshold has to leave that list. Invalidating only one of the two would
+ * leave the screen arguing with itself.
+ */
+export function createAddStokMutation() {
+	const queryClient = useQueryClient();
+
+	return createMutation<Produk, AppError, { id: number; quantity: number }>(() => ({
+		mutationFn: ({ id, quantity }) => produkApi.addStock(id, quantity),
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: produkKeys.all })
 	}));
 }

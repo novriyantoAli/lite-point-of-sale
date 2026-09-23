@@ -132,3 +132,40 @@ export async function fillProdukForm(
 	await form.getByLabel('Harga').fill(String(price));
 	await form.getByLabel('Stok').fill(String(stock));
 }
+
+/**
+ * The Stok screen's restock list. It and the catalogue table below it carry the
+ * same Produk on purpose, so a test has to say which one it is reading —
+ * otherwise "Tambah Stok" would match a button in each.
+ */
+export function stokMenipisSection(page: Page) {
+	return page.getByRole('region', { name: 'Stok menipis' });
+}
+
+/** The Stok screen's table of every Produk. */
+export function stokProdukSection(page: Page) {
+	return page.getByRole('region', { name: 'Stok per Produk' });
+}
+
+/** The Stok row of one Produk, so a test never matches a similar name. */
+export function stokRow(page: Page, name: string) {
+	return stokProdukSection(page)
+		.locator('tbody tr')
+		.filter({ has: page.getByText(name, { exact: true }) });
+}
+
+/**
+ * Records a restock through the Stok screen for one Produk and waits for the
+ * screen to report it. The amount is the units received, never the new total —
+ * the Stok already on the Produk is the API's to add to.
+ */
+export async function addStok(page: Page, name: string, quantity: number) {
+	await page.goto('/stok');
+
+	const row = stokRow(page, name);
+	await row.getByRole('button', { name: 'Tambah Stok' }).click();
+	await row.getByLabel('Jumlah masuk').fill(String(quantity));
+	await row.getByRole('button', { name: 'Tambah Stok' }).click();
+
+	await expect(page.getByRole('status')).toContainText(`Stok ${name} sekarang`);
+}
