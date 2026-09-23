@@ -47,7 +47,7 @@ func (f *fakeProducts) Create(context.Context, domainproduk.Product) (domainprod
 	return domainproduk.Product{}, errNotUsed
 }
 
-func (f *fakeProducts) Update(context.Context, domainproduk.Product) (domainproduk.Product, error) {
+func (f *fakeProducts) Update(context.Context, int64, domainproduk.ProductEdit) (domainproduk.Product, error) {
 	return domainproduk.Product{}, errNotUsed
 }
 

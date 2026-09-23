@@ -152,7 +152,7 @@ func TestProductRepositoryUpdateReplacesTheEditableFieldsOnly(t *testing.T) {
 	repository, db, ctx := newProductRepository(t)
 
 	created := seedProduct(t, repository, ctx, domainproduk.Product{
-		Name: "Kopi", Code: productPtr("KOPI-01"), Price: 18000, Active: false,
+		Name: "Kopi", Code: productPtr("KOPI-01"), Price: 18000, Active: false, Stock: 10,
 	})
 
 	// Plant the state only a finished Penjualan will set (#6).
@@ -160,27 +160,25 @@ func TestProductRepositoryUpdateReplacesTheEditableFieldsOnly(t *testing.T) {
 		t.Fatalf("mark sold: %v", err)
 	}
 
-	updated, err := repository.Update(ctx, domainproduk.Product{
-		ID:       created.ID,
+	updated, err := repository.Update(ctx, created.ID, domainproduk.ProductEdit{
 		Name:     "Kopi Susu Gula Aren",
 		Code:     productPtr("KOPI-02"),
 		Price:    22000,
 		Category: productPtr("Minuman"),
-		Stock:    7,
-		// Deliberately the wrong values: an edit must not be able to write them.
-		Active: true,
-		Sold:   false,
 	})
 	if err != nil {
 		t.Fatalf("update: %v", err)
 	}
-	if updated.Name != "Kopi Susu Gula Aren" || updated.Price != 22000 || updated.Stock != 7 {
-		t.Errorf("returned Produk: got %+v, want the new name, price and stock", updated)
+	if updated.Name != "Kopi Susu Gula Aren" || updated.Price != 22000 {
+		t.Errorf("returned Produk: got %+v, want the new name and price", updated)
 	}
 
 	stored, err := repository.FindByID(ctx, created.ID)
 	if err != nil {
 		t.Fatalf("find after update: %v", err)
+	}
+	if stored.Stock != 10 {
+		t.Errorf("stok: got %d, want the stored 10 — an edit does not move Stok", stored.Stock)
 	}
 	if stored.Active {
 		t.Error("active: got active, want the stored Nonaktif state to survive an edit")
@@ -193,14 +191,47 @@ func TestProductRepositoryUpdateReplacesTheEditableFieldsOnly(t *testing.T) {
 	}
 }
 
+// An edit cannot move Stok, and the UPDATE statement is where that is settled:
+// `stock` is not among the columns it names, so there is no value a caller could
+// pass that would reach it (ADR-0014). A Produk that took a delivery after the
+// form was opened keeps that delivery.
+func TestProductRepositoryUpdateNeverTouchesStok(t *testing.T) {
+	repository, _, ctx := newProductRepository(t)
+	created := seedProduct(t, repository, ctx, domainproduk.Product{
+		Name: "Kopi", Price: 18000, Active: true, Stock: 10,
+	})
+
+	if _, err := repository.AddStock(ctx, created.ID, 5); err != nil {
+		t.Fatalf("add Stok: %v", err)
+	}
+
+	updated, err := repository.Update(ctx, created.ID, domainproduk.ProductEdit{
+		Name: "Kopi Susu", Price: 19000,
+	})
+	if err != nil {
+		t.Fatalf("update: %v", err)
+	}
+	if updated.Stock != 15 {
+		t.Errorf("returned Stok: got %d, want the 15 that is stored", updated.Stock)
+	}
+
+	stored, err := repository.FindByID(ctx, created.ID)
+	if err != nil {
+		t.Fatalf("find after update: %v", err)
+	}
+	if stored.Stock != 15 {
+		t.Errorf("stored Stok: got %d, want 15 — an edit must not move Stok", stored.Stock)
+	}
+}
+
 func TestProductRepositoryUpdateKeepsKodeUnique(t *testing.T) {
 	repository, _, ctx := newProductRepository(t)
 
 	seedProduct(t, repository, ctx, domainproduk.Product{Name: "Kopi", Code: productPtr("KOPI-01"), Price: 18000, Active: true})
 	other := seedProduct(t, repository, ctx, domainproduk.Product{Name: "Teh", Code: productPtr("TEH-01"), Price: 6000, Active: true})
 
-	_, err := repository.Update(ctx, domainproduk.Product{
-		ID: other.ID, Name: "Teh Manis", Code: productPtr("KOPI-01"), Price: 6000,
+	_, err := repository.Update(ctx, other.ID, domainproduk.ProductEdit{
+		Name: "Teh Manis", Code: productPtr("KOPI-01"), Price: 6000,
 	})
 	if !errors.Is(err, domainproduk.ErrCodeTaken) {
 		t.Fatalf("update to a taken Kode: got error %v, want %v", err, domainproduk.ErrCodeTaken)
@@ -423,7 +454,7 @@ func TestProductRepositoryReportsAMissingProduk(t *testing.T) {
 	if _, err := repository.FindByCode(ctx, "HANTU"); !errors.Is(err, domainproduk.ErrProductNotFound) {
 		t.Errorf("find by code: got error %v, want %v", err, domainproduk.ErrProductNotFound)
 	}
-	if _, err := repository.Update(ctx, domainproduk.Product{ID: 404, Name: "Hantu"}); !errors.Is(err, domainproduk.ErrProductNotFound) {
+	if _, err := repository.Update(ctx, 404, domainproduk.ProductEdit{Name: "Hantu"}); !errors.Is(err, domainproduk.ErrProductNotFound) {
 		t.Errorf("update: got error %v, want %v", err, domainproduk.ErrProductNotFound)
 	}
 	if _, err := repository.AddStock(ctx, 404, 1); !errors.Is(err, domainproduk.ErrProductNotFound) {

@@ -193,20 +193,23 @@ describe('ProdukList', () => {
 		const harga = form().getByLabelText('Harga');
 		expect(harga).toHaveValue('18000');
 
-		// Status is not an edit-form field: changing it is the Aktifkan/Nonaktifkan
-		// button's job, and an update must not carry a Status it cannot decide.
+		// Neither Stok nor Status is an edit-form field: Stok moves through the Stok
+		// awal of a create, the Tambah Stok form, and a Penjualan (ADR-0014), and
+		// Status through the Aktifkan/Nonaktifkan button.
+		expect(form().queryByLabelText('Stok')).toBeNull();
 		expect(form().queryByLabelText('Status')).toBeNull();
 
 		await user.clear(harga);
 		await user.type(harga, '22000');
 		await user.click(screen.getByRole('button', { name: 'Simpan Perubahan' }));
 
+		// The edit body carries the editable record only — no Stok to write back over a
+		// delivery that arrived while the form was open.
 		expect(update).toHaveBeenCalledWith(1, {
 			name: 'Kopi Susu',
 			code: 'KOPI-01',
 			price: 22000,
-			category: 'Minuman',
-			stock: 12
+			category: 'Minuman'
 		});
 	});
 

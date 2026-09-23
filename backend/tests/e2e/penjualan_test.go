@@ -212,7 +212,7 @@ func TestCheckoutSnapshotsTheNameAndPrice(t *testing.T) {
 	// The catalogue is repriced and renamed afterwards…
 	var updated dataEnvelope[productEnvelope]
 	status := apiCall(t, http.MethodPut, baseURL+"/api/produk/"+itoa(created.ID), token,
-		produkPayload{Name: "Kopi Susu Gula Aren", Price: 25000, Stock: 4}, &updated)
+		produkEditPayload{Name: "Kopi Susu Gula Aren", Price: 25000}, &updated)
 	if status != http.StatusOK {
 		t.Fatalf("reprice: got status %d, want %d", status, http.StatusOK)
 	}

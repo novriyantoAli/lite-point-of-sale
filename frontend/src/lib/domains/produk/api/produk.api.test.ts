@@ -159,24 +159,49 @@ describe('produkApi.create', () => {
 });
 
 describe('produkApi.update', () => {
-	it('puts the whole editable record to the Produk the path names', async () => {
+	it('puts the editable record to the Produk the path names, with no Stok in the body', async () => {
 		mock.onPut('/produk/1').reply(200, { data: { product: { ...produk, price: 22000 } } });
 
 		const updated = await produkApi.update(1, {
 			name: 'Kopi Susu',
 			code: 'KOPI-01',
 			price: 22000,
-			category: 'Minuman',
-			stock: 12
+			category: 'Minuman'
 		});
 
 		expect(updated.price).toBe(22000);
-		expect(JSON.parse(mock.history.put[0]!.data as string)).toEqual({
+
+		// An edit cannot move Stok, so the request carries no field for one — not even
+		// the value the Produk already has (ADR-0014).
+		const body = JSON.parse(mock.history.put[0]!.data as string);
+		expect(body).toEqual({
 			name: 'Kopi Susu',
 			code: 'KOPI-01',
 			price: 22000,
+			category: 'Minuman'
+		});
+		expect(body).not.toHaveProperty('stock');
+	});
+
+	it('drops a Stok and a Status that arrive from somewhere else', async () => {
+		// The shape an older caller would hand it. The schema is the boundary, so the
+		// request is what proves the fields never leave the app.
+		mock.onPut('/produk/1').reply(200, { data: { product: produk } });
+
+		await produkApi.update(1, {
+			name: 'Kopi Susu',
+			code: 'KOPI-01',
+			price: 18000,
 			category: 'Minuman',
-			stock: 12
+			stock: 10,
+			active: false
+		} as never);
+
+		expect(JSON.parse(mock.history.put[0]!.data as string)).toEqual({
+			name: 'Kopi Susu',
+			code: 'KOPI-01',
+			price: 18000,
+			category: 'Minuman'
 		});
 	});
 });

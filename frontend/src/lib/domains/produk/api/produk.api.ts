@@ -1,17 +1,19 @@
 import { apiClient } from '$lib/api/client';
 import {
+	CreateProdukInputSchema,
 	KategoriListSchema,
 	ProdukEnvelopeSchema,
 	ProdukFilterSchema,
-	ProdukInputSchema,
 	ProdukListSchema,
 	SetActiveInputSchema,
 	StokMenipisSchema,
 	TambahStokInputSchema,
+	UpdateProdukInputSchema,
+	type CreateProdukInput,
 	type Produk,
 	type ProdukFilter,
-	type ProdukInput,
-	type StokMenipis
+	type StokMenipis,
+	type UpdateProdukInput
 } from '../schemas/produk.schema';
 
 /**
@@ -26,8 +28,12 @@ import {
 export interface ProdukApi {
 	list(filter: ProdukFilter): Promise<Produk[]>;
 	categories(): Promise<string[]>;
-	create(input: ProdukInput): Promise<Produk>;
-	update(id: number, input: ProdukInput): Promise<Produk>;
+	create(input: CreateProdukInput): Promise<Produk>;
+	/**
+	 * Changes the editable record of one Produk. It takes no Stok: an edit cannot
+	 * move it, and `UpdateProdukInputSchema` has no field to carry one (ADR-0014).
+	 */
+	update(id: number, input: UpdateProdukInput): Promise<Produk>;
 	setActive(id: number, active: boolean): Promise<Produk>;
 	/**
 	 * Records a restock: adds `quantity` units to one Produk's Stok. It adds rather
@@ -54,14 +60,14 @@ export const produkApi: ProdukApi = {
 		return KategoriListSchema.parse(data).data;
 	},
 
-	async create(input: ProdukInput): Promise<Produk> {
-		const { data } = await apiClient.post('/produk', ProdukInputSchema.parse(input));
+	async create(input: CreateProdukInput): Promise<Produk> {
+		const { data } = await apiClient.post('/produk', CreateProdukInputSchema.parse(input));
 
 		return ProdukEnvelopeSchema.parse(data).data.product;
 	},
 
-	async update(id: number, input: ProdukInput): Promise<Produk> {
-		const { data } = await apiClient.put(`/produk/${id}`, ProdukInputSchema.parse(input));
+	async update(id: number, input: UpdateProdukInput): Promise<Produk> {
+		const { data } = await apiClient.put(`/produk/${id}`, UpdateProdukInputSchema.parse(input));
 
 		return ProdukEnvelopeSchema.parse(data).data.product;
 	},

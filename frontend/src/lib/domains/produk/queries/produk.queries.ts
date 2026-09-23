@@ -2,7 +2,13 @@ import { browser } from '$app/environment';
 import { createMutation, createQuery, useQueryClient } from '@tanstack/svelte-query';
 import type { AppError } from '$lib/api/errors';
 import { produkApi } from '../api/produk.api';
-import type { Produk, ProdukFilter, ProdukInput, StokMenipis } from '../schemas/produk.schema';
+import type {
+	CreateProdukInput,
+	Produk,
+	ProdukFilter,
+	StokMenipis,
+	UpdateProdukInput
+} from '../schemas/produk.schema';
 
 /**
  * The cache keys of the Produk domain, in the one scheme every domain shares:
@@ -71,16 +77,21 @@ export function createStokMenipisQuery() {
 export function createProdukMutation() {
 	const queryClient = useQueryClient();
 
-	return createMutation<Produk, AppError, ProdukInput>(() => ({
-		mutationFn: (input: ProdukInput) => produkApi.create(input),
+	return createMutation<Produk, AppError, CreateProdukInput>(() => ({
+		mutationFn: (input: CreateProdukInput) => produkApi.create(input),
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: produkKeys.all })
 	}));
 }
 
+/**
+ * Changes the editable record of one Produk. Its input has no Stok — the domain's
+ * `UpdateProdukInput` is where that is decided, and this signature follows it
+ * (ADR-0014).
+ */
 export function createUpdateProdukMutation() {
 	const queryClient = useQueryClient();
 
-	return createMutation<Produk, AppError, { id: number; input: ProdukInput }>(() => ({
+	return createMutation<Produk, AppError, { id: number; input: UpdateProdukInput }>(() => ({
 		mutationFn: ({ id, input }) => produkApi.update(id, input),
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: produkKeys.all })
 	}));

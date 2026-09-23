@@ -11,8 +11,8 @@ import (
 // ptr is a small helper for the optional fields of a Produk.
 func ptr(value string) *string { return &value }
 
-func validInput() ProductInput {
-	return ProductInput{
+func validInput() CreateInput {
+	return CreateInput{
 		Name:     "Kopi Susu",
 		Code:     "KOPI-01",
 		Price:    18000,
@@ -24,12 +24,12 @@ func validInput() ProductInput {
 func TestCreateValidatesInput(t *testing.T) {
 	tests := []struct {
 		name  string
-		input ProductInput
+		input CreateInput
 	}{
-		{name: "empty name", input: ProductInput{Name: "", Price: 1000}},
-		{name: "name of spaces only", input: ProductInput{Name: "   ", Price: 1000}},
-		{name: "negative price", input: ProductInput{Name: "Kopi", Price: -1}},
-		{name: "negative stock", input: ProductInput{Name: "Kopi", Price: 1000, Stock: -1}},
+		{name: "empty name", input: CreateInput{Name: "", Price: 1000}},
+		{name: "name of spaces only", input: CreateInput{Name: "   ", Price: 1000}},
+		{name: "negative price", input: CreateInput{Name: "Kopi", Price: -1}},
+		{name: "negative stock", input: CreateInput{Name: "Kopi", Price: 1000, Stock: -1}},
 	}
 
 	for _, test := range tests {
@@ -59,7 +59,7 @@ func TestCreateValidatesInput(t *testing.T) {
 func TestCreateTrimsTextAndKeepsAnAbsentKodeAbsent(t *testing.T) {
 	products := newFakeProducts()
 
-	created, err := newTestService(products).Create(context.Background(), ProductInput{
+	created, err := newTestService(products).Create(context.Background(), CreateInput{
 		Name:     "  Kopi Susu ",
 		Code:     "   ",
 		Price:    18000,
@@ -94,7 +94,7 @@ func TestCreateRejectsADuplicateKode(t *testing.T) {
 	products := newFakeProducts()
 	products.seed(domainproduk.Product{Name: "Kopi Susu", Code: ptr("KOPI-01"), Active: true})
 
-	_, err := newTestService(products).Create(context.Background(), ProductInput{
+	_, err := newTestService(products).Create(context.Background(), CreateInput{
 		Name:  "Kopi Susu Besar",
 		Code:  "KOPI-01",
 		Price: 20000,
@@ -110,7 +110,7 @@ func TestCreateAllowsManyProdukWithoutAKode(t *testing.T) {
 	service := newTestService(products)
 
 	for _, name := range []string{"Teh", "Air"} {
-		if _, err := service.Create(context.Background(), ProductInput{Name: name, Price: 5000}); err != nil {
+		if _, err := service.Create(context.Background(), CreateInput{Name: name, Price: 5000}); err != nil {
 			t.Fatalf("create %s: %v", name, err)
 		}
 	}
@@ -135,7 +135,7 @@ func TestCreateHonoursTheStatusItWasGiven(t *testing.T) {
 	}
 
 	inactive := false
-	created, err := service.Create(context.Background(), ProductInput{
+	created, err := service.Create(context.Background(), CreateInput{
 		Name:   "Belum Dijual",
 		Price:  1000,
 		Active: &inactive,
@@ -154,19 +154,18 @@ func TestUpdateReplacesTheEditableFields(t *testing.T) {
 		Name: "Kopi Susu", Code: ptr("KOPI-01"), Price: 18000, Active: true, Stock: 10,
 	})
 
-	updated, err := newTestService(products).Update(context.Background(), id, ProductInput{
+	updated, err := newTestService(products).Update(context.Background(), id, UpdateInput{
 		Name:     "Kopi Susu Gula Aren",
 		Code:     "KOPI-02",
 		Price:    22000,
 		Category: "Minuman",
-		Stock:    7,
 	})
 	if err != nil {
 		t.Fatalf("update: %v", err)
 	}
 
-	if updated.Name != "Kopi Susu Gula Aren" || updated.Price != 22000 || updated.Stock != 7 {
-		t.Errorf("updated: got %+v, want the new name, price and stock", updated)
+	if updated.Name != "Kopi Susu Gula Aren" || updated.Price != 22000 {
+		t.Errorf("updated: got %+v, want the new name and price", updated)
 	}
 	if updated.Code == nil || *updated.Code != "KOPI-02" {
 		t.Errorf("code: got %v, want KOPI-02", updated.Code)
@@ -176,11 +175,37 @@ func TestUpdateReplacesTheEditableFields(t *testing.T) {
 	}
 }
 
+// An edit is not one of the three paths that move Stok (ADR-0014). The input no
+// longer has a Stok field to send, so what is left to prove is that the stored
+// number survives: a Produk whose Stok rose between the form opening and Simpan
+// being pressed must keep the rise.
+func TestUpdateKeepsTheStokThatIsStored(t *testing.T) {
+	products := newFakeProducts()
+	id := products.seed(domainproduk.Product{Name: "Kopi", Price: 18000, Active: true, Stock: 10})
+
+	// A delivery arrives while the edit form is open.
+	if _, err := products.AddStock(context.Background(), id, 5); err != nil {
+		t.Fatalf("add Stok: %v", err)
+	}
+
+	updated, err := newTestService(products).Update(context.Background(), id, UpdateInput{
+		Name:  "Kopi Susu",
+		Price: 19000,
+	})
+	if err != nil {
+		t.Fatalf("update: %v", err)
+	}
+
+	if updated.Stock != 15 {
+		t.Errorf("stock: got %d, want the stored 15 to survive an edit", updated.Stock)
+	}
+}
+
 func TestUpdateKeepsTheKodeAProdukAlreadyHas(t *testing.T) {
 	products := newFakeProducts()
 	id := products.seed(domainproduk.Product{Name: "Kopi Susu", Code: ptr("KOPI-01"), Active: true})
 
-	updated, err := newTestService(products).Update(context.Background(), id, ProductInput{
+	updated, err := newTestService(products).Update(context.Background(), id, UpdateInput{
 		Name:  "Kopi Susu",
 		Code:  "KOPI-01",
 		Price: 19000,
@@ -199,7 +224,7 @@ func TestUpdateRejectsAKodeAnotherProdukUses(t *testing.T) {
 	products.seed(domainproduk.Product{Name: "Kopi Susu", Code: ptr("KOPI-01"), Active: true})
 	otherID := products.seed(domainproduk.Product{Name: "Teh", Code: ptr("TEH-01"), Active: true})
 
-	_, err := newTestService(products).Update(context.Background(), otherID, ProductInput{
+	_, err := newTestService(products).Update(context.Background(), otherID, UpdateInput{
 		Name:  "Teh Manis",
 		Code:  "KOPI-01",
 		Price: 6000,
@@ -213,7 +238,7 @@ func TestUpdateRejectsAKodeAnotherProdukUses(t *testing.T) {
 func TestUpdateRejectsAnUnknownProduk(t *testing.T) {
 	products := newFakeProducts()
 
-	_, err := newTestService(products).Update(context.Background(), 99, validInput())
+	_, err := newTestService(products).Update(context.Background(), 99, UpdateInput{Name: "Kopi", Price: 18000})
 
 	if !errors.Is(err, domainproduk.ErrProductNotFound) {
 		t.Fatalf("update: got error %v, want %v", err, domainproduk.ErrProductNotFound)
@@ -224,13 +249,11 @@ func TestUpdateNeverTouchesActiveOrSold(t *testing.T) {
 	products := newFakeProducts()
 	id := products.seed(domainproduk.Product{Name: "Kopi", Active: false, Sold: true, Price: 1000})
 
-	// The input asks for Aktif, which an edit is not allowed to decide — the
-	// Aktifkan/Nonaktifkan button is the one action that does.
-	active := true
-	updated, err := newTestService(products).Update(context.Background(), id, ProductInput{
-		Name:   "Kopi Susu",
-		Price:  2000,
-		Active: &active,
+	// An edit has no field for either: reactivating is the Aktifkan/Nonaktifkan
+	// button's job, and nothing may erase that a Produk has sold.
+	updated, err := newTestService(products).Update(context.Background(), id, UpdateInput{
+		Name:  "Kopi Susu",
+		Price: 2000,
 	})
 	if err != nil {
 		t.Fatalf("update: %v", err)

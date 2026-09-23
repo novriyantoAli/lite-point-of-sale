@@ -8,10 +8,10 @@ import (
 	domainproduk "github.com/novriyantoAli/lite-point-of-sale/backend/internal/domain/produk"
 )
 
-// Create adds a Produk to the catalogue. Only an Admin reaches this use case;
-// the HTTP adapter is what enforces that role.
-func (s *Service) Create(ctx context.Context, input ProductInput) (domainproduk.Product, error) {
-	product, err := validate(input)
+// Create adds a Produk to the catalogue, Stok awal included. Only an Admin
+// reaches this use case; the HTTP adapter is what enforces that role.
+func (s *Service) Create(ctx context.Context, input CreateInput) (domainproduk.Product, error) {
+	product, err := validateCreate(input)
 	if err != nil {
 		return domainproduk.Product{}, err
 	}
@@ -28,28 +28,29 @@ func (s *Service) Create(ctx context.Context, input ProductInput) (domainproduk.
 	return created, nil
 }
 
-// Update replaces the editable fields of a Produk. A Nonaktif Produk stays
-// Nonaktif and one that has sold stays sold: neither is an edit-form decision.
-func (s *Service) Update(ctx context.Context, id int64, input ProductInput) (domainproduk.Product, error) {
-	existing, err := s.products.FindByID(ctx, id)
+// Update replaces the editable fields of a Produk. Stok, Active and Sold are not
+// among them: an edit moves none of the three, and the repository's UPDATE does
+// not name those columns at all. A Nonaktif Produk stays Nonaktif and one that
+// has sold stays sold (ADR-0014).
+func (s *Service) Update(ctx context.Context, id int64, input UpdateInput) (domainproduk.Product, error) {
+	// Check the Produk is there before judging the body. The result is not used — the
+	// repository's UPDATE reports a missing Produk on its own — but this has to come
+	// first: otherwise the Kode check below could answer 409 about an id that does
+	// not exist.
+	if _, err := s.products.FindByID(ctx, id); err != nil {
+		return domainproduk.Product{}, err
+	}
+
+	edit, err := validateEdit(input)
 	if err != nil {
 		return domainproduk.Product{}, err
 	}
 
-	product, err := validate(input)
-	if err != nil {
+	if err := s.ensureCodeFree(ctx, edit.Code, id); err != nil {
 		return domainproduk.Product{}, err
 	}
 
-	product.ID = id
-	product.Active = existing.Active
-	product.Sold = existing.Sold
-
-	if err := s.ensureCodeFree(ctx, product.Code, id); err != nil {
-		return domainproduk.Product{}, err
-	}
-
-	return s.products.Update(ctx, product)
+	return s.products.Update(ctx, id, edit)
 }
 
 // List answers the catalogue, narrowed by whatever the filter asks for. An
@@ -100,16 +101,16 @@ func (s *Service) Categories(ctx context.Context) ([]string, error) {
 	return s.products.Categories(ctx)
 }
 
-// validate turns form input into a Product, rejecting what the catalogue cannot
-// store. Blank text is not an error for Kode or Kategori — it is how the form
-// says "none" — but it is for a name, which every Produk needs.
-func validate(input ProductInput) (domainproduk.Product, error) {
-	name := strings.TrimSpace(input.Name)
-	if name == "" {
-		return domainproduk.Product{}, InputError{Message: "Nama Produk wajib diisi."}
+// validateCreate turns create-form input into a Product, rejecting what the
+// catalogue cannot store. Blank text is not an error for Kode or Kategori — it
+// is how the form says "none" — but it is for a name, which every Produk needs.
+func validateCreate(input CreateInput) (domainproduk.Product, error) {
+	name, err := validName(input.Name)
+	if err != nil {
+		return domainproduk.Product{}, err
 	}
-	if input.Price < 0 {
-		return domainproduk.Product{}, InputError{Message: "Harga tidak boleh negatif."}
+	if err := validPrice(input.Price); err != nil {
+		return domainproduk.Product{}, err
 	}
 	if input.Stock < 0 {
 		return domainproduk.Product{}, InputError{Message: "Stok tidak boleh negatif."}
@@ -123,6 +124,46 @@ func validate(input ProductInput) (domainproduk.Product, error) {
 		Stock:    input.Stock,
 		Active:   activeOrTrue(input.Active),
 	}, nil
+}
+
+// validateEdit turns edit-form input into the editable part of a Produk. It
+// shares the Nama and Harga rules with a create, and has no Stok rule because an
+// edit has no Stok field to rule on (ADR-0014).
+func validateEdit(input UpdateInput) (domainproduk.ProductEdit, error) {
+	name, err := validName(input.Name)
+	if err != nil {
+		return domainproduk.ProductEdit{}, err
+	}
+	if err := validPrice(input.Price); err != nil {
+		return domainproduk.ProductEdit{}, err
+	}
+
+	return domainproduk.ProductEdit{
+		Name:     name,
+		Code:     optionalText(input.Code),
+		Price:    input.Price,
+		Category: optionalText(input.Category),
+	}, nil
+}
+
+// validName trims a Nama and refuses a blank one. Adding and changing a Produk
+// must not disagree about what a name is, so the rule lives in one place.
+func validName(raw string) (string, error) {
+	name := strings.TrimSpace(raw)
+	if name == "" {
+		return "", InputError{Message: "Nama Produk wajib diisi."}
+	}
+
+	return name, nil
+}
+
+// validPrice refuses a negative Harga, for the same reason validName exists.
+func validPrice(price int64) error {
+	if price < 0 {
+		return InputError{Message: "Harga tidak boleh negatif."}
+	}
+
+	return nil
 }
 
 // activeOrTrue reads the Status a create asked for. An absent one means Aktif:

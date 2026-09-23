@@ -15,8 +15,8 @@ import (
 // it here, next to the handlers that use it, keeps this package testable with a
 // fake service and keeps the dependency pointing inward (ADR-0004).
 type ProductService interface {
-	Create(ctx context.Context, input usecaseproduk.ProductInput) (domainproduk.Product, error)
-	Update(ctx context.Context, id int64, input usecaseproduk.ProductInput) (domainproduk.Product, error)
+	Create(ctx context.Context, input usecaseproduk.CreateInput) (domainproduk.Product, error)
+	Update(ctx context.Context, id int64, input usecaseproduk.UpdateInput) (domainproduk.Product, error)
 	List(ctx context.Context, filter domainproduk.Filter) ([]domainproduk.Product, error)
 	AddStock(ctx context.Context, id int64, quantity int64) (domainproduk.Product, error)
 	LowStock(ctx context.Context) ([]domainproduk.Product, error)
@@ -25,28 +25,55 @@ type ProductService interface {
 	Categories(ctx context.Context) ([]string, error)
 }
 
-// productRequest is what an Admin posts to add or change a Produk. Code and
-// Category are pointers so an absent or `null` value means "no Kode"/"no
-// Kategori" instead of being confused with the empty string.
-type productRequest struct {
+// createProductRequest is what an Admin posts to add a Produk. Code and Category
+// are pointers so an absent or `null` value means "no Kode"/"no Kategori"
+// instead of being confused with the empty string. Stock is the Stok awal the
+// Produk starts life with.
+type createProductRequest struct {
 	Name     string  `json:"name"`
 	Code     *string `json:"code"`
 	Price    int64   `json:"price"`
 	Category *string `json:"category"`
 	Stock    int64   `json:"stock"`
-	// Active is a pointer so an edit that omits it is not read as "deactivate".
+	// Active is a pointer so a body that omits it is not read as "deactivate".
 	// Only Create reads it, and an absent value means Aktif.
 	Active *bool `json:"active"`
 }
 
-func (r productRequest) input() usecaseproduk.ProductInput {
-	return usecaseproduk.ProductInput{
+func (r createProductRequest) input() usecaseproduk.CreateInput {
+	return usecaseproduk.CreateInput{
 		Name:     r.Name,
 		Code:     derefText(r.Code),
 		Price:    r.Price,
 		Category: derefText(r.Category),
 		Stock:    r.Stock,
 		Active:   r.Active,
+	}
+}
+
+// updateProductRequest is what an Admin puts to change a Produk. It has no
+// `stock`, and that absence is the fix of #22: Stok moves through the Stok awal
+// of a create, the Tambah Stok form, and a Penjualan — never through an edit, so
+// the body does not carry a field the API would have to ignore. A form holding a
+// Stok it read before a delivery arrived has nothing to send it in (ADR-0014).
+//
+// A client that sends one anyway is not rejected: `decodeJSON` leaves unknown
+// keys alone, so an old form keeps working and the Stok it sent is dropped rather
+// than written. The tolerance is deliberate — refusing the field would break that
+// client without protecting anything the statement below does not already protect.
+type updateProductRequest struct {
+	Name     string  `json:"name"`
+	Code     *string `json:"code"`
+	Price    int64   `json:"price"`
+	Category *string `json:"category"`
+}
+
+func (r updateProductRequest) input() usecaseproduk.UpdateInput {
+	return usecaseproduk.UpdateInput{
+		Name:     r.Name,
+		Code:     derefText(r.Code),
+		Price:    r.Price,
+		Category: derefText(r.Category),
 	}
 }
 
@@ -118,8 +145,8 @@ type productEnvelope struct {
 // role guard in front of it.
 func createProductHandler(service ProductService, logger *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		request, ok := decodeProductRequest(w, r, logger)
-		if !ok {
+		var request createProductRequest
+		if !decodeJSON(w, r, &request, logger) {
 			return
 		}
 
@@ -135,8 +162,9 @@ func createProductHandler(service ProductService, logger *slog.Logger) http.Hand
 	}
 }
 
-// updateProductHandler replaces the editable fields of a Produk. Active and Sold
-// are not part of the body: the API is what decides those.
+// updateProductHandler replaces the editable fields of a Produk — nama, Kode,
+// harga, Kategori. Stok, Active and Sold are not part of the body: each moves
+// through its own route, and the API is what decides them.
 func updateProductHandler(service ProductService, logger *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, ok := productID(w, r, logger)
@@ -144,8 +172,8 @@ func updateProductHandler(service ProductService, logger *slog.Logger) http.Hand
 			return
 		}
 
-		request, ok := decodeProductRequest(w, r, logger)
-		if !ok {
+		var request updateProductRequest
+		if !decodeJSON(w, r, &request, logger) {
 			return
 		}
 
@@ -288,16 +316,6 @@ func deleteProductHandler(service ProductService, logger *slog.Logger) http.Hand
 
 		w.WriteHeader(http.StatusNoContent)
 	}
-}
-
-// decodeProductRequest reads the body of a create or an update.
-func decodeProductRequest(w http.ResponseWriter, r *http.Request, logger *slog.Logger) (productRequest, bool) {
-	var request productRequest
-	if !decodeJSON(w, r, &request, logger) {
-		return productRequest{}, false
-	}
-
-	return request, true
 }
 
 // productFilter reads the catalogue filters off the query string. An `active`

@@ -30,6 +30,22 @@ type Product struct {
 	Sold bool
 }
 
+// ProductEdit is the editable part of a Produk: everything an Admin may change
+// from the catalogue form.
+//
+// Stok is deliberately absent. It is set once as a Produk's Stok awal, raised by
+// AddStock, and lowered by a Penjualan — an edit is not one of those three paths
+// (CONTEXT.md, Stok). Leaving it out of this struct is what makes that
+// structural rather than a rule to remember: an edit form that read a Stok
+// before a delivery arrived has no field to write it back into, at any layer
+// (ADR-0014).
+type ProductEdit struct {
+	Name     string
+	Code     *string
+	Price    int64
+	Category *string
+}
+
 // LowStockThreshold is the Stok below which a Produk counts as menipis: the
 // Admin is told to restock it (CONTEXT.md, Stok). "Below", not "at or below" —
 // the ambang is the first Stok that is still enough. It is a constant rather
@@ -64,10 +80,11 @@ var (
 // the SQLite adapter; the use cases never see SQL (ADR-0004).
 type ProductRepository interface {
 	Create(ctx context.Context, product Product) (Product, error)
-	// Update replaces the mutable fields of a Produk (nama, Kode, harga,
-	// Kategori, Stok). Active and Sold are changed by their own methods,
-	// because neither is something an edit form may rewrite.
-	Update(ctx context.Context, product Product) (Product, error)
+	// Update replaces the editable fields of a Produk (nama, Kode, harga,
+	// Kategori) and answers it as it now stands, Stok included. Stok, Active and
+	// Sold are left alone: each moves through a path of its own — AddStock,
+	// SetActive, a Penjualan — and none of them is an edit (ADR-0014).
+	Update(ctx context.Context, id int64, edit ProductEdit) (Product, error)
 	FindByID(ctx context.Context, id int64) (Product, error)
 	FindByCode(ctx context.Context, code string) (Product, error)
 	List(ctx context.Context, filter Filter) ([]Product, error)

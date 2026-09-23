@@ -189,19 +189,25 @@ test('a Produk may be added straight as Nonaktif', async ({ page }) => {
 
 test('the Admin changes a Harga from the row of the Produk', async ({ page }) => {
 	await logIn(page);
-	await createProduk(page, { name: 'Ubah E2E', price: 18000, stock: 5 });
+	await createProduk(page, { name: 'Ubah E2E', price: 18000, stock: 37 });
 
 	await produkRow(page, 'Ubah E2E').getByRole('button', { name: 'Ubah' }).click();
 
-	// The form opens pre-filled with the record being changed, and without a
-	// Status field: an edit keeps the Produk's status.
+	// The form opens pre-filled with the record being changed, and with neither a
+	// Status nor a Stok field: an edit keeps the Produk's status, and Stok moves
+	// through the Tambah Stok form and a Penjualan — never through an edit (#22).
 	const form = produkForm(page);
 	await expect(form.getByLabel('Harga')).toHaveValue('18000');
 	await expect(form.getByLabel('Status')).toHaveCount(0);
+	await expect(form.getByLabel('Stok')).toHaveCount(0);
 	await form.getByLabel('Harga').fill('22000');
 	await page.getByRole('button', { name: 'Simpan Perubahan' }).click();
 
-	await expect(produkRow(page, 'Ubah E2E')).toContainText('Rp 22.000');
+	const row = produkRow(page, 'Ubah E2E');
+	await expect(row).toContainText('Rp 22.000');
+	// The Stok the Produk had is still the Stok it has — read from the cell, not as
+	// a substring of the whole row, which any other column could satisfy.
+	await expect(row.getByRole('cell', { name: '37', exact: true })).toBeVisible();
 });
 
 test('the Admin deletes a Produk that never sold, but only after confirming', async ({ page }) => {
