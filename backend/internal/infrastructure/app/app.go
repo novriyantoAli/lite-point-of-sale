@@ -19,6 +19,7 @@ import (
 	"github.com/novriyantoAli/lite-point-of-sale/backend/internal/infrastructure/sqlite"
 	usecaseauth "github.com/novriyantoAli/lite-point-of-sale/backend/internal/usecase/auth"
 	usecasehealth "github.com/novriyantoAli/lite-point-of-sale/backend/internal/usecase/health"
+	usecasepenjualan "github.com/novriyantoAli/lite-point-of-sale/backend/internal/usecase/penjualan"
 	usecaseproduk "github.com/novriyantoAli/lite-point-of-sale/backend/internal/usecase/produk"
 )
 
@@ -75,10 +76,15 @@ func New(ctx context.Context, cfg config.Config, logger *slog.Logger) (*App, err
 
 	healthChecker := usecasehealth.NewChecker(adaptersqlite.NewDatabaseChecker(db))
 
-	productService := usecaseproduk.NewService(adaptersqlite.NewProductRepository(db))
+	// One Produk repository instance serves both slices: the catalogue's own use
+	// cases and the checkout that reads a Produk to price a cart.
+	productRepository := adaptersqlite.NewProductRepository(db)
+	productService := usecaseproduk.NewService(productRepository)
+
+	saleService := usecasepenjualan.NewService(productRepository, adaptersqlite.NewSaleRepository(db))
 
 	return &App{
-		handler:  httpapi.NewRouter(healthChecker, authService, productService, logger),
+		handler:  httpapi.NewRouter(healthChecker, authService, productService, saleService, logger),
 		database: db,
 	}, nil
 }

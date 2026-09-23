@@ -1,0 +1,185 @@
+package httpapi
+
+import (
+	"context"
+	"log/slog"
+	"net/http"
+	"strconv"
+
+	domainauth "github.com/novriyantoAli/lite-point-of-sale/backend/internal/domain/auth"
+	domainpenjualan "github.com/novriyantoAli/lite-point-of-sale/backend/internal/domain/penjualan"
+	usecasepenjualan "github.com/novriyantoAli/lite-point-of-sale/backend/internal/usecase/penjualan"
+)
+
+// SaleService is the Penjualan use cases the HTTP adapter depends on. Declaring
+// it here, next to the handlers that use it, keeps this package testable with a
+// fake service and keeps the dependency pointing inward (ADR-0004).
+type SaleService interface {
+	Checkout(ctx context.Context, cashier domainauth.PublicUser, input usecasepenjualan.CheckoutInput) (domainpenjualan.Sale, error)
+	FindByReceiptNumber(ctx context.Context, receiptNumber int64) (domainpenjualan.Sale, error)
+}
+
+// checkoutRequest is the cart a Kasir posts. The Items carry the Produk id and
+// the quantity only: the name and the price are the catalogue's to know, and a
+// client that sent them would be able to write its own history.
+type checkoutRequest struct {
+	Items   []checkoutItemRequest  `json:"items"`
+	Payment checkoutPaymentRequest `json:"payment"`
+}
+
+type checkoutItemRequest struct {
+	ProductID int64 `json:"product_id"`
+	Quantity  int64 `json:"quantity"`
+}
+
+// checkoutPaymentRequest is the Pembayaran being recorded. Amount is what the
+// buyer handed over for Tunai; the Kembalian is the API's to work out, never the
+// client's to declare.
+type checkoutPaymentRequest struct {
+	Method string `json:"method"`
+	Amount int64  `json:"amount"`
+}
+
+func (r checkoutRequest) input() usecasepenjualan.CheckoutInput {
+	items := make([]usecasepenjualan.ItemInput, 0, len(r.Items))
+	for _, item := range r.Items {
+		items = append(items, usecasepenjualan.ItemInput{
+			ProductID: item.ProductID,
+			Quantity:  item.Quantity,
+		})
+	}
+
+	return usecasepenjualan.CheckoutInput{
+		Items: items,
+		Payment: usecasepenjualan.PaymentInput{
+			Method: r.Payment.Method,
+			Amount: r.Payment.Amount,
+		},
+	}
+}
+
+// saleResponse is the JSON view of a Penjualan: the Nomor Struk, who rang it up,
+// what was bought at the price it was bought for, and how it was paid.
+type saleResponse struct {
+	ReceiptNumber int64              `json:"receipt_number"`
+	CreatedAt     string             `json:"created_at"`
+	CashierID     int64              `json:"cashier_id"`
+	CashierName   string             `json:"cashier_name"`
+	Total         int64              `json:"total"`
+	Items         []saleItemResponse `json:"items"`
+	Payment       paymentResponse    `json:"payment"`
+}
+
+// saleItemResponse is one Item as it was recorded: the Produk it came from, plus
+// the name and price copied at checkout.
+type saleItemResponse struct {
+	ProductID int64  `json:"product_id"`
+	Name      string `json:"name"`
+	Price     int64  `json:"price"`
+	Quantity  int64  `json:"quantity"`
+	Subtotal  int64  `json:"subtotal"`
+}
+
+// paymentResponse is the Pembayaran of a Penjualan. For Tunai, `change` is the
+// Kembalian; for a non-tunai method it is zero.
+type paymentResponse struct {
+	Method string `json:"method"`
+	Amount int64  `json:"amount"`
+	Change int64  `json:"change"`
+}
+
+// saleEnvelope wraps a Penjualan, the same way productEnvelope wraps a Produk.
+type saleEnvelope struct {
+	Sale saleResponse `json:"sale"`
+}
+
+func newSaleResponse(sale domainpenjualan.Sale) saleResponse {
+	items := make([]saleItemResponse, 0, len(sale.Items))
+	for _, item := range sale.Items {
+		items = append(items, saleItemResponse{
+			ProductID: item.ProductID,
+			Name:      item.Name,
+			Price:     item.Price,
+			Quantity:  item.Quantity,
+			Subtotal:  item.Subtotal(),
+		})
+	}
+
+	return saleResponse{
+		ReceiptNumber: sale.ReceiptNumber,
+		CreatedAt:     sale.CreatedAt,
+		CashierID:     sale.CashierID,
+		CashierName:   sale.CashierName,
+		Total:         sale.Total,
+		Items:         items,
+		Payment: paymentResponse{
+			Method: string(sale.Payment.Method),
+			Amount: sale.Payment.Amount,
+			Change: sale.Payment.Change,
+		},
+	}
+}
+
+// checkoutHandler turns a cart into a Penjualan: the atomic write that records
+// the sale, snapshots each Item's name and price, and takes the Stok out
+// (CONTEXT.md, Penjualan).
+//
+// Any signed-in Pengguna may ring one up. Both Peran of CONTEXT.md sell at a
+// one-terminal store — the Admin is the owner behind the counter as often as the
+// Kasir is — so this route is the one part of the API without a role guard.
+func checkoutHandler(service SaleService, logger *slog.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		cashier, ok := requireUser(w, r, logger)
+		if !ok {
+			return
+		}
+
+		var request checkoutRequest
+		if !decodeJSON(w, r, &request, logger) {
+			return
+		}
+
+		sale, err := service.Checkout(r.Context(), cashier, request.input())
+		if err != nil {
+			writeError(w, err, logger)
+			return
+		}
+
+		writeJSON(w, http.StatusCreated, dataResponse{Data: saleEnvelope{
+			Sale: newSaleResponse(sale),
+		}}, logger)
+	}
+}
+
+// saleHandler answers one stored Penjualan by its Nomor Struk. The Nomor Struk
+// is what the Struk prints, so it is what a reprint or a look-up arrives with.
+func saleHandler(service SaleService, logger *slog.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		receiptNumber, ok := receiptNumberParam(w, r, logger)
+		if !ok {
+			return
+		}
+
+		sale, err := service.FindByReceiptNumber(r.Context(), receiptNumber)
+		if err != nil {
+			writeError(w, err, logger)
+			return
+		}
+
+		writeJSON(w, http.StatusOK, dataResponse{Data: saleEnvelope{
+			Sale: newSaleResponse(sale),
+		}}, logger)
+	}
+}
+
+// receiptNumberParam reads the {receiptNumber} of the route. A path that is not
+// a number at all is invalid input, not a missing Penjualan.
+func receiptNumberParam(w http.ResponseWriter, r *http.Request, logger *slog.Logger) (int64, bool) {
+	receiptNumber, err := strconv.ParseInt(r.PathValue("receiptNumber"), 10, 64)
+	if err != nil || receiptNumber <= 0 {
+		writeInvalidInput(w, "Nomor Struk tidak valid.", logger)
+		return 0, false
+	}
+
+	return receiptNumber, true
+}

@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	domainauth "github.com/novriyantoAli/lite-point-of-sale/backend/internal/domain/auth"
+	domainpenjualan "github.com/novriyantoAli/lite-point-of-sale/backend/internal/domain/penjualan"
 	domainproduk "github.com/novriyantoAli/lite-point-of-sale/backend/internal/domain/produk"
 )
 
@@ -41,9 +42,12 @@ var invalidInputFailure = failure{
 	message: "Permintaan tidak valid.",
 }
 
-// inputError is how a use case reports a validation failure: the message is
-// written for the person filling in the form, and the type unwraps to its own
-// domain's ErrInvalidInput so the status code is still picked by errors.Is.
+// inputError is how a use case reports a failure whose message is written for
+// the person using the form. The status code still comes from the sentinel the
+// error unwraps to: an InputError unwraps to its domain's ErrInvalidInput and
+// answers 400, while a checkout refused for Stok unwraps to
+// ErrInsufficientStock and answers 409 with the same kind of message.
+//
 // Every usecase package declares its own InputError; this is the shape they
 // share, so this adapter does not have to know each of them.
 type inputError interface {
@@ -137,26 +141,58 @@ var failures = []struct {
 		cause: domainproduk.ErrInvalidInput,
 		as:    invalidInputFailure,
 	},
+	{
+		cause: domainpenjualan.ErrSaleNotFound,
+		as: failure{
+			status:  http.StatusNotFound,
+			code:    "sale_not_found",
+			message: "Penjualan tidak ditemukan.",
+		},
+	},
+	{
+		cause: domainpenjualan.ErrInsufficientStock,
+		as: failure{
+			status:  http.StatusConflict,
+			code:    "insufficient_stock",
+			message: "Stok tidak cukup untuk salah satu Item.",
+		},
+	},
+	{
+		cause: domainpenjualan.ErrInvalidInput,
+		as:    invalidInputFailure,
+	},
 }
 
-// writeError answers a use case failure. A validation error keeps its own
-// message, because it is written for the person filling in the form; anything
-// unrecognized is a 500 whose detail stays in the log.
+// writeError answers a use case failure. A use case that wrote a message for the
+// person using the form keeps it — that message is more use than a status code —
+// while the status code and the machine-readable code are still the sentinel's.
+// Anything unrecognized is a 500 whose detail stays in the log.
 func writeError(w http.ResponseWriter, err error, logger *slog.Logger) {
+	message := ""
 	var inputErr inputError
-	if errors.As(err, &inputErr) && inputErr.InputMessage() != "" {
-		writeInvalidInput(w, inputErr.InputMessage(), logger)
-		return
+	if errors.As(err, &inputErr) {
+		message = inputErr.InputMessage()
 	}
 
 	for _, mapping := range failures {
 		if errors.Is(err, mapping.cause) {
+			if message == "" {
+				message = mapping.as.message
+			}
 			writeJSON(w, mapping.as.status, errorResponse{
-				Message: mapping.as.message,
+				Message: message,
 				Error:   mapping.as.code,
 			}, logger)
 			return
 		}
+	}
+
+	// An error that wrote a message but unwraps to no sentinel this API knows is
+	// still the caller's mistake rather than ours: 400 with the message it wrote,
+	// instead of a 500 that hides a form error.
+	if message != "" {
+		writeInvalidInput(w, message, logger)
+		return
 	}
 
 	logger.Error("unhandled api error", "error", err)

@@ -1,0 +1,141 @@
+import { describe, expect, it } from 'vitest';
+import {
+	CheckoutInputSchema,
+	CheckoutItemSchema,
+	JumlahBayarSchema,
+	METODE_LABEL,
+	PenjualanEnvelopeSchema,
+	PenjualanSchema
+} from './penjualan.schema';
+
+const sale = {
+	receipt_number: 1,
+	created_at: '2026-09-23 10:00:00',
+	cashier_id: 1,
+	cashier_name: 'kasir1',
+	total: 36000,
+	items: [{ product_id: 1, name: 'Kopi Susu', price: 18000, quantity: 2, subtotal: 36000 }],
+	payment: { method: 'cash', amount: 50000, change: 14000 }
+};
+
+describe('PenjualanSchema', () => {
+	it('reads a Penjualan as the API answers it', () => {
+		expect(PenjualanSchema.parse(sale)).toEqual(sale);
+	});
+
+	it('reads a non-tunai method, so a stored Penjualan stays readable when #7 lands', () => {
+		const parsed = PenjualanSchema.parse({
+			...sale,
+			payment: { method: 'qris', amount: 36000, change: 0 }
+		});
+
+		expect(parsed.payment.method).toBe('qris');
+	});
+
+	it('rejects a method the API does not know', () => {
+		expect(() =>
+			PenjualanSchema.parse({ ...sale, payment: { ...sale.payment, method: 'bitcoin' } })
+		).toThrow();
+	});
+
+	it('rejects a Penjualan missing its Nomor Struk', () => {
+		// The Nomor Struk is what identifies the sale for a reprint, so an answer
+		// without it has to fail loudly rather than be read as 0.
+		const withoutReceipt: Partial<typeof sale> = { ...sale };
+		delete withoutReceipt.receipt_number;
+
+		expect(() => PenjualanSchema.parse(withoutReceipt)).toThrow();
+	});
+
+	it('rejects a fractional total: money is whole rupiah in this app', () => {
+		expect(() => PenjualanSchema.parse({ ...sale, total: 36000.5 })).toThrow();
+	});
+});
+
+describe('PenjualanEnvelopeSchema', () => {
+	it('reads the envelope the API answers with', () => {
+		expect(PenjualanEnvelopeSchema.parse({ data: { sale } }).data.sale).toEqual(sale);
+	});
+});
+
+describe('CheckoutItemSchema', () => {
+	it('reads a Produk id and a whole quantity', () => {
+		expect(CheckoutItemSchema.parse({ product_id: 1, quantity: 3 })).toEqual({
+			product_id: 1,
+			quantity: 3
+		});
+	});
+
+	it('parses the quantity a form submits as text', () => {
+		expect(CheckoutItemSchema.parse({ product_id: 1, quantity: '3' }).quantity).toBe(3);
+	});
+
+	it('refuses a quantity of zero or less: a line of zero is not an Item', () => {
+		expect(() => CheckoutItemSchema.parse({ product_id: 1, quantity: 0 })).toThrow();
+		expect(() => CheckoutItemSchema.parse({ product_id: 1, quantity: -2 })).toThrow();
+	});
+
+	it('refuses a thousand separator instead of reading 2.000 as 2', () => {
+		// The same rule the Harga field carries: guessing wrong by 1000× is worse
+		// than asking again.
+		expect(() => CheckoutItemSchema.parse({ product_id: 1, quantity: '2.000' })).toThrow();
+	});
+});
+
+describe('JumlahBayarSchema', () => {
+	it('parses the text a form submits into whole rupiah', () => {
+		expect(JumlahBayarSchema.parse('50000')).toBe(50000);
+	});
+
+	it('accepts a payment of exactly zero, which the API is the one to refuse against the total', () => {
+		expect(JumlahBayarSchema.parse(0)).toBe(0);
+	});
+
+	it('refuses a negative payment', () => {
+		expect(() => JumlahBayarSchema.parse('-1')).toThrow();
+	});
+
+	it('refuses a blank field rather than reading it as 0', () => {
+		expect(() => JumlahBayarSchema.parse('')).toThrow();
+	});
+
+	it('refuses a thousand separator instead of reading 50.000 as 50', () => {
+		expect(() => JumlahBayarSchema.parse('50.000')).toThrow();
+	});
+});
+
+describe('CheckoutInputSchema', () => {
+	it('reads the body of a checkout, parsing the amount the form submitted', () => {
+		const parsed = CheckoutInputSchema.parse({
+			items: [{ product_id: 1, quantity: 2 }],
+			payment: { method: 'cash', amount: '50000' }
+		});
+
+		expect(parsed).toEqual({
+			items: [{ product_id: 1, quantity: 2 }],
+			payment: { method: 'cash', amount: 50000 }
+		});
+	});
+
+	it('refuses an empty keranjang', () => {
+		expect(() =>
+			CheckoutInputSchema.parse({ items: [], payment: { method: 'cash', amount: 10000 } })
+		).toThrow();
+	});
+
+	it('refuses a method other than Tunai, which is all this slice offers', () => {
+		expect(() =>
+			CheckoutInputSchema.parse({
+				items: [{ product_id: 1, quantity: 1 }],
+				payment: { method: 'qris', amount: 10000 }
+			})
+		).toThrow();
+	});
+});
+
+describe('METODE_LABEL', () => {
+	it('writes Tunai for the cash method rather than the English word', () => {
+		expect(METODE_LABEL.cash).toBe('Tunai');
+		expect(METODE_LABEL.qris).toBe('QRIS');
+	});
+});
