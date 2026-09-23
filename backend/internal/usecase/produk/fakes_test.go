@@ -48,21 +48,23 @@ func (f *fakeProducts) Create(_ context.Context, product domainproduk.Product) (
 	return product, nil
 }
 
-func (f *fakeProducts) Update(_ context.Context, product domainproduk.Product) (domainproduk.Product, error) {
+func (f *fakeProducts) Update(_ context.Context, id int64, edit domainproduk.ProductEdit) (domainproduk.Product, error) {
 	if f.err != nil {
 		return domainproduk.Product{}, f.err
 	}
 
-	existing, ok := f.products[product.ID]
+	product, ok := f.products[id]
 	if !ok {
 		return domainproduk.Product{}, domainproduk.ErrProductNotFound
 	}
 
-	// Active and Sold are not part of an edit: the fake keeps them, exactly as
-	// the SQL UPDATE does.
-	product.Active = existing.Active
-	product.Sold = existing.Sold
-	f.products[product.ID] = product
+	// Only the editable fields move. Stok, Active and Sold are not in an edit at
+	// all — exactly as the SQL UPDATE leaves their columns alone (ADR-0014).
+	product.Name = edit.Name
+	product.Code = edit.Code
+	product.Price = edit.Price
+	product.Category = edit.Category
+	f.products[id] = product
 
 	return product, nil
 }

@@ -61,8 +61,14 @@ const optionalText = z
  * "what does 18.000 mean" is exactly the kind of rule that drifts.
  */
 
-/** What the form fills in to add or change a Produk. */
-export const ProdukInputSchema = z.object({
+/**
+ * What the form fills in to add a Produk.
+ *
+ * `stock` is the Stok awal the Produk starts life with (CONTEXT.md, Stok): it is
+ * set here, once. From then on only the Tambah Stok form raises it and only a
+ * Penjualan lowers it — which is why the update schema below has no such field.
+ */
+export const CreateProdukInputSchema = z.object({
 	name: z.string().trim().min(1, 'Nama Produk wajib diisi.'),
 	code: optionalText,
 	price: wholeNumber('Harga harus bilangan bulat.', 'Harga tidak boleh negatif.'),
@@ -70,21 +76,38 @@ export const ProdukInputSchema = z.object({
 	stock: wholeNumber('Stok harus bilangan bulat.', 'Stok tidak boleh negatif.'),
 	/**
 	 * The Status a new Produk starts with. It is optional because only create reads
-	 * it: `usecase/produk` keeps a Produk's existing Active on update, so an edit
-	 * that left the field out must not read as "deactivate". An absent value means
-	 * Aktif — that default belongs to the Go side, and the form sends the field
-	 * only when adding.
+	 * it: an edit cannot decide a Produk's Status — the Aktifkan/Nonaktifkan button
+	 * is the one action that does — so an absent value means Aktif, a default that
+	 * belongs to the Go side.
 	 */
 	active: z.boolean().optional()
 });
-export type ProdukInput = z.infer<typeof ProdukInputSchema>;
+export type CreateProdukInput = z.infer<typeof CreateProdukInputSchema>;
+
+/**
+ * What the form fills in to change a Produk: the editable record, which is nama,
+ * Kode, harga and Kategori.
+ *
+ * It is derived from the create schema so the two can never disagree about what a
+ * Nama or a Harga is, and it omits `stock` and `active` rather than accepting them
+ * and letting the API drop them (ADR-0014). Stok moves through the Stok awal of a
+ * create, the Tambah Stok form, and a Penjualan — never through an edit. A form
+ * that kept a Stok field would send back the number it read when it opened and
+ * overwrite a delivery that arrived in between; with no field to send, that cannot
+ * happen at any layer.
+ */
+export const UpdateProdukInputSchema = CreateProdukInputSchema.omit({
+	stock: true,
+	active: true
+});
+export type UpdateProdukInput = z.infer<typeof UpdateProdukInputSchema>;
 
 /**
  * What the Aktifkan/Nonaktifkan button posts. It is a body of its own rather than
- * a field on `ProdukInputSchema`, because Status is not an edit-form decision —
- * `usecase/produk` keeps a Produk's existing Active on update — and because it
- * crosses the HTTP boundary like every other body, so it is parsed like every
- * other body instead of being handed to axios as a bare object.
+ * a field on `CreateProdukInputSchema`, because Status is not an edit-form
+ * decision and because it crosses the HTTP boundary like every other body, so it
+ * is parsed like every other body instead of being handed to axios as a bare
+ * object.
  */
 export const SetActiveInputSchema = z.object({
 	active: z.boolean()

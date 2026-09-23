@@ -13,7 +13,7 @@ String unik opsional yang dipakai untuk menemukan Produk dengan cepat — bisa b
 _Avoid_: SKU, barcode (sebagai konsep terpisah)
 
 **Stok**:
-Jumlah unit Produk yang tersedia. Berkurang otomatis saat Produk terjual, tidak boleh negatif, dan ditambah lewat penambahan manual.
+Jumlah unit Produk yang tersedia. Di-set saat Produk dibuat, ditambah lewat penambahan manual, berkurang otomatis saat Produk terjual, dan tidak boleh negatif. Tidak ikut berubah saat Produk diubah.
 _Avoid_: Inventory, persediaan
 
 **Stok menipis**:

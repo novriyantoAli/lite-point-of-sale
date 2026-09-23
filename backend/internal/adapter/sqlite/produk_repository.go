@@ -49,29 +49,22 @@ func (r *ProductRepository) Create(ctx context.Context, product domainproduk.Pro
 	return product, nil
 }
 
-// Update satisfies domain/produk.ProductRepository. Only the editable fields
-// are written: active and sold have their own paths, so an edit can neither
-// reactivate a Nonaktif Produk nor erase that it has sold.
-func (r *ProductRepository) Update(ctx context.Context, product domainproduk.Product) (domainproduk.Product, error) {
-	result, err := r.db.ExecContext(ctx,
-		`UPDATE produk SET name = ?, code = ?, price = ?, category = ?, stock = ? WHERE id = ?`,
-		product.Name, product.Code, product.Price, product.Category, product.Stock, product.ID)
-	if err != nil {
-		if isUniqueViolation(err) {
-			return domainproduk.Product{}, domainproduk.ErrCodeTaken
-		}
-		return domainproduk.Product{}, fmt.Errorf("update Produk %d: %w", product.ID, err)
+// Update satisfies domain/produk.ProductRepository. The statement names only the
+// editable columns: stock, active and sold are not in it at all, so no caller
+// can move any of them through an edit — each has its own path (AddStock,
+// SetActive, a Penjualan). RETURNING answers the Produk as it now stands, Stok
+// included, from the same statement that wrote it (ADR-0014).
+func (r *ProductRepository) Update(ctx context.Context, id int64, edit domainproduk.ProductEdit) (domainproduk.Product, error) {
+	row := r.db.QueryRowContext(ctx,
+		`UPDATE produk SET name = ?, code = ?, price = ?, category = ? WHERE id = ? RETURNING `+productColumns,
+		edit.Name, edit.Code, edit.Price, edit.Category, id)
+
+	product, err := scanProduct(row)
+	if err != nil && isUniqueViolation(err) {
+		return domainproduk.Product{}, domainproduk.ErrCodeTaken
 	}
 
-	affected, err := result.RowsAffected()
-	if err != nil {
-		return domainproduk.Product{}, fmt.Errorf("count updated Produk %d: %w", product.ID, err)
-	}
-	if affected == 0 {
-		return domainproduk.Product{}, domainproduk.ErrProductNotFound
-	}
-
-	return product, nil
+	return product, err
 }
 
 // FindByID satisfies domain/produk.ProductRepository.

@@ -9,7 +9,7 @@ ADR-0011 menetapkan batas ini untuk **Pengguna** saja dan menutup dengan sengaja
 | Glosarium, label UI | Indonesia | `CONTEXT.md`, "Produk", "Kode", "Kategori", "Nonaktif" |
 | Route | Indonesia | `/produk`, `/api/produk`, `/api/produk/kategori` |
 | Domain frontend (zod + komponen) | Indonesia | `ProdukSchema`, `ProdukEnvelopeSchema`, `ProdukList.svelte`, `produk.schema.ts` |
-| Identifier Go | Inggris | `domainproduk.Product`, `ProductRepository`, `ProductService`, `usecaseproduk.ProductInput` |
+| Identifier Go | Inggris | `domainproduk.Product`, `ProductRepository`, `ProductService`, `usecaseproduk.CreateInput`, `usecaseproduk.UpdateInput` |
 | DTO JSON | Inggris | `{"data":{"product":{…}}}`, `name`, `code`, `price`, `category`, `stock`, `active`, `sold` |
 
 DTO JSON ikut sisi Go karena schema zod memang mirror DTO Go 1:1 (ADR-0006) — `ProdukEnvelopeSchema` yang menerjemahkannya menjadi `Produk` di sisi domain frontend. Jadi route `/api/produk` yang menjawab `{"data":{"product":…}}` itu disengaja, bukan sisa rename yang tertinggal.

@@ -5,8 +5,9 @@ import (
 	"testing"
 )
 
-// produkPayload is the body an Admin posts to add or change a Produk. Code and
-// Category are pointers so a test can tell "no Kode" from "Kode of spaces".
+// produkPayload is the body an Admin posts to add a Produk. Code and Category
+// are pointers so a test can tell "no Kode" from "Kode of spaces". Changing one
+// is `produkEditPayload`, which has no Stock.
 type produkPayload struct {
 	Name     string  `json:"name"`
 	Code     *string `json:"code"`
@@ -15,6 +16,16 @@ type produkPayload struct {
 	Stock    int64   `json:"stock"`
 	// Active is only read on create; leaving it out means Aktif.
 	Active *bool `json:"active"`
+}
+
+// produkEditPayload is the body an Admin puts to change a Produk. It has no
+// Stock, and that absence is the point of #22: Stok moves through the Stok awal
+// of a create, a restock, and a Penjualan — never through an edit (ADR-0014).
+type produkEditPayload struct {
+	Name     string  `json:"name"`
+	Code     *string `json:"code"`
+	Price    int64   `json:"price"`
+	Category *string `json:"category"`
 }
 
 // productPayload is one Produk as the API answers it.
@@ -63,7 +74,7 @@ func TestProdukRequiresAnAdmin(t *testing.T) {
 		{name: "list Kategori", method: http.MethodGet, path: "/api/produk/kategori"},
 		{name: "list Stok menipis", method: http.MethodGet, path: "/api/produk/stok-menipis"},
 		{name: "create a Produk", method: http.MethodPost, path: "/api/produk", body: produkPayload{Name: "Kopi", Price: 18000}},
-		{name: "change a Produk", method: http.MethodPut, path: "/api/produk/1", body: produkPayload{Name: "Kopi", Price: 19000}},
+		{name: "change a Produk", method: http.MethodPut, path: "/api/produk/1", body: produkEditPayload{Name: "Kopi", Price: 19000}},
 		{name: "deactivate a Produk", method: http.MethodPatch, path: "/api/produk/1", body: activePayload{Active: false}},
 		{name: "delete a Produk", method: http.MethodDelete, path: "/api/produk/1"},
 	}
@@ -267,26 +278,73 @@ func TestUpdateProdukReplacesTheEditableFields(t *testing.T) {
 	created := createProduk(t, baseURL, token, produkPayload{Name: "Kopi", Code: strPtr("KOPI-01"), Price: 18000, Stock: 10})
 
 	var updated dataEnvelope[productEnvelope]
-	status := apiCall(t, http.MethodPut, baseURL+"/api/produk/"+itoa(created.ID), token, produkPayload{
+	status := apiCall(t, http.MethodPut, baseURL+"/api/produk/"+itoa(created.ID), token, produkEditPayload{
 		Name:     "Kopi Susu Gula Aren",
 		Code:     strPtr("KOPI-02"),
 		Price:    22000,
 		Category: strPtr("Minuman"),
-		Stock:    7,
 	}, &updated)
 
 	if status != http.StatusOK {
 		t.Fatalf("update: got status %d, want %d", status, http.StatusOK)
 	}
 	product := updated.Data.Product
-	if product.Name != "Kopi Susu Gula Aren" || product.Price != 22000 || product.Stock != 7 {
-		t.Errorf("update: got %+v, want the new name, price and stock", product)
+	if product.Name != "Kopi Susu Gula Aren" || product.Price != 22000 {
+		t.Errorf("update: got %+v, want the new name and price", product)
+	}
+	if product.Stock != 10 {
+		t.Errorf("update: got Stok %d, want the stored 10 — an edit does not move Stok", product.Stock)
 	}
 	if product.Code == nil || *product.Code != "KOPI-02" {
 		t.Errorf("update: got code %v, want KOPI-02", product.Code)
 	}
 	if !product.Active {
 		t.Error("update: got nonaktif, want the Produk to stay active")
+	}
+}
+
+// The regression guard of #22, at the REST seam: a client that still sends a Stok
+// in the body of a PUT must not be able to write one. The field is not part of the
+// body the API reads, so a stale Stok is dropped instead of overwriting the Stok
+// that is stored — and the restock that arrived in the meantime survives.
+func TestUpdateProdukCannotMoveStok(t *testing.T) {
+	baseURL, token := newAdminToken(t)
+	created := createProduk(t, baseURL, token, produkPayload{Name: "Kopi", Price: 18000, Stock: 10})
+
+	// A delivery arrives while the edit form is open: 10 becomes 15.
+	var restocked dataEnvelope[productEnvelope]
+	status := apiCall(t, http.MethodPost, baseURL+"/api/produk/"+itoa(created.ID)+"/stok", token,
+		addStockPayload{Quantity: 5}, &restocked)
+	if status != http.StatusOK {
+		t.Fatalf("restock: got status %d, want %d", status, http.StatusOK)
+	}
+
+	// The form still holds the 10 it read when it opened, and sends it back.
+	var updated dataEnvelope[productEnvelope]
+	status = apiCall(t, http.MethodPut, baseURL+"/api/produk/"+itoa(created.ID), token, map[string]any{
+		"name":  "Kopi Susu",
+		"price": 19000,
+		"stock": 10,
+	}, &updated)
+	if status != http.StatusOK {
+		t.Fatalf("update: got status %d, want %d", status, http.StatusOK)
+	}
+	if updated.Data.Product.Stock != 15 {
+		t.Errorf("Stok after an edit that carried a stale 10: got %d, want the 15 the delivery left",
+			updated.Data.Product.Stock)
+	}
+
+	// Read the stored number back through the one route that adds to it: if the
+	// edit had written the stale 10, this would answer 11 instead of 16.
+	var afterRestock dataEnvelope[productEnvelope]
+	status = apiCall(t, http.MethodPost, baseURL+"/api/produk/"+itoa(created.ID)+"/stok", token,
+		addStockPayload{Quantity: 1}, &afterRestock)
+	if status != http.StatusOK {
+		t.Fatalf("second restock: got status %d, want %d", status, http.StatusOK)
+	}
+	if afterRestock.Data.Product.Stock != 16 {
+		t.Errorf("Stok after a further delivery: got %d, want 16 — the edit must not have moved it",
+			afterRestock.Data.Product.Stock)
 	}
 }
 
@@ -297,7 +355,7 @@ func TestUpdateProdukRejectsAKodeAnotherProdukUses(t *testing.T) {
 
 	var failure errorPayload
 	status := apiCall(t, http.MethodPut, baseURL+"/api/produk/"+itoa(other.ID), token,
-		produkPayload{Name: "Teh Manis", Code: strPtr("KOPI-01"), Price: 6000}, &failure)
+		produkEditPayload{Name: "Teh Manis", Code: strPtr("KOPI-01"), Price: 6000}, &failure)
 
 	if status != http.StatusConflict {
 		t.Fatalf("update to a taken Kode: got status %d, want %d", status, http.StatusConflict)
@@ -473,7 +531,7 @@ func TestProdukRoutesReportAMissingOrUnusableId(t *testing.T) {
 	}{
 		{
 			name: "a Produk that is not there", method: http.MethodPut, path: "/api/produk/404",
-			body: produkPayload{Name: "Kopi", Price: 1000}, wantStatus: http.StatusNotFound, wantErrorCode: "product_not_found",
+			body: produkEditPayload{Name: "Kopi", Price: 1000}, wantStatus: http.StatusNotFound, wantErrorCode: "product_not_found",
 		},
 		{
 			name: "a Produk that is not there", method: http.MethodPatch, path: "/api/produk/404",

@@ -7,21 +7,36 @@ import (
 	domainproduk "github.com/novriyantoAli/lite-point-of-sale/backend/internal/domain/produk"
 )
 
-// ProductInput is what an Admin fills in to add or change a Produk. The same
-// fields serve both: an edit replaces the whole editable record, and Stok is
-// part of it — the dedicated "tambah Stok" flow of #5 arrives on top of this,
-// not instead of it.
+// CreateInput is what an Admin fills in to add a Produk.
+//
+// Stock is the Stok awal the Produk starts life with (CONTEXT.md, Stok): it is
+// set here, once. From then on only AddStock raises it and only a Penjualan
+// lowers it, which is why UpdateInput below has no such field.
 //
 // Active is a pointer because only Create reads it. A new Produk is Aktif unless
 // the Admin says otherwise, and Update keeps the Produk's existing status —
 // deactivating is its own action, not an edit-form decision.
-type ProductInput struct {
+type CreateInput struct {
 	Name     string
 	Code     string
 	Price    int64
 	Category string
 	Stock    int64
 	Active   *bool
+}
+
+// UpdateInput is what an Admin fills in to change a Produk: the editable record,
+// which is nama, Kode, harga and Kategori.
+//
+// There is no Stock here, and that is the point (ADR-0014). An edit form holds a
+// Stok it read when it opened, and sending it back would overwrite a delivery
+// that arrived in between. Stok moves through exactly three paths — the Stok awal
+// of a create, AddStock, and a Penjualan — and an edit is not one of them.
+type UpdateInput struct {
+	Name     string
+	Code     string
+	Price    int64
+	Category string
 }
 
 // InputError is a validation failure that carries a message fit for the API

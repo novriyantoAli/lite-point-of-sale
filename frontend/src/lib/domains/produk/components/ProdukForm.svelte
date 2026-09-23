@@ -6,11 +6,17 @@
 	import * as Select from '$lib/components/ui/select';
 	import { collectFieldErrors } from '$lib/utils';
 	import { createProdukMutation, createUpdateProdukMutation } from '../queries/produk.queries';
-	import { ProdukInputSchema, type Produk } from '../schemas/produk.schema';
+	import {
+		CreateProdukInputSchema,
+		UpdateProdukInputSchema,
+		type Produk
+	} from '../schemas/produk.schema';
 
 	/**
-	 * Adds a Produk or changes one. The same fields serve both, because an edit
-	 * replaces the whole editable record — there is no second shape for it.
+	 * Adds a Produk or changes one. Adding fills in the Stok awal; changing edits the
+	 * editable record only — nama, Kode, harga, Kategori — because an edit cannot
+	 * move Stok (ADR-0014). The two shapes are two schemas, so the form never sends
+	 * a field the API would have to drop.
 	 *
 	 * `produk` is the record being changed, or undefined to add a new one. The
 	 * parent remounts this component per record (`{#key}`), and that is what gives
@@ -32,9 +38,9 @@
 	const update = createUpdateProdukMutation();
 
 	/**
-	 * The fields stay strings: a form submits text, and the schema is the one
-	 * place that turns that text into the integers the API takes (§11, and the
-	 * reason `ProdukInputSchema` owns the parsing). Parsing here as well would be a
+	 * The fields stay strings: a form submits text, and the schemas are the one
+	 * place that turn that text into the integers the API takes (§11, and the reason
+	 * `CreateProdukInputSchema` owns the parsing). Parsing here as well would be a
 	 * second set of rules to keep in step.
 	 */
 	// The parent remounts this component per record, so the prop is deliberately
@@ -44,7 +50,12 @@
 	let code = $state(untrack(() => produk?.code ?? ''));
 	let price = $state(untrack(() => (produk === undefined ? '' : String(produk.price))));
 	let category = $state(untrack(() => produk?.category ?? ''));
-	let stock = $state(untrack(() => (produk === undefined ? '' : String(produk.stock))));
+	/**
+	 * The Stok awal of a Produk being added. It is not seeded from `produk.stock`
+	 * and is not rendered when changing a Produk: an edit has no Stok to change, so
+	 * there is no number here to send back over a delivery that arrived meanwhile.
+	 */
+	let stock = $state('');
 	let fieldErrors = $state<Partial<Record<'name' | 'price' | 'stock', string>>>({});
 
 	/**
@@ -83,27 +94,36 @@
 		event.preventDefault();
 		fieldErrors = {};
 
-		const parsed = ProdukInputSchema.safeParse({
-			name,
-			code,
-			price,
-			category,
-			stock,
-			// Status is a create-only decision, so an edit leaves the field out
-			// entirely rather than sending a value the API would ignore.
-			...(editing ? {} : { active: statusOption.active })
-		});
-		if (!parsed.success) {
-			fieldErrors = collectFieldErrors(parsed.error, fields);
-			return;
-		}
-
 		try {
-			const saved =
-				produk === undefined
-					? await create.mutateAsync(parsed.data)
-					: await update.mutateAsync({ id: produk.id, input: parsed.data });
-			onSaved(saved);
+			if (produk === undefined) {
+				const parsed = CreateProdukInputSchema.safeParse({
+					name,
+					code,
+					price,
+					category,
+					stock,
+					// Status is a create-only decision, which is why the field is not
+					// rendered when changing a Produk.
+					active: statusOption.active
+				});
+				if (!parsed.success) {
+					fieldErrors = collectFieldErrors(parsed.error, fields);
+					return;
+				}
+
+				onSaved(await create.mutateAsync(parsed.data));
+				return;
+			}
+
+			// The edit body carries no Stok and no Status: the schema has no field for
+			// either, so there is nothing here to send that the API would have to drop.
+			const parsed = UpdateProdukInputSchema.safeParse({ name, code, price, category });
+			if (!parsed.success) {
+				fieldErrors = collectFieldErrors(parsed.error, fields);
+				return;
+			}
+
+			onSaved(await update.mutateAsync({ id: produk.id, input: parsed.data }));
 		} catch {
 			// `error` carries the normalized message, rendered below.
 		}
@@ -156,20 +176,22 @@
 			{/if}
 		</div>
 
-		<div class="space-y-2">
-			<Label for="produk-stok">Stok</Label>
-			<Input
-				id="produk-stok"
-				name="stock"
-				inputmode="numeric"
-				autocomplete="off"
-				bind:value={stock}
-				aria-invalid={fieldErrors.stock ? true : undefined}
-			/>
-			{#if fieldErrors.stock}
-				<p class="text-sm text-destructive">{fieldErrors.stock}</p>
-			{/if}
-		</div>
+		{#if !editing}
+			<div class="space-y-2">
+				<Label for="produk-stok">Stok</Label>
+				<Input
+					id="produk-stok"
+					name="stock"
+					inputmode="numeric"
+					autocomplete="off"
+					bind:value={stock}
+					aria-invalid={fieldErrors.stock ? true : undefined}
+				/>
+				{#if fieldErrors.stock}
+					<p class="text-sm text-destructive">{fieldErrors.stock}</p>
+				{/if}
+			</div>
+		{/if}
 
 		<div class="space-y-2">
 			<Label for="produk-kategori">Kategori</Label>

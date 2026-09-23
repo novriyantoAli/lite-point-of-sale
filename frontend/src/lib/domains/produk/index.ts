@@ -19,7 +19,8 @@ export {
 
 export {
 	ProdukSchema,
-	ProdukInputSchema,
+	CreateProdukInputSchema,
+	UpdateProdukInputSchema,
 	ProdukFilterSchema,
 	ProdukEnvelopeSchema,
 	ProdukListSchema,
@@ -28,7 +29,8 @@ export {
 	TambahStokInputSchema,
 	StokMenipisSchema,
 	type Produk,
-	type ProdukInput,
+	type CreateProdukInput,
+	type UpdateProdukInput,
 	type ProdukFilter,
 	type SetActiveInput,
 	type TambahStokInput,

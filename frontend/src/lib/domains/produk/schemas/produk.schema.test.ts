@@ -3,7 +3,8 @@ import {
 	KategoriListSchema,
 	ProdukEnvelopeSchema,
 	ProdukFilterSchema,
-	ProdukInputSchema,
+	CreateProdukInputSchema,
+	UpdateProdukInputSchema,
 	ProdukListSchema,
 	ProdukSchema,
 	SetActiveInputSchema,
@@ -48,9 +49,9 @@ describe('ProdukSchema', () => {
 	});
 });
 
-describe('ProdukInputSchema', () => {
+describe('CreateProdukInputSchema', () => {
 	it('trims text and coerces the numbers a form submits as strings', () => {
-		const parsed = ProdukInputSchema.parse({
+		const parsed = CreateProdukInputSchema.parse({
 			name: '  Kopi Susu ',
 			code: ' KOPI-01 ',
 			price: '18000',
@@ -68,7 +69,7 @@ describe('ProdukInputSchema', () => {
 	});
 
 	it('turns blank Kode and Kategori into null, the value the API stores', () => {
-		const parsed = ProdukInputSchema.parse({
+		const parsed = CreateProdukInputSchema.parse({
 			name: 'Air Mineral',
 			code: '   ',
 			price: 3000,
@@ -81,7 +82,7 @@ describe('ProdukInputSchema', () => {
 	});
 
 	it('accepts a Kode and Kategori that are already null', () => {
-		const parsed = ProdukInputSchema.parse({
+		const parsed = CreateProdukInputSchema.parse({
 			name: 'Air Mineral',
 			code: null,
 			price: 3000,
@@ -94,42 +95,42 @@ describe('ProdukInputSchema', () => {
 	});
 
 	it('rejects a blank name with a message fit for the form', () => {
-		const result = ProdukInputSchema.safeParse({ name: '   ', price: 1000, stock: 0 });
+		const result = CreateProdukInputSchema.safeParse({ name: '   ', price: 1000, stock: 0 });
 
 		expect(result.success).toBe(false);
 		expect(result.error?.issues[0]?.message).toBe('Nama Produk wajib diisi.');
 	});
 
 	it('rejects a negative Harga', () => {
-		const result = ProdukInputSchema.safeParse({ name: 'Kopi', price: -1, stock: 0 });
+		const result = CreateProdukInputSchema.safeParse({ name: 'Kopi', price: -1, stock: 0 });
 
 		expect(result.success).toBe(false);
 		expect(result.error?.issues[0]?.message).toBe('Harga tidak boleh negatif.');
 	});
 
 	it('rejects a negative Stok', () => {
-		const result = ProdukInputSchema.safeParse({ name: 'Kopi', price: 1000, stock: -1 });
+		const result = CreateProdukInputSchema.safeParse({ name: 'Kopi', price: 1000, stock: -1 });
 
 		expect(result.success).toBe(false);
 		expect(result.error?.issues[0]?.message).toBe('Stok tidak boleh negatif.');
 	});
 
 	it('rejects a Harga that is not a number instead of reading it as 0', () => {
-		const result = ProdukInputSchema.safeParse({ name: 'Kopi', price: 'seribu', stock: 0 });
+		const result = CreateProdukInputSchema.safeParse({ name: 'Kopi', price: 'seribu', stock: 0 });
 
 		expect(result.success).toBe(false);
 		expect(result.error?.issues[0]?.message).toBe('Harga harus bilangan bulat.');
 	});
 
 	it('rejects a blank Harga instead of quietly pricing the Produk at 0', () => {
-		const result = ProdukInputSchema.safeParse({ name: 'Kopi', price: '', stock: 0 });
+		const result = CreateProdukInputSchema.safeParse({ name: 'Kopi', price: '', stock: 0 });
 
 		expect(result.success).toBe(false);
 		expect(result.error?.issues[0]?.message).toBe('Harga harus bilangan bulat.');
 	});
 
 	it('rejects a fractional Harga', () => {
-		const result = ProdukInputSchema.safeParse({ name: 'Kopi', price: '18000.5', stock: 0 });
+		const result = CreateProdukInputSchema.safeParse({ name: 'Kopi', price: '18000.5', stock: 0 });
 
 		expect(result.success).toBe(false);
 		expect(result.error?.issues[0]?.message).toBe('Harga harus bilangan bulat.');
@@ -138,7 +139,7 @@ describe('ProdukInputSchema', () => {
 	it('rejects a Harga written with the Indonesian thousands separator instead of reading it as 18', () => {
 		// `Number('18.000')` is 18, so coercing would have saved this Produk at Rp 18
 		// while the list showed "Rp 18.000" back — a silent 1000× mistake.
-		const result = ProdukInputSchema.safeParse({ name: 'Kopi', price: '18.000', stock: 0 });
+		const result = CreateProdukInputSchema.safeParse({ name: 'Kopi', price: '18.000', stock: 0 });
 
 		expect(result.success).toBe(false);
 		expect(result.error?.issues[0]?.message).toBe('Harga harus bilangan bulat.');
@@ -149,43 +150,46 @@ describe('ProdukInputSchema', () => {
 		// or not depending on the digits. Money has no decimals here, so all of them
 		// have to fail the same way.
 		for (const price of ['1.500', '18,000', '1 500', '1e3']) {
-			expect(ProdukInputSchema.safeParse({ name: 'Kopi', price, stock: 0 }).success).toBe(false);
+			expect(CreateProdukInputSchema.safeParse({ name: 'Kopi', price, stock: 0 }).success).toBe(
+				false
+			);
 		}
 	});
 
 	it('rejects a Stok with a separator, since it is the same rule', () => {
-		const result = ProdukInputSchema.safeParse({ name: 'Kopi', price: 1000, stock: '1.000' });
+		const result = CreateProdukInputSchema.safeParse({ name: 'Kopi', price: 1000, stock: '1.000' });
 
 		expect(result.success).toBe(false);
 		expect(result.error?.issues[0]?.message).toBe('Stok harus bilangan bulat.');
 	});
 
 	it('rejects an absent Harga instead of coercing it to 0', () => {
-		const result = ProdukInputSchema.safeParse({ name: 'Kopi', stock: 0 });
+		const result = CreateProdukInputSchema.safeParse({ name: 'Kopi', stock: 0 });
 
 		expect(result.success).toBe(false);
 		expect(result.error?.issues[0]?.message).toBe('Harga harus bilangan bulat.');
 	});
 
 	it('accepts whitespace around a whole Harga', () => {
-		expect(ProdukInputSchema.parse({ name: 'Kopi', price: ' 18000 ', stock: 0 }).price).toBe(18000);
+		expect(CreateProdukInputSchema.parse({ name: 'Kopi', price: ' 18000 ', stock: 0 }).price).toBe(
+			18000
+		);
 	});
 
 	it('accepts a Harga of 0: a free Produk is a choice, not a mistake', () => {
-		expect(ProdukInputSchema.parse({ name: 'Air', price: '0', stock: '0' }).price).toBe(0);
+		expect(CreateProdukInputSchema.parse({ name: 'Air', price: '0', stock: '0' }).price).toBe(0);
 	});
 
 	it('carries the Status a new Produk was given', () => {
 		expect(
-			ProdukInputSchema.parse({ name: 'Kopi', price: 1000, stock: 0, active: false }).active
+			CreateProdukInputSchema.parse({ name: 'Kopi', price: 1000, stock: 0, active: false }).active
 		).toBe(false);
 	});
 
-	it('leaves the Status out when it was not asked for, so an edit cannot deactivate', () => {
-		// An absent key is what keeps an update body free of `active` entirely:
-		// `usecase/produk` keeps a Produk's Status on update, so a field it would
-		// ignore must not be sent at all.
-		const parsed = ProdukInputSchema.parse({ name: 'Kopi', price: 1000, stock: 0 });
+	it('leaves the Status out when it was not asked for, so a create defaults to Aktif', () => {
+		// An absent key is what lets the Go side own the default: a Produk added with
+		// no Status asked for is Aktif.
+		const parsed = CreateProdukInputSchema.parse({ name: 'Kopi', price: 1000, stock: 0 });
 
 		expect('active' in parsed).toBe(false);
 		expect(JSON.stringify(parsed)).not.toContain('active');
@@ -193,8 +197,62 @@ describe('ProdukInputSchema', () => {
 
 	it('rejects a Status that arrived as a string', () => {
 		expect(() =>
-			ProdukInputSchema.parse({ name: 'Kopi', price: 1000, stock: 0, active: 'true' })
+			CreateProdukInputSchema.parse({ name: 'Kopi', price: 1000, stock: 0, active: 'true' })
 		).toThrow();
+	});
+});
+
+describe('UpdateProdukInputSchema', () => {
+	it('carries the editable record, and nothing else', () => {
+		const parsed = UpdateProdukInputSchema.parse({
+			name: '  Kopi Susu ',
+			code: ' KOPI-01 ',
+			price: '22000',
+			category: ' Minuman '
+		});
+
+		expect(parsed).toEqual({
+			name: 'Kopi Susu',
+			code: 'KOPI-01',
+			price: 22000,
+			category: 'Minuman'
+		});
+	});
+
+	it('cannot carry a Stok into an edit, even when a form hands it one', () => {
+		// The shape a form would send if it still held a Stok field: the number it read
+		// when it opened. The schema has nowhere to put it, so it never reaches the
+		// request — which is what stops an edit from overwriting a later delivery
+		// (ADR-0014).
+		const parsed = UpdateProdukInputSchema.parse({ name: 'Kopi Susu', price: 22000, stock: 10 });
+
+		expect('stock' in parsed).toBe(false);
+		expect(JSON.stringify(parsed)).not.toContain('stock');
+	});
+
+	it('cannot carry a Status into an edit either', () => {
+		const parsed = UpdateProdukInputSchema.parse({
+			name: 'Kopi Susu',
+			price: 22000,
+			active: false
+		});
+
+		expect('active' in parsed).toBe(false);
+	});
+
+	it('shares the Nama and Harga rules with a create, so the two cannot disagree', () => {
+		expect(
+			UpdateProdukInputSchema.safeParse({ name: '   ', price: 1000 }).error?.issues[0]?.message
+		).toBe('Nama Produk wajib diisi.');
+		expect(
+			UpdateProdukInputSchema.safeParse({ name: 'Kopi', price: -1 }).error?.issues[0]?.message
+		).toBe('Harga tidak boleh negatif.');
+		expect(UpdateProdukInputSchema.parse({ name: ' Kopi ', price: ' 22000 ' })).toEqual({
+			name: 'Kopi',
+			code: null,
+			price: 22000,
+			category: null
+		});
 	});
 });
 

@@ -66,8 +66,8 @@ func NewRouter(healthChecker HealthChecker, auth AuthService, products ProductSe
 	mux.Handle("POST /api/produk", adminOnly(createProductHandler(products, logger)))
 	mux.Handle("PUT /api/produk/{id}", adminOnly(updateProductHandler(products, logger)))
 	// A restock is its own verb on its own path rather than a field of the edit
-	// above: it adds to the Stok instead of replacing it, and an edit form that
-	// could overwrite a Stok would silently undo a delivery (#5).
+	// above: it adds to the Stok instead of replacing it, and the edit above has no
+	// Stok field to overwrite a delivery with at all (#22, ADR-0014).
 	mux.Handle("POST /api/produk/{id}/stok", adminOnly(addStockHandler(products, logger)))
 	mux.Handle("PATCH /api/produk/{id}", adminOnly(setProductActiveHandler(products, logger)))
 	mux.Handle("DELETE /api/produk/{id}", adminOnly(deleteProductHandler(products, logger)))
