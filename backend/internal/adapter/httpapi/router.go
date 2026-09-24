@@ -27,7 +27,7 @@ type HealthChecker interface {
 }
 
 // NewRouter returns the API router with every route the service exposes.
-func NewRouter(healthChecker HealthChecker, auth AuthService, products ProductService, sales SaleService, logger *slog.Logger) http.Handler {
+func NewRouter(healthChecker HealthChecker, auth AuthService, products ProductService, sales SaleService, settings SettingsService, logger *slog.Logger) http.Handler {
 	mux := http.NewServeMux()
 
 	// Public: a liveness and readiness probe, and the one route the UI reads
@@ -77,6 +77,11 @@ func NewRouter(healthChecker HealthChecker, auth AuthService, products ProductSe
 	// part of the API behind the token check but no role guard.
 	mux.Handle("POST /api/penjualan", authenticated(checkoutHandler(sales, logger)))
 	mux.Handle("GET /api/penjualan/{receiptNumber}", authenticated(saleHandler(sales, logger)))
+
+	// Pengaturan is the store's settings an Admin changes (CONTEXT.md): the Struk
+	// template and the ambang Stok menipis. Read and write are both Admin-only.
+	mux.Handle("GET /api/pengaturan", adminOnly(getSettingsHandler(settings, logger)))
+	mux.Handle("PUT /api/pengaturan", adminOnly(updateSettingsHandler(settings, logger)))
 
 	return mux
 }

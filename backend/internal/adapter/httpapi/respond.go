@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	domainauth "github.com/novriyantoAli/lite-point-of-sale/backend/internal/domain/auth"
+	domainpengaturan "github.com/novriyantoAli/lite-point-of-sale/backend/internal/domain/pengaturan"
 	domainpenjualan "github.com/novriyantoAli/lite-point-of-sale/backend/internal/domain/penjualan"
 	domainproduk "github.com/novriyantoAli/lite-point-of-sale/backend/internal/domain/produk"
 )
@@ -159,6 +160,10 @@ var failures = []struct {
 	},
 	{
 		cause: domainpenjualan.ErrInvalidInput,
+		as:    invalidInputFailure,
+	},
+	{
+		cause: domainpengaturan.ErrInvalidInput,
 		as:    invalidInputFailure,
 	},
 }

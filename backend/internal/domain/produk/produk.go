@@ -46,13 +46,9 @@ type ProductEdit struct {
 	Category *string
 }
 
-// LowStockThreshold is the Stok below which a Produk counts as menipis: the
-// Admin is told to restock it (CONTEXT.md, Stok). "Below", not "at or below" —
-// the ambang is the first Stok that is still enough. It is a constant rather
-// than a stored setting because there is nowhere to store one yet — the
-// Pengaturan screen arrives with the Struk template in #8, and this moves there
-// when it does.
-const LowStockThreshold int64 = 5
+// LowStockThreshold is gone from this package: the ambang Stok menipis is now a
+// stored setting (domain pengaturan), read through usecaseproduk.LowStockSettings
+// rather than a constant. See ADR-0017, keputusan 3.
 
 // Filter narrows a catalogue listing. Every field is optional: an empty string
 // (or a nil Active) means "do not filter on this".

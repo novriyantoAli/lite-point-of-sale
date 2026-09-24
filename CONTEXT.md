@@ -17,11 +17,11 @@ Jumlah unit Produk yang tersedia. Di-set saat Produk dibuat, ditambah lewat pena
 _Avoid_: Inventory, persediaan
 
 **Stok menipis**:
-Keadaan Produk Aktif yang Stok-nya di bawah ambang — masuk daftar yang harus ditambah Admin, urut dari yang paling sedikit. Ambang adalah Stok pertama yang masih cukup, jadi Produk tepat di angka ambang belum menipis. Stok 0 disebut **Habis** dan tetap bagian dari daftar yang sama. Ambangnya satu konstanta domain (saat ini 5), bukan pengaturan per toko — layar Pengaturan belum ada.
+Keadaan Produk Aktif yang Stok-nya di bawah ambang — masuk daftar yang harus ditambah Admin, urut dari yang paling sedikit. Ambang adalah Stok pertama yang masih cukup, jadi Produk tepat di angka ambang belum menipis. Stok 0 disebut **Habis** dan tetap bagian dari daftar yang sama. Ambangnya satu setelan toko yang diubah Admin di layar **Pengaturan**, bukan konstanta kode.
 _Avoid_: Low stock, stok kritis, out of stock
 
 **Struk**:
-Bukti cetak Penjualan yang diberikan ke pembeli — berisi info toko, daftar Item, total, metode bayar, dan (bila Tunai) jumlah bayar & Kembalian. Template-nya berupa blok sederhana yang isinya bisa diatur.
+Bukti cetak Penjualan yang diberikan ke pembeli — berisi info toko, daftar Item, total, metode bayar, dan (bila Tunai) jumlah bayar & Kembalian. Template-nya berupa blok teks **header** dan **footer** yang diatur Admin di **Pengaturan**, dicetak pada lebar kertas 58 atau 80 mm.
 _Avoid_: Nota, kuitansi, resi
 
 **Penjualan**:
@@ -55,6 +55,10 @@ _Avoid_: Staff, operator
 **Admin**:
 Peran Pengguna yang boleh mengelola Produk, Stok, Pengaturan (termasuk template Struk), dan melihat laporan.
 _Avoid_: Manager, owner
+
+**Pengaturan**:
+Setelan satu toko yang diubah Admin — template **Struk** (blok header & footer, lebar kertas 58/80 mm) dan ambang **Stok menipis**. Disimpan sebagai satu baris.
+_Avoid_: konfigurasi, preferensi
 
 **Kategori**:
 Label opsional satu level untuk mengelompokkan Produk; hanya untuk filter/pengelompokan di daftar produk, tidak memengaruhi harga.

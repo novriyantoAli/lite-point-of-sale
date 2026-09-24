@@ -26,12 +26,24 @@ func (s *Service) AddStock(ctx context.Context, id int64, quantity int64) (domai
 }
 
 // LowStock answers the Produk an Admin has to restock: the Active ones whose
-// Stok is below domainproduk.LowStockThreshold, thinnest first. Whether a Produk
-// counts as menipis is a domain rule, so the threshold is read here and not
-// passed in by the caller.
+// Stok is below the ambang Stok menipis, thinnest first — together with the
+// ambang itself, because it is the rule that decided the list. Whether a Produk
+// counts as menipis is a domain rule, and the threshold is now a stored setting
+// (ADR-0017), so it is read here from the LowStockSettings port rather than a
+// constant or a value the caller passes in.
 //
 // "Below" and not "at or below": the ambang is the first Stok that is still
 // enough, so a Produk sitting exactly on it has not run low yet.
-func (s *Service) LowStock(ctx context.Context) ([]domainproduk.Product, error) {
-	return s.products.ListLowStock(ctx, domainproduk.LowStockThreshold)
+func (s *Service) LowStock(ctx context.Context) (LowStockReport, error) {
+	threshold, err := s.settings.LowStockThreshold(ctx)
+	if err != nil {
+		return LowStockReport{}, err
+	}
+
+	products, err := s.products.ListLowStock(ctx, threshold)
+	if err != nil {
+		return LowStockReport{}, err
+	}
+
+	return LowStockReport{Threshold: threshold, Products: products}, nil
 }

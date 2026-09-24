@@ -4,6 +4,8 @@
 package produk
 
 import (
+	"context"
+
 	domainproduk "github.com/novriyantoAli/lite-point-of-sale/backend/internal/domain/produk"
 )
 
@@ -56,12 +58,32 @@ func (e InputError) InputMessage() string { return e.Message }
 // Unwrap makes errors.Is(err, domainproduk.ErrInvalidInput) true.
 func (e InputError) Unwrap() error { return domainproduk.ErrInvalidInput }
 
+// LowStockReport is what the restock list answers: the Produk to restock, and
+// the ambang that selected them. The threshold travels with the list because it
+// is the rule behind it — the UI shows the Admin "Stok di bawah N", and a
+// threshold it held separately would be a second copy of that rule.
+type LowStockReport struct {
+	Threshold int64
+	Products  []domainproduk.Product
+}
+
+// LowStockSettings is the one setting the restock list needs: the ambang below
+// which a Produk counts as menipis. It is a port of this package rather than an
+// import of the pengaturan domain, so the dependency still points inward
+// (ADR-0004, ADR-0017).
+type LowStockSettings interface {
+	LowStockThreshold(ctx context.Context) (int64, error)
+}
+
 // Service holds the ports the Produk use cases need.
 type Service struct {
 	products domainproduk.ProductRepository
+	// settings answers the ambang Stok menipis, which moved out of a domain
+	// constant and into the stored Pengaturan (ADR-0017).
+	settings LowStockSettings
 }
 
-// NewService wires the Produk use cases to their port.
-func NewService(products domainproduk.ProductRepository) *Service {
-	return &Service{products: products}
+// NewService wires the Produk use cases to their ports.
+func NewService(products domainproduk.ProductRepository, settings LowStockSettings) *Service {
+	return &Service{products: products, settings: settings}
 }

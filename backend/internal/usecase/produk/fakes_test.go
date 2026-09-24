@@ -235,7 +235,37 @@ func matches(product domainproduk.Product, filter domainproduk.Filter) bool {
 	return true
 }
 
-// newTestService wires a Service over fresh fakes.
+// fakeSettings is an in-memory LowStockSettings. The Produk use case reads the
+// ambang Stok menipis through it, which is the seam that proves the list follows
+// the stored setting rather than a constant (ADR-0017, ADR-0007).
+type fakeSettings struct {
+	threshold int64
+	err       error
+}
+
+func newFakeSettings() *fakeSettings {
+	return &fakeSettings{threshold: 5}
+}
+
+func (f *fakeSettings) LowStockThreshold(_ context.Context) (int64, error) {
+	if f.err != nil {
+		return 0, f.err
+	}
+
+	return f.threshold, nil
+}
+
+// newTestService wires a Service over fresh fakes, with the ambang Stok menipis
+// at its seeded default of 5.
 func newTestService(products *fakeProducts) *Service {
-	return NewService(products)
+	return NewService(products, newFakeSettings())
+}
+
+// newTestServiceWithThreshold wires a Service whose ambang Stok menipis is the
+// one given, for the tests that prove the list follows the setting.
+func newTestServiceWithThreshold(products *fakeProducts, threshold int64) *Service {
+	settings := newFakeSettings()
+	settings.threshold = threshold
+
+	return NewService(products, settings)
 }

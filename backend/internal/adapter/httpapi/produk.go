@@ -19,7 +19,7 @@ type ProductService interface {
 	Update(ctx context.Context, id int64, input usecaseproduk.UpdateInput) (domainproduk.Product, error)
 	List(ctx context.Context, filter domainproduk.Filter) ([]domainproduk.Product, error)
 	AddStock(ctx context.Context, id int64, quantity int64) (domainproduk.Product, error)
-	LowStock(ctx context.Context) ([]domainproduk.Product, error)
+	LowStock(ctx context.Context) (usecaseproduk.LowStockReport, error)
 	SetActive(ctx context.Context, id int64, active bool) (domainproduk.Product, error)
 	Delete(ctx context.Context, id int64) error
 	Categories(ctx context.Context) ([]string, error)
@@ -287,15 +287,15 @@ func addStockHandler(service ProductService, logger *slog.Logger) http.HandlerFu
 // asked for.
 func listLowStockHandler(service ProductService, logger *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		products, err := service.LowStock(r.Context())
+		report, err := service.LowStock(r.Context())
 		if err != nil {
 			writeError(w, err, logger)
 			return
 		}
 
 		writeJSON(w, http.StatusOK, dataResponse{Data: lowStockResponse{
-			Threshold: domainproduk.LowStockThreshold,
-			Products:  newProductResponses(products),
+			Threshold: report.Threshold,
+			Products:  newProductResponses(report.Products),
 		}}, logger)
 	}
 }

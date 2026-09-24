@@ -19,6 +19,7 @@ import (
 	"github.com/novriyantoAli/lite-point-of-sale/backend/internal/infrastructure/sqlite"
 	usecaseauth "github.com/novriyantoAli/lite-point-of-sale/backend/internal/usecase/auth"
 	usecasehealth "github.com/novriyantoAli/lite-point-of-sale/backend/internal/usecase/health"
+	usecasepengaturan "github.com/novriyantoAli/lite-point-of-sale/backend/internal/usecase/pengaturan"
 	usecasepenjualan "github.com/novriyantoAli/lite-point-of-sale/backend/internal/usecase/penjualan"
 	usecaseproduk "github.com/novriyantoAli/lite-point-of-sale/backend/internal/usecase/produk"
 )
@@ -79,12 +80,18 @@ func New(ctx context.Context, cfg config.Config, logger *slog.Logger) (*App, err
 	// One Produk repository instance serves both slices: the catalogue's own use
 	// cases and the checkout that reads a Produk to price a cart.
 	productRepository := adaptersqlite.NewProductRepository(db)
-	productService := usecaseproduk.NewService(productRepository)
+
+	// Pengaturan is its own domain (Struk template, ambang Stok menipis), and its
+	// service also satisfies usecaseproduk.LowStockSettings — the Produk use case
+	// reads the ambang through that port without importing the pengaturan domain
+	// (ADR-0017, keputusan 3).
+	settingsService := usecasepengaturan.NewService(adaptersqlite.NewSettingsRepository(db))
+	productService := usecaseproduk.NewService(productRepository, settingsService)
 
 	saleService := usecasepenjualan.NewService(productRepository, adaptersqlite.NewSaleRepository(db))
 
 	return &App{
-		handler:  httpapi.NewRouter(healthChecker, authService, productService, saleService, logger),
+		handler:  httpapi.NewRouter(healthChecker, authService, productService, saleService, settingsService, logger),
 		database: db,
 	}, nil
 }

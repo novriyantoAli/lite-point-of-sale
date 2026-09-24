@@ -3,9 +3,12 @@ package e2e
 import (
 	"net/http"
 	"testing"
-
-	domainproduk "github.com/novriyantoAli/lite-point-of-sale/backend/internal/domain/produk"
 )
+
+// seededLowStockThreshold is the ambang Stok menipis migration 0005 seeds. The
+// test states its own number because the constant that once lived in the domain
+// has moved into the stored Pengaturan (ADR-0017).
+const seededLowStockThreshold int64 = 5
 
 // addStockPayload is the body an Admin posts to record a restock: how many
 // units arrived, never the new total — the Stok that is already there is the
@@ -228,7 +231,7 @@ func TestStokMenipisAnswersTheActiveProdukToRestock(t *testing.T) {
 	diAmbang := createProduk(t, baseURL, token, produkPayload{
 		Name:  "Di Ambang",
 		Price: 1000,
-		Stock: domainproduk.LowStockThreshold,
+		Stock: seededLowStockThreshold,
 	})
 
 	// A Produk that is not for sale is not one that runs out, so it stays off
@@ -242,10 +245,10 @@ func TestStokMenipisAnswersTheActiveProdukToRestock(t *testing.T) {
 
 	low := listLowStock(t, baseURL, token)
 
-	// The answered threshold is the domain's, not a number the adapter invented:
-	// it is what the UI shows the Admin as the rule behind the list.
-	if low.Threshold != domainproduk.LowStockThreshold {
-		t.Errorf("threshold: got %d, want %d", low.Threshold, domainproduk.LowStockThreshold)
+	// The answered threshold is the stored setting's, not a number the adapter
+	// invented: it is what the UI shows the Admin as the rule behind the list.
+	if low.Threshold != seededLowStockThreshold {
+		t.Errorf("threshold: got %d, want %d", low.Threshold, seededLowStockThreshold)
 	}
 
 	want := []int64{habis.ID, menipis.ID}

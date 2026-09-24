@@ -19,7 +19,8 @@
 			? [
 					{ href: resolve('/(app)/produk'), label: 'Produk' },
 					{ href: resolve('/(app)/stok'), label: 'Stok' },
-					{ href: resolve('/(app)/pengguna'), label: 'Pengguna' }
+					{ href: resolve('/(app)/pengguna'), label: 'Pengguna' },
+					{ href: resolve('/(app)/pengaturan'), label: 'Pengaturan' }
 				]
 			: [])
 	]);

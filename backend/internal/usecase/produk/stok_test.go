@@ -8,6 +8,11 @@ import (
 	domainproduk "github.com/novriyantoAli/lite-point-of-sale/backend/internal/domain/produk"
 )
 
+// seededLowStockThreshold is the ambang Stok menipis the migration seeds and the
+// default fake settings answer. It is a test's own number now, because the
+// domain constant it once was has moved into the stored Pengaturan (ADR-0017).
+const seededLowStockThreshold int64 = 5
+
 // seedStock plants a Produk with a Stok and a Status, bypassing the use cases,
 // so a test can start from the state it wants to reason about.
 func seedStock(products *fakeProducts, name string, stock int64, active bool) int64 {
@@ -143,8 +148,8 @@ func TestLowStockAnswersTheThinnestActiveProdukFirst(t *testing.T) {
 	menipis := seedStock(products, "Menipis", 2, true)
 	// The ambang itself is the first Stok that is still enough, so the Produk
 	// sitting exactly on it is not menipis (issue #5: "di bawah ambang atau nol").
-	seedStock(products, "Di Ambang", domainproduk.LowStockThreshold, true)
-	seedStock(products, "Aman", domainproduk.LowStockThreshold+1, true)
+	seedStock(products, "Di Ambang", seededLowStockThreshold, true)
+	seedStock(products, "Aman", seededLowStockThreshold+1, true)
 	seedStock(products, "Nonaktif", 0, false)
 
 	low, err := newTestService(products).LowStock(context.Background())
@@ -152,33 +157,41 @@ func TestLowStockAnswersTheThinnestActiveProdukFirst(t *testing.T) {
 		t.Fatalf("low Stok: %v", err)
 	}
 
+	if low.Threshold != seededLowStockThreshold {
+		t.Fatalf("threshold: got %d, want the seeded %d", low.Threshold, seededLowStockThreshold)
+	}
+
 	want := []int64{habis, menipis}
-	if len(low) != len(want) {
-		t.Fatalf("low Stok: got %d Produk, want %d", len(low), len(want))
+	if len(low.Products) != len(want) {
+		t.Fatalf("low Stok: got %d Produk, want %d", len(low.Products), len(want))
 	}
 	for i, id := range want {
-		if low[i].ID != id {
-			t.Errorf("low Stok[%d]: got id %d, want %d (thinnest first)", i, low[i].ID, id)
+		if low.Products[i].ID != id {
+			t.Errorf("low Stok[%d]: got id %d, want %d (thinnest first)", i, low.Products[i].ID, id)
 		}
 	}
 }
 
-// The threshold is what the UI shows the Admin ("Stok menipis ≤ 5"), so the one
-// that decides the list is the one that must be answered.
-func TestLowStockUsesTheThresholdItAnswers(t *testing.T) {
+// The ambang is a stored setting now, not a constant, so the list must follow
+// the one the settings port answers — not a number the use case holds itself.
+func TestLowStockFollowsTheStoredThreshold(t *testing.T) {
 	products := newFakeProducts()
-	seedStock(products, "Kopi", 1, true)
+	menipis := seedStock(products, "Menipis", 2, true)
+	// At a threshold of 3 this Produk is the first Stok that is still enough, so
+	// it is not menipis — the same "below, not at or below" rule, now on the
+	// threshold the test chose.
+	seedStock(products, "Di Ambang", 3, true)
 
-	low, err := newTestService(products).LowStock(context.Background())
+	low, err := newTestServiceWithThreshold(products, 3).LowStock(context.Background())
 	if err != nil {
 		t.Fatalf("low Stok: %v", err)
 	}
-	if len(low) != 1 {
-		t.Fatalf("low Stok: got %d Produk, want 1", len(low))
-	}
 
-	if domainproduk.LowStockThreshold <= 0 {
-		t.Errorf("LowStockThreshold: got %d, want a positive threshold", domainproduk.LowStockThreshold)
+	if low.Threshold != 3 {
+		t.Errorf("threshold: got %d, want 3", low.Threshold)
+	}
+	if len(low.Products) != 1 || low.Products[0].ID != menipis {
+		t.Errorf("low Stok: got %+v, want only the Produk below 3", low.Products)
 	}
 }
 
@@ -190,5 +203,17 @@ func TestLowStockPropagatesARepositoryFailure(t *testing.T) {
 
 	if err == nil {
 		t.Fatal("low Stok: got no error, want the repository failure")
+	}
+}
+
+func TestLowStockPropagatesASettingsFailure(t *testing.T) {
+	products := newFakeProducts()
+	settings := newFakeSettings()
+	settings.err = errors.New("settings gone")
+
+	_, err := NewService(products, settings).LowStock(context.Background())
+
+	if err == nil {
+		t.Fatal("low Stok: got no error, want the settings failure")
 	}
 }
