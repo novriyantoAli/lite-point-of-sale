@@ -12,11 +12,17 @@ import { positiveWholeNumber, wholeNumber } from '$lib/utils';
  */
 
 /**
- * The four Pembayaran methods of CONTEXT.md. All four are named because a stored
- * Penjualan has to stay readable when #7 lands the non-tunai ones; the checkout
- * input below accepts Tunai only.
+ * The four Pembayaran methods of CONTEXT.md, in the order the till offers them:
+ * Tunai first, then the three that are only recorded.
  */
-export const MetodePembayaranSchema = z.enum(['cash', 'qris', 'debit', 'transfer']);
+export const METODE_URUT = ['cash', 'qris', 'debit', 'transfer'] as const;
+
+/**
+ * The Pembayaran method of a Penjualan. A checkout takes all four: Tunai takes
+ * money, and QRIS, Debit and Transfer are recorded without a gateway
+ * (CONTEXT.md, Pembayaran).
+ */
+export const MetodePembayaranSchema = z.enum(METODE_URUT);
 export type MetodePembayaran = z.infer<typeof MetodePembayaranSchema>;
 
 /** How each method is written for a person. `cash` is Tunai (CONTEXT.md). */
@@ -26,6 +32,18 @@ export const METODE_LABEL: Record<MetodePembayaran, string> = {
 	debit: 'Debit',
 	transfer: 'Transfer'
 };
+
+/**
+ * Whether a Pembayaran by this method can produce a Kembalian. Only Tunai can be
+ * handed back; QRIS, Debit and Transfer pay the total exactly, so their Kembalian
+ * is always zero (CONTEXT.md, Kembalian).
+ *
+ * The form and the Struk both ask this instead of comparing against the `cash`
+ * literal, so the rule has one answer rather than two that can drift.
+ */
+export function punyaKembalian(method: MetodePembayaran): boolean {
+	return method === 'cash';
+}
 
 /**
  * One Item of a Penjualan: the Produk it came from, plus the name and price as
@@ -87,9 +105,11 @@ export const CheckoutItemSchema = z.object({
 export type CheckoutItem = z.infer<typeof CheckoutItemSchema>;
 
 /**
- * The nominal the buyer handed over. It is its own schema so the payment form can
- * validate the field on its own with the same rule the request body uses — a
- * second copy of "what does 50.000 mean" is exactly the kind of rule that drifts.
+ * The nominal of the Pembayaran: for Tunai what the buyer handed over, for a
+ * recorded method the total of the Penjualan. It is its own schema so the payment
+ * form can validate the field on its own with the same rule the request body
+ * uses — a second copy of "what does 50.000 mean" is exactly the kind of rule that
+ * drifts.
  */
 export const JumlahBayarSchema = wholeNumber(
 	'Jumlah bayar harus bilangan bulat.',
@@ -99,18 +119,20 @@ export const JumlahBayarSchema = wholeNumber(
 /**
  * The body of a checkout.
  *
- * `method` is the literal `cash`, not the whole MetodePembayaranSchema: the till
- * offers Tunai and only Tunai until #7 lands the other three, and a schema that
- * accepted QRIS here would only move the refusal to the API.
+ * `method` is any of the four methods of CONTEXT.md. For Tunai, `amount` is what
+ * the buyer handed over and the API works the Kembalian out from it; for a
+ * recorded method it is the total of the sale, and the API refuses anything else
+ * — a non-tunai Pembayaran has no Kembalian to absorb a difference (CONTEXT.md,
+ * Pembayaran, Kembalian).
  *
- * Whether the amount covers the total is a form-level check, not one here: the
- * schema does not know the total, which is the keranjang's to work out. The API
- * checks it again, and that check is the one that decides.
+ * Whether a Tunai amount covers the total is a form-level check, not one here:
+ * the schema does not know the total, which is the keranjang's to work out. The
+ * API checks it again, and that check is the one that decides.
  */
 export const CheckoutInputSchema = z.object({
 	items: z.array(CheckoutItemSchema).min(1, 'Keranjang masih kosong.'),
 	payment: z.object({
-		method: z.literal('cash'),
+		method: MetodePembayaranSchema,
 		amount: JumlahBayarSchema
 	})
 });

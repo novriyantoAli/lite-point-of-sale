@@ -16,9 +16,10 @@ import (
 // Transfer. The string values are what the API and the frontend schemas use;
 // keep them stable.
 //
-// All four are declared here even though only Tunai is accepted by checkout
-// today: the method of a stored Penjualan has to stay readable after #7 lands
-// non-tunai Pembayaran, and the column's CHECK constraint is written once.
+// All four are declared here — and named once in the column's CHECK constraint —
+// because a stored Penjualan has to stay readable: the set is fixed rather than
+// widened by a later migration. Checkout accepts all four; only Tunai produces a
+// Kembalian.
 type PaymentMethod string
 
 const (

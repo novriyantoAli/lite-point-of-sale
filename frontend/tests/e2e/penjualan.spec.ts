@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import {
+	bayarNonTunai,
 	bayarTunai,
 	bukaKasir,
 	createPengguna,
@@ -141,6 +142,36 @@ test('a payment below the total is refused, and nothing is sold', async ({ page 
 	await expect(strukPenjualan(page)).toHaveCount(0);
 	await page.goto('/stok');
 	await expect(stokRow(page, 'Kurang Bayar E2E')).toContainText('3');
+});
+
+test('the Kasir takes a non-tunai Pembayaran, and the Struk names the method', async ({ page }) => {
+	await logIn(page);
+
+	// Each method gets a Produk of its own: the suite shares one store for the
+	// whole run, and the Stok assertion below would otherwise depend on the order
+	// the methods ran in.
+	for (const metode of ['QRIS', 'Debit', 'Transfer']) {
+		const name = `Non-tunai ${metode} E2E`;
+		await createProduk(page, { name, price: 7000, stock: 5 });
+
+		await bukaKasir(page);
+		await tambahProduk(page, name);
+		await bayarNonTunai(page, metode);
+
+		// What the Struk shows: the method and the total, and no Kembalian at all —
+		// a recorded method pays the total exactly (CONTEXT.md, Kembalian).
+		const bayar = strukPenjualan(page).locator('p').filter({ hasText: 'Bayar' });
+		await expect(bayar).toContainText(metode);
+		await expect(bayar).toContainText('Rp 7.000');
+		await expect(strukPenjualan(page).getByText('Kembalian')).toHaveCount(0);
+
+		// The API stored it: the sale took the Stok out, so it was written rather
+		// than just echoed. What the Pembayaran row holds is asserted at the REST
+		// seam in backend/tests/e2e/penjualan_test.go — the BFF has no reader for a
+		// Penjualan by its Nomor Struk yet (#8, #9 build one).
+		await page.goto('/stok');
+		await expect(stokRow(page, name)).toContainText('4');
+	}
 });
 
 test('every Penjualan gets a Nomor Struk of its own that keeps counting', async ({ page }) => {

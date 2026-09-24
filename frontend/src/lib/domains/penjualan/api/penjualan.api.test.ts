@@ -57,13 +57,32 @@ describe('penjualanApi.checkout', () => {
 		expect(mock.history.post).toHaveLength(0);
 	});
 
-	it('refuses a method other than Tunai before the request is sent', async () => {
+	it('posts a recorded method with the total as its nominal', async () => {
+		const qris = { ...sale, payment: { method: 'qris', amount: 36000, change: 0 } };
+		mock.onPost('/penjualan').reply(201, { data: { sale: qris } });
+
+		// No gateway is involved: the method and the nominal are all that is sent,
+		// and no Kembalian is declared (CONTEXT.md, Pembayaran).
+		await expect(
+			penjualanApi.checkout({
+				items: [{ product_id: 1, quantity: 2 }],
+				payment: { method: 'qris', amount: 36000 }
+			})
+		).resolves.toEqual(qris);
+
+		expect(JSON.parse(mock.history.post[0]!.data).payment).toEqual({
+			method: 'qris',
+			amount: 36000
+		});
+	});
+
+	it('refuses a method the API does not know before the request is sent', async () => {
 		mock.onPost('/penjualan').reply(201, { data: { sale } });
 
 		await expect(
 			penjualanApi.checkout({
 				items: [{ product_id: 1, quantity: 1 }],
-				payment: { method: 'qris' as 'cash', amount: 18000 }
+				payment: { method: 'bitcoin' as 'cash', amount: 18000 }
 			})
 		).rejects.toThrow();
 		expect(mock.history.post).toHaveLength(0);
