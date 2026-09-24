@@ -70,9 +70,26 @@ describe('CetakStruk', () => {
 		renderCetak({ printed: false, message: 'Printer belum diatur.' });
 		await user.click(screen.getByRole('button', { name: 'Cetak ulang Struk' }));
 
-		expect(await screen.findByRole('alert')).toHaveTextContent('Kertas habis.');
+		// The alert follows the mutation's own answer, so it takes a tick to replace
+		// the automatic print's message.
+		await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('Kertas habis.'));
 		// The button comes back once the retry has settled, offering another go.
 		expect(await screen.findByRole('button', { name: 'Cetak ulang Struk' })).toBeEnabled();
+	});
+
+	it('shows one alert when the retry request itself fails after a failed print', async () => {
+		cetakStruk.mockRejectedValue({ message: 'Tidak dapat menghubungi server.', status: 502 });
+		const user = userEvent.setup();
+
+		renderCetak({ printed: false, message: 'Printer belum diatur.' });
+		await user.click(screen.getByRole('button', { name: 'Cetak ulang Struk' }));
+
+		// The request that could not be made is the latest news, and it does not stack
+		// on top of the print result it never replaced.
+		await waitFor(() =>
+			expect(screen.getByRole('alert')).toHaveTextContent('Tidak dapat menghubungi server.')
+		);
+		expect(screen.getAllByRole('alert')).toHaveLength(1);
 	});
 
 	it('shows the API error when the reprint itself could not be made', async () => {

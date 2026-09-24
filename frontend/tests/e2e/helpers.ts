@@ -1,4 +1,5 @@
-import { expect, type Page } from '@playwright/test';
+import { readFileSync, statSync } from 'node:fs';
+import { expect, test, type Page } from '@playwright/test';
 
 /**
  * The credentials of the seeded Admin Pengguna, matching the
@@ -274,6 +275,66 @@ export async function bayarNonTunai(page: Page, label: string) {
 	await pembayaran(page).getByRole('button', { name: 'Bayar & Simpan Penjualan' }).click();
 
 	await expect(strukPenjualan(page)).toBeVisible();
+}
+
+/**
+ * The printer file this run writes to.
+ *
+ * Playwright starts the Go API with `POS_PRINTER_DEVICE` pointing at it
+ * (playwright.config.ts), so a print really writes ESC/POS bytes through the
+ * device adapter. Reading them back is what proves the content of a Struk at the
+ * browser seam (ADR-0017).
+ */
+export function printerFile(): string {
+	return test.info().config.metadata.e2ePrinterPath as string;
+}
+
+/** How much the printer file holds right now — the marker for "what comes next". */
+export function printerSize(): number {
+	return statSync(printerFile()).size;
+}
+
+/** The bytes the printer file received after `from`, as text. */
+export function printedSince(from: number): string {
+	return readFileSync(printerFile()).subarray(from).toString('utf8');
+}
+
+/**
+ * The one ESC/POS job in `printed` that carries this Nomor Struk.
+ *
+ * The printer file is shared by the whole run, so another worker's Struk can be
+ * appended alongside this one. A job starts with the initialise command and ends
+ * with the cut command, so the bytes between the two around the sale's own Nomor
+ * Struk are its Struk alone — whatever else landed next to it.
+ */
+export function printedJob(printed: string, nomor: number): string {
+	const marker = `Nomor Struk: ${nomor}`;
+	const at = printed.indexOf(marker);
+	if (at < 0) {
+		throw new Error(`the printer file holds no Struk for Nomor Struk ${nomor}`);
+	}
+
+	const start = printed.lastIndexOf('\x1b@', at);
+	const end = printed.indexOf('\x1dVB\x00', at);
+
+	return printed.slice(start < 0 ? 0 : start, end < 0 ? printed.length : end);
+}
+
+/**
+ * The text lines of one ESC/POS job, with the control sequences taken out: what a
+ * printer would put on the paper, which is what a column check is about.
+ */
+export function printedText(job: string): string[] {
+	return job
+		.split('\x1b@')
+		.join('')
+		.split('\x1ba\x00')
+		.join('')
+		.split('\x1bE\x00')
+		.join('')
+		.split('\x1dVB\x00')
+		.join('')
+		.split('\n');
 }
 
 /** The Nomor Struk the recorded-Penjualan panel is showing. */

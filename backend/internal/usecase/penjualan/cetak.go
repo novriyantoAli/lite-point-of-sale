@@ -34,7 +34,7 @@ type CheckoutResult struct {
 	Print PrintResult
 }
 
-// CetakStruk prints the Struk of one stored Penjualan. It is both the reprint
+// PrintReceipt prints the Struk of one stored Penjualan. It is both the reprint
 // path and what the panel after a checkout retries with, so the two produce the
 // same result shape.
 //
@@ -42,23 +42,23 @@ type CheckoutResult struct {
 // *current* Pengaturan — not a copy from when the sale happened. A Struk is the
 // store's document, and a shop that renamed itself prints its new name on a
 // receipt it reissues (ADR-0017, keputusan 5).
-func (s *Service) CetakStruk(ctx context.Context, receiptNumber int64) (PrintResult, error) {
+func (s *Service) PrintReceipt(ctx context.Context, receiptNumber int64) (PrintResult, error) {
 	sale, err := s.sales.FindByReceiptNumber(ctx, receiptNumber)
 	if err != nil {
 		return PrintResult{}, err
 	}
 
-	return s.printStruk(ctx, sale)
+	return s.composeAndPrint(ctx, sale)
 }
 
-// printStruk composes the Struk of a sale and hands it to the printer.
+// composeAndPrint composes the Struk of a sale and hands it to the printer.
 //
 // A printer that fails is answered as a PrintResult with Printed false, never as
 // an error: the Penjualan is already stored and the money has moved, so a Struk
 // that did not come out must never look like a sale that did not happen
 // (ADR-0017, keputusan 1). An error is reserved for a failure that stopped the
 // Struk being composed at all — a Pengaturan that could not be read.
-func (s *Service) printStruk(ctx context.Context, sale domainpenjualan.Sale) (PrintResult, error) {
+func (s *Service) composeAndPrint(ctx context.Context, sale domainpenjualan.Sale) (PrintResult, error) {
 	settings, err := s.settings.Get(ctx)
 	if err != nil {
 		return PrintResult{}, err

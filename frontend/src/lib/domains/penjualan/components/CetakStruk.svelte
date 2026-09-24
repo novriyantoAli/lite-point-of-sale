@@ -21,13 +21,12 @@
 	const cetak = createCetakStrukMutation();
 
 	/**
-	 * What the last print pressed here answered, or null before one has run. The
-	 * result shown is this if it exists, and otherwise the automatic print's outcome
-	 * the parent passed in — so the Kasir sees that outcome before pressing anything.
+	 * What the last print answered: the result the retry got, or the automatic
+	 * print's outcome the parent passed in. The mutation already holds its own
+	 * answer, so nothing is copied into runes (Golden Rule 6, skill §3) — and only
+	 * one of the two can be showing at a time.
 	 */
-	let dicetak = $state<HasilCetak | null>(null);
-
-	const hasil = $derived(dicetak ?? hasilAwal);
+	const hasil = $derived(cetak.data ?? hasilAwal);
 
 	/** A Struk that did not come out is retried; one that did is printed again. */
 	const teksTombol = $derived(
@@ -36,7 +35,7 @@
 
 	async function cetakUlang() {
 		try {
-			dicetak = await cetak.mutateAsync(nomorStruk);
+			await cetak.mutateAsync(nomorStruk);
 		} catch {
 			// `cetak.error` carries the normalized message, rendered below.
 		}
@@ -48,17 +47,17 @@
 		{teksTombol}
 	</Button>
 
-	{#if hasil}
-		{#if hasil.printed}
-			<p class="text-sm text-muted-foreground" role="status">Struk tercetak.</p>
-		{:else}
-			<p class="text-sm text-destructive" role="alert">
-				{hasil.message ?? 'Struk gagal dicetak.'}
-			</p>
-		{/if}
-	{/if}
-
+	<!--
+		One outcome, in one place: the request that could not be made at all is the
+		latest news, and it takes the screen over the print result it never replaced.
+	-->
 	{#if cetak.error}
 		<p class="text-sm text-destructive" role="alert">{cetak.error.message}</p>
+	{:else if hasil?.printed === false}
+		<p class="text-sm text-destructive" role="alert">
+			{hasil.message ?? 'Struk gagal dicetak.'}
+		</p>
+	{:else if hasil?.printed}
+		<p class="text-sm text-muted-foreground" role="status">Struk tercetak.</p>
 	{/if}
 </div>

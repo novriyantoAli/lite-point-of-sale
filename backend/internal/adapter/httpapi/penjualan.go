@@ -17,7 +17,7 @@ import (
 type SaleService interface {
 	Checkout(ctx context.Context, cashier domainauth.PublicUser, input usecasepenjualan.CheckoutInput) (usecasepenjualan.CheckoutResult, error)
 	FindByReceiptNumber(ctx context.Context, receiptNumber int64) (domainpenjualan.Sale, error)
-	CetakStruk(ctx context.Context, receiptNumber int64) (usecasepenjualan.PrintResult, error)
+	PrintReceipt(ctx context.Context, receiptNumber int64) (usecasepenjualan.PrintResult, error)
 }
 
 // checkoutRequest is the cart a Kasir posts. The Items carry the Produk id and
@@ -220,7 +220,7 @@ func printSaleHandler(service SaleService, logger *slog.Logger) http.HandlerFunc
 			return
 		}
 
-		printed, err := service.CetakStruk(r.Context(), receiptNumber)
+		printed, err := service.PrintReceipt(r.Context(), receiptNumber)
 		if err != nil {
 			writeError(w, err, logger)
 			return

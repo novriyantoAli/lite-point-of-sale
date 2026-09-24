@@ -192,9 +192,9 @@ func TestCetakStrukPrintsAStoredSale(t *testing.T) {
 
 	created := saleOf(t, service, tunai(1, 1, 18000))
 
-	printed, err := service.CetakStruk(context.Background(), created.ReceiptNumber)
+	printed, err := service.PrintReceipt(context.Background(), created.ReceiptNumber)
 	if err != nil {
-		t.Fatalf("CetakStruk: %v", err)
+		t.Fatalf("PrintReceipt: %v", err)
 	}
 
 	if !printed.Printed {
@@ -224,8 +224,8 @@ func TestCetakStrukUsesTheCurrentTemplate(t *testing.T) {
 
 	settings.settings.Header = "Toko Kopi Purnama"
 
-	if _, err := service.CetakStruk(context.Background(), created.ReceiptNumber); err != nil {
-		t.Fatalf("CetakStruk: %v", err)
+	if _, err := service.PrintReceipt(context.Background(), created.ReceiptNumber); err != nil {
+		t.Fatalf("PrintReceipt: %v", err)
 	}
 
 	reprint := printer.printed[1]
@@ -241,7 +241,7 @@ func TestCetakStrukUsesTheCurrentTemplate(t *testing.T) {
 func TestCetakStrukReportsAMissingSale(t *testing.T) {
 	service := NewService(newFakeProducts(), newFakeSales(), newFakeSettings(), &fakePrinter{})
 
-	_, err := service.CetakStruk(context.Background(), 404)
+	_, err := service.PrintReceipt(context.Background(), 404)
 	if !errors.Is(err, domainpenjualan.ErrSaleNotFound) {
 		t.Fatalf("got %v, want ErrSaleNotFound", err)
 	}
@@ -255,9 +255,9 @@ func TestCetakStrukReportsAPrinterFailureWithoutAnError(t *testing.T) {
 
 	created := saleOf(t, service, tunai(1, 1, 18000))
 
-	printed, err := service.CetakStruk(context.Background(), created.ReceiptNumber)
+	printed, err := service.PrintReceipt(context.Background(), created.ReceiptNumber)
 	if err != nil {
-		t.Fatalf("CetakStruk with a broken printer: got %v, want a reported failure", err)
+		t.Fatalf("PrintReceipt with a broken printer: got %v, want a reported failure", err)
 	}
 	if printed.Printed || printed.Message != "Printer belum diatur." {
 		t.Errorf("print result: got %+v, want the unconfigured-printer message", printed)

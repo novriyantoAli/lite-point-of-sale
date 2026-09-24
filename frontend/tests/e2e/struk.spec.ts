@@ -1,4 +1,3 @@
-import { readFileSync, statSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
 import {
 	bayarTunai,
@@ -9,6 +8,9 @@ import {
 	logIn,
 	nomorStruk,
 	penjualanTersimpan,
+	printedJob,
+	printedSince,
+	printerSize,
 	strukPenjualan,
 	tambahProduk
 } from './helpers';
@@ -23,25 +25,16 @@ import {
  * is what proves the content of a Struk at the browser seam rather than only in
  * the encoder's own tests (ADR-0017).
  *
- * The file is shared by the whole run, so each assertion reads only the bytes
- * appended since a marker it took itself. Receipt numbers are never asserted to
- * be a particular value: the suite shares one store.
+ * The file is shared by the whole run, so each assertion reads the bytes appended
+ * since a marker it took itself, and then narrows to its own sale's job — another
+ * worker's Struk may have landed alongside it. Receipt numbers are never asserted
+ * to be a particular value: the suite shares one store.
+ *
+ * Changing the template is deliberately *not* here: the Pengaturan row is one row
+ * for the whole store, so a spec that rewrites it while `pengaturan.spec.ts`
+ * saves-then-reads it would flake. That assertion lives in pengaturan.spec.ts,
+ * the file that owns the form.
  */
-
-/** The printer file this run writes to. */
-function printerPath(): string {
-	return test.info().config.metadata.e2ePrinterPath as string;
-}
-
-/** How much the printer file holds right now — the marker for "what comes next". */
-function printerSize(): number {
-	return statSync(printerPath()).size;
-}
-
-/** The bytes the printer file received after `from`, as text. */
-function printedSince(from: number): string {
-	return readFileSync(printerPath()).subarray(from).toString('utf8');
-}
 
 test('a checkout prints the Struk, and the Kasir sees that it did', async ({ page }) => {
 	await logIn(page);
@@ -62,7 +55,7 @@ test('a checkout prints the Struk, and the Kasir sees that it did', async ({ pag
 
 	// What actually reached the printer: the ESC/POS job, with the content
 	// CONTEXT.md lists (ADR-0017, keputusan 4).
-	const printed = printedSince(before);
+	const printed = printedJob(printedSince(before), nomor);
 
 	expect(printed).toContain('\x1b@');
 	expect(printed).toContain(`Nomor Struk: ${nomor}`);
@@ -98,54 +91,10 @@ test('the Kasir reprints a Struk from the /penjualan lookup', async ({ page }) =
 
 	// The reprint goes through POST /api/penjualan/{nomorStruk}/struk, and the
 	// bytes of the sale come out again (ADR-0017, keputusan 5).
-	const printed = printedSince(before);
+	const printed = printedJob(printedSince(before), nomor);
 
 	expect(printed).toContain(`Nomor Struk: ${nomor}`);
 	expect(printed).toContain('Cetak Ulang E2E');
 	expect(printed).toContain('Total');
 	expect(printed).toContain('Rp 7.000');
-});
-
-test('changing the template in Pengaturan changes a reprint of an old sale', async ({ page }) => {
-	await logIn(page);
-	await createProduk(page, { name: 'Template E2E', price: 4000, stock: 5 });
-
-	await bukaKasir(page);
-	await tambahProduk(page, 'Template E2E');
-	await bayarTunai(page, 4000);
-	const nomor = await nomorStruk(page);
-
-	// The shop changes its Struk template the way an Admin does: through the form.
-	await page.goto('/pengaturan');
-	await page.getByLabel('Header Struk').fill('Toko Baru E2E\nJl. Melati 2');
-	await page.getByLabel('Footer Struk').fill('Terima kasih E2E');
-	await page.getByLabel('Lebar kertas').click();
-	await page.getByRole('option', { name: '58 mm' }).click();
-	await page.getByRole('button', { name: 'Simpan Pengaturan' }).click();
-	await expect(page.getByRole('status')).toContainText('Pengaturan disimpan.');
-
-	// Reprinting the sale that happened *before* the change prints the template as
-	// it stands now, not a copy from when the sale happened (ADR-0017, keputusan 5).
-	await bukaPenjualan(page);
-	await cariPenjualan(page, String(nomor));
-
-	const record = penjualanTersimpan(page);
-	await expect(record.getByText(new RegExp(`Nomor Struk ${nomor}`))).toBeVisible();
-
-	const before = printerSize();
-	await record.getByRole('button', { name: 'Cetak Struk' }).click();
-	await expect(record.getByText('Struk tercetak.')).toBeVisible();
-
-	const printed = printedSince(before);
-
-	expect(printed).toContain('Toko Baru E2E');
-	expect(printed).toContain('Jl. Melati 2');
-	expect(printed).toContain('Terima kasih E2E');
-	expect(printed).toContain(`Nomor Struk: ${nomor}`);
-
-	// 58 mm means 32 columns: the header the Admin just typed is wrapped to that,
-	// never run past the roll.
-	for (const line of printed.split('\n')) {
-		expect([...line].length).toBeLessThanOrEqual(32);
-	}
 });

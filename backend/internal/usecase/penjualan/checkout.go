@@ -80,7 +80,7 @@ func (s *Service) Checkout(ctx context.Context, cashier domainauth.PublicUser, i
 		return CheckoutResult{}, err
 	}
 
-	printed, err := s.printStruk(ctx, stored)
+	printed, err := s.composeAndPrint(ctx, stored)
 	if err != nil {
 		// The template could not be read, so there was nothing to print. The
 		// Penjualan is stored either way: a print that could not even be composed is
