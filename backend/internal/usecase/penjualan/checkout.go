@@ -35,12 +35,26 @@ func (s *Service) Checkout(ctx context.Context, cashier domainauth.PublicUser, i
 		return domainpenjualan.Sale{}, err
 	}
 
-	// Tunai below the total is refused rather than stored: Kembalian is
-	// `bayar - total` and has to be at least zero (CONTEXT.md, Kembalian). A
-	// non-tunai Pembayaran is recorded for its nominal, so the same rule is what
-	// stops it recording less than the sale it pays for.
-	if input.Payment.Amount < total {
-		return domainpenjualan.Sale{}, InputError{Message: "Jumlah bayar kurang dari total Penjualan."}
+	// The Pembayaran is recorded as it was taken, and what each method accepts
+	// differs (CONTEXT.md, Pembayaran, Kembalian):
+	//
+	//   - Tunai is what the buyer handed over, and it has to cover the total:
+	//     Kembalian is `bayar - total` and must be at least zero.
+	//   - QRIS, Debit and Transfer are recorded for the total of the sale. There is
+	//     no Kembalian to absorb a difference, and one Penjualan has one Pembayaran,
+	//     so there is no split to absorb an underpayment either.
+	//
+	// Change stays zero for a recorded method: there is nothing to hand back.
+	var change int64
+	if method == domainpenjualan.PaymentCash {
+		if input.Payment.Amount < total {
+			return domainpenjualan.Sale{}, InputError{Message: "Jumlah bayar kurang dari total Penjualan."}
+		}
+		change = input.Payment.Amount - total
+	} else if input.Payment.Amount != total {
+		return domainpenjualan.Sale{}, InputError{
+			Message: fmt.Sprintf("Pembayaran non-tunai harus sebesar total Penjualan: %d.", total),
+		}
 	}
 
 	sale := domainpenjualan.Sale{
@@ -51,7 +65,7 @@ func (s *Service) Checkout(ctx context.Context, cashier domainauth.PublicUser, i
 		Payment: domainpenjualan.Payment{
 			Method: method,
 			Amount: input.Payment.Amount,
-			Change: input.Payment.Amount - total,
+			Change: change,
 		},
 	}
 
@@ -95,20 +109,19 @@ func mergeLines(input []ItemInput) ([]ItemInput, error) {
 
 // paymentMethod reads the Pembayaran method of this checkout.
 //
-// Only Tunai is accepted here. The domain already names QRIS, Debit and Transfer
-// — a stored Penjualan has to stay readable when #7 lands them — but accepting
-// one today would record a Pembayaran this slice cannot answer for.
+// All four methods of CONTEXT.md are accepted: Tunai takes money, and QRIS, Debit
+// and Transfer are recorded — no gateway is involved (CONTEXT.md, Pembayaran). An
+// unknown method is refused rather than stored, because the method column names
+// exactly these four and a Pembayaran the app cannot name is not one it can show
+// or report on.
 func paymentMethod(input PaymentInput) (domainpenjualan.PaymentMethod, error) {
 	method := domainpenjualan.PaymentMethod(strings.TrimSpace(input.Method))
 
-	if method == domainpenjualan.PaymentCash {
-		return method, nil
-	}
 	if !method.Valid() {
 		return "", InputError{Message: "Metode pembayaran tidak dikenal."}
 	}
 
-	return "", InputError{Message: "Metode pembayaran ini belum tersedia."}
+	return method, nil
 }
 
 // price reads every Produk in the cart and turns the lines into Item snapshots,

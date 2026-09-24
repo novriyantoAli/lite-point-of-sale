@@ -13,6 +13,7 @@ export {
 	ItemPenjualanSchema,
 	JumlahBayarSchema,
 	METODE_LABEL,
+	METODE_URUT,
 	MetodePembayaranSchema,
 	PembayaranSchema,
 	PenjualanEnvelopeSchema,

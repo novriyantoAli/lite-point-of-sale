@@ -199,9 +199,9 @@ export function jumlahItem(page: Page, name: string) {
 	return keranjang(page).getByRole('spinbutton', { name: `Jumlah ${name}` });
 }
 
-/** The Tunai payment form of the till. */
+/** The Pembayaran form of the till: the method, and Tunai's amount. */
 export function pembayaran(page: Page) {
-	return page.getByRole('form', { name: 'Pembayaran Tunai' });
+	return page.getByRole('form', { name: 'Pembayaran' });
 }
 
 /** The recorded-Penjualan panel that replaces the till once a sale is stored. */
@@ -226,6 +226,26 @@ export async function tambahProduk(page: Page, name: string) {
  */
 export async function bayarTunai(page: Page, amount: number) {
 	await pembayaran(page).getByRole('textbox', { name: 'Jumlah bayar' }).fill(String(amount));
+	await pembayaran(page).getByRole('button', { name: 'Bayar & Simpan Penjualan' }).click();
+
+	await expect(strukPenjualan(page)).toBeVisible();
+}
+
+/**
+ * Pays the keranjang with a recorded method — QRIS, Debit or Transfer — and waits
+ * for the recorded Penjualan. There is nothing to type: no gateway is called, and
+ * the method pays the total (CONTEXT.md, Pembayaran).
+ *
+ * The method is picked by clicking its label, which is what a Kasir clicks: the
+ * radio itself is hidden from sight and only carries the choice.
+ */
+export async function bayarNonTunai(page: Page, label: string) {
+	// The pill is what a Kasir clicks; the radio inside it is hidden from sight and
+	// only carries the choice. Clicking the label is also what proves the label
+	// names the radio, which is how the method is announced.
+	await pembayaran(page).getByText(label, { exact: true }).click();
+	await expect(pembayaran(page).getByRole('radio', { name: label })).toBeChecked();
+
 	await pembayaran(page).getByRole('button', { name: 'Bayar & Simpan Penjualan' }).click();
 
 	await expect(strukPenjualan(page)).toBeVisible();

@@ -5,7 +5,8 @@ import {
 	JumlahBayarSchema,
 	METODE_LABEL,
 	PenjualanEnvelopeSchema,
-	PenjualanSchema
+	PenjualanSchema,
+	punyaKembalian
 } from './penjualan.schema';
 
 const sale = {
@@ -23,7 +24,7 @@ describe('PenjualanSchema', () => {
 		expect(PenjualanSchema.parse(sale)).toEqual(sale);
 	});
 
-	it('reads a non-tunai method, so a stored Penjualan stays readable when #7 lands', () => {
+	it('reads a non-tunai Pembayaran, so a stored Penjualan stays readable', () => {
 		const parsed = PenjualanSchema.parse({
 			...sale,
 			payment: { method: 'qris', amount: 36000, change: 0 }
@@ -123,11 +124,24 @@ describe('CheckoutInputSchema', () => {
 		).toThrow();
 	});
 
-	it('refuses a method other than Tunai, which is all this slice offers', () => {
+	it('accepts the three recorded methods, so the till can offer them', () => {
+		// No gateway is involved: the method and the nominal are all the till sends
+		// for a non-tunai Pembayaran (CONTEXT.md, Pembayaran).
+		for (const method of ['qris', 'debit', 'transfer'] as const) {
+			const parsed = CheckoutInputSchema.parse({
+				items: [{ product_id: 1, quantity: 1 }],
+				payment: { method, amount: 10000 }
+			});
+
+			expect(parsed.payment.method).toBe(method);
+		}
+	});
+
+	it('refuses a method the API does not know', () => {
 		expect(() =>
 			CheckoutInputSchema.parse({
 				items: [{ product_id: 1, quantity: 1 }],
-				payment: { method: 'qris', amount: 10000 }
+				payment: { method: 'bitcoin', amount: 10000 }
 			})
 		).toThrow();
 	});
@@ -137,5 +151,14 @@ describe('METODE_LABEL', () => {
 	it('writes Tunai for the cash method rather than the English word', () => {
 		expect(METODE_LABEL.cash).toBe('Tunai');
 		expect(METODE_LABEL.qris).toBe('QRIS');
+	});
+});
+
+describe('punyaKembalian', () => {
+	it('is Tunai alone, so the form and the Struk agree on what shows a Kembalian', () => {
+		expect(punyaKembalian('cash')).toBe(true);
+		for (const method of ['qris', 'debit', 'transfer'] as const) {
+			expect(punyaKembalian(method)).toBe(false);
+		}
 	});
 });

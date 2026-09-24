@@ -436,9 +436,8 @@ func TestCheckoutRefusesAProdukThatIsNotSellable(t *testing.T) {
 	}
 }
 
-func TestCheckoutRefusesANonTunaiMethodForNow(t *testing.T) {
+func TestCheckoutRecordsANonTunaiPembayaran(t *testing.T) {
 	baseURL, token := newAdminToken(t)
-	created := createProduk(t, baseURL, token, produkPayload{Name: "Kopi", Price: 18000, Stock: 5})
 
 	tests := []struct {
 		name   string
@@ -447,7 +446,102 @@ func TestCheckoutRefusesANonTunaiMethodForNow(t *testing.T) {
 		{name: "QRIS", method: "qris"},
 		{name: "Debit", method: "debit"},
 		{name: "Transfer", method: "transfer"},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			// Each subtest sells a Produk of its own: the suite shares one store for
+			// the whole run, and one Stok would make the assertions depend on the
+			// order the subtests ran in.
+			created := createProduk(t, baseURL, token, produkPayload{
+				Name: "Kopi " + test.name, Price: 18000, Stock: 10,
+			})
+
+			// A non-tunai Pembayaran is recorded for the total of the sale: there is
+			// no gateway and no Kembalian, just the method and the nominal
+			// (CONTEXT.md, Pembayaran).
+			sale := checkout(t, baseURL, token, checkoutPayload{
+				Items:   []checkoutItemPayload{{ProductID: created.ID, Quantity: 2}},
+				Payment: checkoutPaymentPayload{Method: test.method, Amount: 36000},
+			})
+
+			if sale.Payment.Method != test.method {
+				t.Errorf("method: got %q, want %q", sale.Payment.Method, test.method)
+			}
+			if sale.Payment.Amount != 36000 {
+				t.Errorf("nominal: got %d, want 36000", sale.Payment.Amount)
+			}
+			if sale.Payment.Change != 0 {
+				t.Errorf("Kembalian: got %d, want 0", sale.Payment.Change)
+			}
+
+			// The Pembayaran is stored, not just echoed: reading the Penjualan back by
+			// its Nomor Struk answers the same method and the same zero Kembalian.
+			stored := readSale(t, baseURL, token, sale.ReceiptNumber)
+			if stored.Payment != sale.Payment {
+				t.Errorf("read back Pembayaran: got %+v, want %+v", stored.Payment, sale.Payment)
+			}
+
+			// The sale still takes the Stok out, whatever the method was.
+			if stock := stockOf(t, baseURL, token, created.ID); stock != 8 {
+				t.Errorf("Stok after a %s sale: got %d, want 8", test.method, stock)
+			}
+		})
+	}
+}
+
+func TestCheckoutRefusesANonTunaiPembayaranThatIsNotTheTotal(t *testing.T) {
+	baseURL, token := newAdminToken(t)
+	created := createProduk(t, baseURL, token, produkPayload{Name: "Kopi", Price: 18000, Stock: 5})
+
+	tests := []struct {
+		name   string
+		amount int64
+	}{
+		{name: "more than the total", amount: 40000},
+		{name: "less than the total", amount: 35000},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			var failure errorPayload
+			status := apiCall(t, http.MethodPost, baseURL+"/api/penjualan", token, checkoutPayload{
+				Items:   []checkoutItemPayload{{ProductID: created.ID, Quantity: 2}},
+				Payment: checkoutPaymentPayload{Method: "qris", Amount: test.amount},
+			}, &failure)
+
+			// There is no Kembalian to absorb an overpayment and no split payment to
+			// absorb an underpayment, so a nominal that is not the total is refused
+			// rather than recorded.
+			if status != http.StatusBadRequest {
+				t.Fatalf("got status %d, want %d", status, http.StatusBadRequest)
+			}
+			if failure.Error != "invalid_input" {
+				t.Errorf("got code %q, want %q", failure.Error, "invalid_input")
+			}
+			if failure.Message == "" {
+				t.Error("got no message, want one the till can show")
+			}
+
+			// Refused means nothing was sold and no Stok left.
+			if stock := stockOf(t, baseURL, token, created.ID); stock != 5 {
+				t.Errorf("Stok after a refused checkout: got %d, want 5", stock)
+			}
+		})
+	}
+}
+
+func TestCheckoutRefusesAMethodItDoesNotKnow(t *testing.T) {
+	baseURL, token := newAdminToken(t)
+	created := createProduk(t, baseURL, token, produkPayload{Name: "Kopi", Price: 18000, Stock: 5})
+
+	tests := []struct {
+		name   string
+		method string
+	}{
 		{name: "something that is not a method at all", method: "bitcoin"},
+		{name: "blank", method: "  "},
+		{name: "an upper-cased method", method: "QRIS"},
 	}
 
 	for _, test := range tests {
@@ -458,8 +552,6 @@ func TestCheckoutRefusesANonTunaiMethodForNow(t *testing.T) {
 				Payment: checkoutPaymentPayload{Method: test.method, Amount: 18000},
 			}, &failure)
 
-			// #7 lands the other three; until then the API says so rather than
-			// recording a Pembayaran this slice cannot answer for.
 			if status != http.StatusBadRequest {
 				t.Fatalf("got status %d, want %d", status, http.StatusBadRequest)
 			}

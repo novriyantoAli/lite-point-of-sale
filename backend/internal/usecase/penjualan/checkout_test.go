@@ -31,6 +31,16 @@ func tunai(productID, quantity, amount int64) CheckoutInput {
 	}
 }
 
+// nonTunai builds a checkout of one line paid by a recorded method — QRIS, Debit
+// or Transfer. Nothing is processed through a gateway: the method and the
+// nominal are all that is written (CONTEXT.md, Pembayaran).
+func nonTunai(method string, productID, quantity, amount int64) CheckoutInput {
+	return CheckoutInput{
+		Items:   []ItemInput{{ProductID: productID, Quantity: quantity}},
+		Payment: PaymentInput{Method: method, Amount: amount},
+	}
+}
+
 func TestCheckoutPricesTheCartFromTheCatalogue(t *testing.T) {
 	products := newFakeProducts(kopi(), teh())
 	sales := newFakeSales()
@@ -273,16 +283,14 @@ func TestCheckoutRefusesAProdukThatIsNotSellable(t *testing.T) {
 	}
 }
 
-func TestCheckoutOnlyTakesTunaiForNow(t *testing.T) {
+func TestCheckoutRecordsANonTunaiPembayaran(t *testing.T) {
 	tests := []struct {
 		name   string
-		method string
+		method domainpenjualan.PaymentMethod
 	}{
-		{name: "QRIS", method: "qris"},
-		{name: "Debit", method: "debit"},
-		{name: "Transfer", method: "transfer"},
-		{name: "not a method at all", method: "bitcoin"},
-		{name: "blank", method: "  "},
+		{name: "QRIS", method: domainpenjualan.PaymentQRIS},
+		{name: "Debit", method: domainpenjualan.PaymentDebit},
+		{name: "Transfer", method: domainpenjualan.PaymentTransfer},
 	}
 
 	for _, test := range tests {
@@ -290,10 +298,79 @@ func TestCheckoutOnlyTakesTunaiForNow(t *testing.T) {
 			products := newFakeProducts(kopi())
 			sales := newFakeSales()
 
-			_, err := newTestService(products, sales).Checkout(context.Background(), kasir, CheckoutInput{
-				Items:   []ItemInput{{ProductID: 1, Quantity: 1}},
-				Payment: PaymentInput{Method: test.method, Amount: 18000},
-			})
+			// The nominal of a non-tunai Pembayaran is the total of the Penjualan it
+			// pays for: one sale, one Pembayaran, no split (CONTEXT.md, Pembayaran).
+			sale, err := newTestService(products, sales).Checkout(context.Background(), kasir,
+				nonTunai(string(test.method), 1, 2, 36000))
+			if err != nil {
+				t.Fatalf("checkout: %v", err)
+			}
+
+			if sale.Payment.Method != test.method {
+				t.Errorf("method: got %q, want %q", sale.Payment.Method, test.method)
+			}
+			if sale.Payment.Amount != 36000 {
+				t.Errorf("nominal: got %d, want 36000", sale.Payment.Amount)
+			}
+			// No Kembalian: only Tunai can be handed back (CONTEXT.md, Kembalian).
+			if sale.Payment.Change != 0 {
+				t.Errorf("Kembalian: got %d, want 0", sale.Payment.Change)
+			}
+
+			// What is recorded is what the repository stored, method included.
+			if len(sales.recorded) != 1 || sales.recorded[0].Payment.Method != test.method {
+				t.Errorf("recorded: got %+v, want one Penjualan paid by %q", sales.recorded, test.method)
+			}
+		})
+	}
+}
+
+func TestCheckoutRefusesANonTunaiPembayaranThatIsNotTheTotal(t *testing.T) {
+	tests := []struct {
+		name   string
+		amount int64
+	}{
+		{name: "more than the total", amount: 40000},
+		{name: "less than the total", amount: 35000},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			products := newFakeProducts(kopi())
+			sales := newFakeSales()
+
+			// There is no Kembalian to absorb an overpayment and no split payment to
+			// absorb an underpayment, so a nominal that is not the total is refused
+			// rather than recorded (CONTEXT.md, Pembayaran, Kembalian).
+			_, err := newTestService(products, sales).Checkout(context.Background(), kasir,
+				nonTunai("qris", 1, 2, test.amount))
+			if !errors.Is(err, domainpenjualan.ErrInvalidInput) {
+				t.Fatalf("got %v, want ErrInvalidInput", err)
+			}
+			if len(sales.recorded) != 0 {
+				t.Errorf("recorded: got %d Penjualan, want none", len(sales.recorded))
+			}
+		})
+	}
+}
+
+func TestCheckoutRefusesAMethodItDoesNotKnow(t *testing.T) {
+	tests := []struct {
+		name   string
+		method string
+	}{
+		{name: "not a method at all", method: "bitcoin"},
+		{name: "blank", method: "  "},
+		{name: "an upper-cased method", method: "QRIS"},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			products := newFakeProducts(kopi())
+			sales := newFakeSales()
+
+			_, err := newTestService(products, sales).Checkout(context.Background(), kasir,
+				nonTunai(test.method, 1, 1, 18000))
 			if !errors.Is(err, domainpenjualan.ErrInvalidInput) {
 				t.Fatalf("got %v, want ErrInvalidInput", err)
 			}

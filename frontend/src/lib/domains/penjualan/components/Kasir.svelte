@@ -1,15 +1,15 @@
 <script lang="ts">
 	import Keranjang from './Keranjang.svelte';
-	import PembayaranTunai from './PembayaranTunai.svelte';
+	import Pembayaran from './Pembayaran.svelte';
 	import PencarianProduk from './PencarianProduk.svelte';
 	import StrukPenjualan from './StrukPenjualan.svelte';
 	import type { Penjualan } from '../schemas/penjualan.schema';
 	import { keranjangState } from '../state/keranjang.state.svelte';
 
 	/**
-	 * The till: find a Produk, build a keranjang, take a Tunai Pembayaran, and record
-	 * the Penjualan (CONTEXT.md). It is the one screen a Kasir needs; an Admin sells
-	 * from the same screen.
+	 * The till: find a Produk, build a keranjang, take a Pembayaran — Tunai, or QRIS,
+	 * Debit or Transfer recorded — and record the Penjualan (CONTEXT.md). It is the
+	 * one screen a Kasir needs; an Admin sells from the same screen.
 	 *
 	 * It owns nothing but which of its two faces is showing — the running sale or the
 	 * one just recorded. The keranjang belongs to the domain's own state, so the
@@ -43,6 +43,6 @@
 	{:else}
 		<PencarianProduk onAdd={(produk) => keranjangState.add(produk)} />
 		<Keranjang />
-		<PembayaranTunai onCheckedOut={checkedOut} />
+		<Pembayaran onCheckedOut={checkedOut} />
 	{/if}
 </div>

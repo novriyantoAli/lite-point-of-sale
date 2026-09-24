@@ -90,7 +90,7 @@ function keranjang() {
 }
 
 function pembayaran() {
-	return within(screen.getByRole('form', { name: 'Pembayaran Tunai' }));
+	return within(screen.getByRole('form', { name: 'Pembayaran' }));
 }
 
 function struk() {
@@ -304,6 +304,56 @@ describe('Kasir', () => {
 
 		expect(await pembayaran().findByText('Jumlah bayar harus bilangan bulat.')).toBeInTheDocument();
 		expect(mock.history.post).toHaveLength(0);
+	});
+
+	it('offers the four Pembayaran methods, with Tunai the one already picked', async () => {
+		serveCatalogue();
+		const user = userEvent.setup();
+
+		renderKasir();
+		await screen.findByText(/Kopi Susu/);
+		await tambah(user, 'Kopi Susu');
+
+		// Tunai is the default: it is the method that needs an amount typed, and the
+		// one a till takes most of the day.
+		expect(pembayaran().getByRole('radio', { name: 'Tunai' })).toBeChecked();
+		for (const label of ['QRIS', 'Debit', 'Transfer']) {
+			expect(pembayaran().getByRole('radio', { name: label })).not.toBeChecked();
+		}
+	});
+
+	it('records a non-tunai Pembayaran for the total, with nothing to type and no Kembalian', async () => {
+		serveCatalogue();
+		const qris = { ...sale, payment: { method: 'qris', amount: 36000, change: 0 } };
+		mock.onPost('/penjualan').reply(201, { data: { sale: qris } });
+		const user = userEvent.setup();
+
+		renderKasir();
+		await screen.findByText(/Kopi Susu/);
+		await tambah(user, 'Kopi Susu');
+		await tambah(user, 'Kopi Susu');
+
+		await user.click(pembayaran().getByRole('radio', { name: 'QRIS' }));
+
+		// A recorded method pays the total, so there is no amount for the Kasir to
+		// type — and no Kembalian for the API to work out (CONTEXT.md, Kembalian).
+		expect(pembayaran().queryByLabelText('Jumlah bayar')).not.toBeInTheDocument();
+		expect(pembayaran().queryByText('Kembalian')).not.toBeInTheDocument();
+		expect(pembayaran().getByRole('status')).toHaveTextContent('QRIS · Rp 36.000');
+
+		await user.click(pembayaran().getByRole('button', { name: 'Bayar & Simpan Penjualan' }));
+
+		await waitFor(() => expect(mock.history.post).toHaveLength(1));
+		expect(JSON.parse(mock.history.post[0]!.data)).toEqual({
+			items: [{ product_id: 1, quantity: 2 }],
+			payment: { method: 'qris', amount: 36000 }
+		});
+
+		// The Struk is the API's answer, and a recorded method has no Kembalian to
+		// show.
+		expect(await screen.findByText(/Nomor Struk/)).toBeInTheDocument();
+		expect(struk().getByText(/Bayar · QRIS/)).toBeInTheDocument();
+		expect(struk().queryByText('Kembalian')).not.toBeInTheDocument();
 	});
 
 	it('checks the keranjang out and shows the Penjualan that was recorded', async () => {
