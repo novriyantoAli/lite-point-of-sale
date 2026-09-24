@@ -30,7 +30,12 @@ export function createPenjualanDetailQuery(nomorStruk: () => NomorStruk) {
 	return createQuery<Penjualan, AppError>(() => ({
 		queryKey: penjualanKeys.detail(nomorStruk()),
 		queryFn: () => penjualanApi.getByReceiptNumber(nomorStruk()),
-		enabled: browser
+		enabled: browser,
+		// A 404 is an answer, not a hiccup: that Nomor Struk names no Penjualan, and
+		// asking Go again only delays the message the screen already has. Every
+		// other failure (502, a dropped connection) keeps the app's one retry —
+		// the `retry: 1` the root QueryClient sets (ADR-0006 conventions).
+		retry: (failureCount, error) => error.status !== 404 && failureCount < 1
 	}));
 }
 

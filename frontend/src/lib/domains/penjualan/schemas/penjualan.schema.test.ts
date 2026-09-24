@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, expectTypeOf, it } from 'vitest';
 import {
 	CheckoutInputSchema,
 	CheckoutItemSchema,
@@ -7,8 +7,13 @@ import {
 	NomorStrukSchema,
 	PenjualanEnvelopeSchema,
 	PenjualanSchema,
-	punyaKembalian
+	punyaKembalian,
+	type NomorStruk
 } from './penjualan.schema';
+
+// Compile-time: the schema's own `unknown` plumbing must not leak out — the
+// lookup keys a query and builds a URL on a plain number.
+expectTypeOf<NomorStruk>().toEqualTypeOf<number>();
 
 const sale = {
 	receipt_number: 1,
@@ -83,6 +88,13 @@ describe('NomorStrukSchema', () => {
 
 	it('refuses a blank field rather than reading it as 0', () => {
 		expect(() => NomorStrukSchema.parse('')).toThrow();
+	});
+
+	it('says a blank field is required, not that it is a malformed number', () => {
+		const parsed = NomorStrukSchema.safeParse('  ');
+
+		expect(parsed.success).toBe(false);
+		expect(parsed.error?.issues[0]?.message).toBe('Nomor Struk wajib diisi.');
 	});
 
 	it('refuses what is not a number at all, so the field need not ask the API', () => {

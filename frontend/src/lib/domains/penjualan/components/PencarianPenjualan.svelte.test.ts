@@ -126,7 +126,9 @@ describe('PencarianPenjualan', () => {
 	});
 
 	it('reads a Nomor Struk that names nothing as a message, not an empty screen', async () => {
-		getByReceiptNumber.mockRejectedValueOnce({
+		// The 404 is a definitive answer, so the query must not spend its retry on
+		// it: one call, and the message the screen already has shows straight away.
+		getByReceiptNumber.mockRejectedValue({
 			message: 'Penjualan tidak ditemukan.',
 			status: 404,
 			code: 'sale_not_found'
@@ -137,10 +139,11 @@ describe('PencarianPenjualan', () => {
 		await cari(user, '999');
 
 		expect(await screen.findByRole('alert')).toHaveTextContent('Penjualan tidak ditemukan.');
+		expect(getByReceiptNumber).toHaveBeenCalledTimes(1);
 		expect(screen.queryByRole('region', { name: 'Penjualan tersimpan' })).not.toBeInTheDocument();
 	});
 
-	it('retries the same Nomor Struk from the error, and then shows the Penjualan', async () => {
+	it('asks Go once more after a failure that is not a 404, then shows the Penjualan', async () => {
 		getByReceiptNumber.mockRejectedValueOnce({
 			message: 'Tidak dapat menghubungi server.',
 			status: 502
@@ -150,7 +153,31 @@ describe('PencarianPenjualan', () => {
 
 		renderScreen();
 		await cari(user, '7');
-		await screen.findByRole('alert');
+
+		// The app's one retry (root QueryClient) is spent on its own: the second
+		// attempt is the one that answers.
+		const record = await hasil();
+		expect(record.getByText(/Kopi Susu/)).toBeInTheDocument();
+		expect(getByReceiptNumber).toHaveBeenCalledTimes(2);
+	});
+
+	it('shows the message once the retry is spent, and lets the person ask again', async () => {
+		getByReceiptNumber.mockRejectedValueOnce({
+			message: 'Tidak dapat menghubungi server.',
+			status: 502
+		});
+		getByReceiptNumber.mockRejectedValueOnce({
+			message: 'Tidak dapat menghubungi server.',
+			status: 502
+		});
+		getByReceiptNumber.mockResolvedValue(sale);
+		const user = userEvent.setup();
+
+		renderScreen();
+		await cari(user, '7');
+
+		expect(await screen.findByRole('alert')).toHaveTextContent('Tidak dapat menghubungi server.');
+		expect(getByReceiptNumber).toHaveBeenCalledTimes(2);
 
 		await user.click(screen.getByRole('button', { name: 'Coba lagi' }));
 
@@ -165,6 +192,16 @@ describe('PencarianPenjualan', () => {
 		await cari(user, 'abc');
 
 		expect(await screen.findByText('Nomor Struk harus bilangan bulat.')).toBeInTheDocument();
+		expect(getByReceiptNumber).not.toHaveBeenCalled();
+	});
+
+	it('says a blank field is required, without asking the API', async () => {
+		const user = userEvent.setup();
+
+		renderScreen();
+		await user.click(screen.getByRole('button', { name: 'Cari' }));
+
+		expect(await screen.findByText('Nomor Struk wajib diisi.')).toBeInTheDocument();
 		expect(getByReceiptNumber).not.toHaveBeenCalled();
 	});
 

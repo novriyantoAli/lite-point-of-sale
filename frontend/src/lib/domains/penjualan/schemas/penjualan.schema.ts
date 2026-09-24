@@ -149,9 +149,27 @@ export const PenjualanEnvelopeSchema = z.object({
  * zero. Keeping it here lets the field refuse "abc" without a round trip, while
  * a number that names no Penjualan is still Go's 404 to answer — the schema
  * knows what a Nomor Struk looks like, never which ones exist.
+ *
+ * An untouched field gets its own message. `positiveWholeNumber` reads "" as a
+ * malformed number and answers "harus bilangan bulat", which is the wrong
+ * complaint about a box nobody has typed in yet.
  */
-export const NomorStrukSchema = positiveWholeNumber(
-	'Nomor Struk harus bilangan bulat.',
-	'Nomor Struk harus lebih dari nol.'
-);
+export const NomorStrukSchema = z
+	.union([z.string(), z.number()])
+	.transform((value, ctx): unknown => {
+		if (typeof value !== 'string') {
+			return value;
+		}
+
+		const trimmed = value.trim();
+		if (trimmed === '') {
+			ctx.addIssue({ code: 'custom', message: 'Nomor Struk wajib diisi.' });
+			return z.NEVER;
+		}
+
+		return trimmed;
+	})
+	.pipe(
+		positiveWholeNumber('Nomor Struk harus bilangan bulat.', 'Nomor Struk harus lebih dari nol.')
+	);
 export type NomorStruk = z.infer<typeof NomorStrukSchema>;
