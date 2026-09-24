@@ -124,8 +124,7 @@
 					name="header"
 					rows={4}
 					bind:value={header}
-					class={textareaClass}
-				></textarea>
+					class={textareaClass}></textarea>
 				<p class="text-sm text-muted-foreground">
 					Blok teks di atas baris Item pada Struk — misalnya nama dan alamat toko.
 				</p>
@@ -138,8 +137,7 @@
 					name="footer"
 					rows={4}
 					bind:value={footer}
-					class={textareaClass}
-				></textarea>
+					class={textareaClass}></textarea>
 				<p class="text-sm text-muted-foreground">
 					Blok teks di bawah total pada Struk — misalnya ucapan terima kasih.
 				</p>

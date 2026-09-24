@@ -46,11 +46,9 @@ describe('pengaturanApi.get', () => {
 
 describe('pengaturanApi.update', () => {
 	it('puts the new Pengaturan and returns the stored one', async () => {
-		mock
-			.onPut('/pengaturan')
-			.reply(200, {
-				data: { settings: { ...pengaturan, paper_width: 58, low_stock_threshold: 3 } }
-			});
+		mock.onPut('/pengaturan').reply(200, {
+			data: { settings: { ...pengaturan, paper_width: 58, low_stock_threshold: 3 } }
+		});
 
 		const updated = await pengaturanApi.update({
 			header: 'Toko Kopi',

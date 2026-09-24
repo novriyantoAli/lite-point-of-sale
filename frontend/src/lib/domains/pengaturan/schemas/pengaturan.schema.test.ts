@@ -96,9 +96,9 @@ describe('UpdatePengaturanInputSchema', () => {
 
 describe('PengaturanEnvelopeSchema', () => {
 	it('reads the envelope the API wraps the Pengaturan in', () => {
-		expect(PengaturanEnvelopeSchema.parse({ data: { settings: pengaturan } }).data.settings).toEqual(
-			pengaturan
-		);
+		expect(
+			PengaturanEnvelopeSchema.parse({ data: { settings: pengaturan } }).data.settings
+		).toEqual(pengaturan);
 	});
 
 	it('rejects an answer that carries no Pengaturan', () => {
