@@ -1,19 +1,38 @@
-import { createMutation, useQueryClient } from '@tanstack/svelte-query';
+import { browser } from '$app/environment';
+import { createMutation, createQuery, useQueryClient } from '@tanstack/svelte-query';
 import type { AppError } from '$lib/api/errors';
 import { produkKeys } from '$lib/domains/produk';
 import { penjualanApi } from '../api/penjualan.api';
-import type { CheckoutInput, Penjualan } from '../schemas/penjualan.schema';
+import type { CheckoutInput, NomorStruk, Penjualan } from '../schemas/penjualan.schema';
 
 /**
  * The cache keys of the Penjualan domain, in the one scheme every domain shares:
- * `["<domain>", "<shape>", ...]`. There is no reader of a Penjualan yet — the
- * till shows the sale the checkout mutation answers with — so the keys are here
- * for the mutation to invalidate and for the reprint (#8) and sales list (#9) to
- * build on.
+ * `["<domain>", "<shape>", ...]`. The mutation invalidates the subtree, and the
+ * lookup screen (#29) reads `detail`; the sales list (#9) builds on the same
+ * root rather than inventing a second scheme.
  */
 export const penjualanKeys = {
-	all: ['penjualan'] as const
+	all: ['penjualan'] as const,
+	detail: (nomorStruk: NomorStruk) => [...penjualanKeys.all, 'detail', nomorStruk] as const
 };
+
+/**
+ * One stored Penjualan, read by its Nomor Struk. `nomorStruk` is a thunk so the
+ * query re-derives when the lookup screen's field changes (§6.3), and the
+ * factory is only mounted once a search has been submitted — there is no
+ * "disabled" key for a number nobody asked for.
+ *
+ * `enabled: browser` for the same reason as the other domains: it is a
+ * same-origin call to the BFF, so it can only be made where the BFF is
+ * reachable, and a lookup does not need SSR.
+ */
+export function createPenjualanDetailQuery(nomorStruk: () => NomorStruk) {
+	return createQuery<Penjualan, AppError>(() => ({
+		queryKey: penjualanKeys.detail(nomorStruk()),
+		queryFn: () => penjualanApi.getByReceiptNumber(nomorStruk()),
+		enabled: browser
+	}));
+}
 
 /**
  * Checks a cart out. On success it invalidates the whole `produk` subtree, not
@@ -22,9 +41,9 @@ export const penjualanKeys = {
  * which a sale can add a Produk to.
  *
  * The sale itself is *not* written into the cache. The till shows the Penjualan
- * the mutation returned, and a reader that wants it again asks for it by its
- * Nomor Struk; seeding a cache entry here would be a second copy of a record
- * nothing has read yet.
+ * the mutation returned, and the lookup screen reads it again by its Nomor Struk
+ * when it is asked for; seeding a `detail` entry here would be a second copy of
+ * a record the reader fetches on its own.
  */
 export function createCheckoutMutation() {
 	const queryClient = useQueryClient();

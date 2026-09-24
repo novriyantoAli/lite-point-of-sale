@@ -5,16 +5,18 @@
 
 	let { data, children } = $props();
 
-	// The till is the Kasir's screen and the Admin's too: at a one-terminal store the
-	// owner is behind the counter as often as the Kasir is, so "Kasir" is the one
-	// entry both Peran see. Only an Admin sees the catalogue, the Stok and the
-	// Pengguna entries, and the route guard backs that up.
+	// The till and the Penjualan lookup are the Kasir's screens and the Admin's
+	// too: at a one-terminal store the owner is behind the counter as often as the
+	// Kasir is, and CONTEXT.md gives the Kasir "cetak Struk" — so both entries are
+	// for both Peran. Only an Admin sees the catalogue, the Stok and the Pengguna
+	// entries, and the route guard backs that up.
 	//
 	// `resolve` takes SvelteKit's route ids, which keep the group prefix — it is
 	// what turns `/(app)/pengguna` into the `/pengguna` a link needs.
 	const navigation = $derived([
 		{ href: resolve('/'), label: 'Beranda' },
 		{ href: resolve('/(app)/kasir'), label: 'Kasir' },
+		{ href: resolve('/(app)/penjualan'), label: 'Penjualan' },
 		...(data.user?.role === 'admin'
 			? [
 					{ href: resolve('/(app)/produk'), label: 'Produk' },

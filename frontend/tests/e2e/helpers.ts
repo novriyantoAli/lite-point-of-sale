@@ -209,6 +209,31 @@ export function strukPenjualan(page: Page) {
 	return page.getByRole('region', { name: 'Penjualan tercatat' });
 }
 
+/** Opens the `/penjualan` lookup. */
+export async function bukaPenjualan(page: Page) {
+	await page.goto('/penjualan');
+}
+
+/** The `/penjualan` lookup form. */
+export function cariPenjualanForm(page: Page) {
+	return page.getByRole('search', { name: 'Cari Penjualan' });
+}
+
+/**
+ * Looks one Penjualan up by its Nomor Struk, the way a person does. It does not
+ * wait for an answer: the same helper serves the found case and the 404 one.
+ */
+export async function cariPenjualan(page: Page, nomor: string) {
+	const form = cariPenjualanForm(page);
+	await form.getByLabel('Nomor Struk').fill(nomor);
+	await form.getByRole('button', { name: 'Cari' }).click();
+}
+
+/** The record `/penjualan` shows for a found Penjualan. */
+export function penjualanTersimpan(page: Page) {
+	return page.getByRole('region', { name: 'Penjualan tersimpan' });
+}
+
 /** Opens the till. */
 export async function bukaKasir(page: Page) {
 	await page.goto('/kasir');

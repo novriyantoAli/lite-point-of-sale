@@ -142,3 +142,16 @@ export type CheckoutInput = z.infer<typeof CheckoutInputSchema>;
 export const PenjualanEnvelopeSchema = z.object({
 	data: z.object({ sale: PenjualanSchema })
 });
+
+/**
+ * The Nomor Struk a person types into the lookup screen. It is the rule Go
+ * applies to the path itself (`receiptNumberParam`): a whole number more than
+ * zero. Keeping it here lets the field refuse "abc" without a round trip, while
+ * a number that names no Penjualan is still Go's 404 to answer — the schema
+ * knows what a Nomor Struk looks like, never which ones exist.
+ */
+export const NomorStrukSchema = positiveWholeNumber(
+	'Nomor Struk harus bilangan bulat.',
+	'Nomor Struk harus lebih dari nol.'
+);
+export type NomorStruk = z.infer<typeof NomorStrukSchema>;

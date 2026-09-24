@@ -3,6 +3,8 @@ import {
 	bayarNonTunai,
 	bayarTunai,
 	bukaKasir,
+	bukaPenjualan,
+	cariPenjualan,
 	createPengguna,
 	createProduk,
 	jumlahItem,
@@ -14,6 +16,7 @@ import {
 	logOut,
 	nomorStruk,
 	pembayaran,
+	penjualanTersimpan,
 	produkRow,
 	stokRow,
 	strukPenjualan,
@@ -240,4 +243,90 @@ test('a Produk that has been sold can only be deactivated, never deleted', async
 	const row = produkRow(page, 'Terjual E2E');
 	await expect(row).toContainText('Pernah terjual');
 	await expect(row.getByRole('button', { name: 'Hapus' })).toHaveCount(0);
+});
+
+/**
+ * The `/penjualan` lookup (#29): a Nomor Struk in, the stored Penjualan out. It
+ * is the way back to a sale that already happened — the ground the reprint (#8)
+ * and the sales list (#9) stand on.
+ */
+
+test('the Admin reads a stored Penjualan by its Nomor Struk', async ({ page }) => {
+	await logIn(page);
+	await createProduk(page, { name: 'Cari Struk E2E', price: 5000, stock: 5 });
+
+	await bukaKasir(page);
+	await tambahProduk(page, 'Cari Struk E2E');
+	await bayarTunai(page, 10000);
+	const nomor = await nomorStruk(page);
+
+	await bukaPenjualan(page);
+	await cariPenjualan(page, String(nomor));
+
+	// The record the API stored — Nomor Struk, waktu, Kasir, Item, total, and the
+	// Tunai Kembalian — not this screen's arithmetic.
+	const record = penjualanTersimpan(page);
+	await expect(record.getByText(new RegExp(`Nomor Struk ${nomor}`))).toBeVisible();
+	await expect(record.getByText(/Kasir admin/)).toBeVisible();
+	await expect(record.locator('li').filter({ hasText: 'Cari Struk E2E' })).toContainText(
+		'1 × Rp 5.000'
+	);
+	await expect(record.locator('p').filter({ hasText: 'Total' })).toContainText('Rp 5.000');
+	await expect(record.locator('p').filter({ hasText: 'Bayar · Tunai' })).toContainText('Rp 10.000');
+	await expect(record.locator('p').filter({ hasText: 'Kembalian' })).toContainText('Rp 5.000');
+});
+
+test('a recorded method is read back with no Kembalian', async ({ page }) => {
+	await logIn(page);
+	await createProduk(page, { name: 'Cari QRIS E2E', price: 7000, stock: 5 });
+
+	await bukaKasir(page);
+	await tambahProduk(page, 'Cari QRIS E2E');
+	await bayarNonTunai(page, 'QRIS');
+	const nomor = await nomorStruk(page);
+
+	await bukaPenjualan(page);
+	await cariPenjualan(page, String(nomor));
+
+	const record = penjualanTersimpan(page);
+	await expect(record.locator('p').filter({ hasText: 'Bayar · QRIS' })).toContainText('Rp 7.000');
+	await expect(record.getByText('Kembalian')).toHaveCount(0);
+});
+
+test('a Nomor Struk that names nothing is a readable message, not an empty screen', async ({
+	page
+}) => {
+	await logIn(page);
+
+	await bukaPenjualan(page);
+	await cariPenjualan(page, '999999');
+
+	// Go's 404, read out as the message it carries (CONTEXT.md, Nomor Struk).
+	await expect(page.getByRole('alert')).toContainText('Penjualan tidak ditemukan.');
+	await expect(penjualanTersimpan(page)).toHaveCount(0);
+});
+
+test('a Kasir may open /penjualan and look a sale up, not just the Admin', async ({ page }) => {
+	await logIn(page);
+	await createPengguna(page, { username: 'kasir-cari-e2e', password: 'rahasia-kasir' });
+	await createProduk(page, { name: 'Kasir Cari E2E', price: 4000, stock: 5 });
+	await logOut(page);
+
+	await logIn(page, { username: 'kasir-cari-e2e', password: 'rahasia-kasir' });
+
+	// The lookup is the Kasir's too: CONTEXT.md gives them "cetak Struk", so the
+	// route is not Admin-only and the entry is not hidden.
+	await expect(page.getByRole('link', { name: 'Penjualan' })).toBeVisible();
+
+	await bukaKasir(page);
+	await tambahProduk(page, 'Kasir Cari E2E');
+	await bayarTunai(page, 4000);
+	const nomor = await nomorStruk(page);
+
+	await bukaPenjualan(page);
+	await cariPenjualan(page, String(nomor));
+
+	await expect(penjualanTersimpan(page).getByText(/Kasir kasir-cari-e2e/)).toBeVisible();
+
+	await logOut(page);
 });

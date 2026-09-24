@@ -107,3 +107,50 @@ describe('penjualanApi.checkout', () => {
 		await expect(penjualanApi.checkout(cart)).rejects.toThrow();
 	});
 });
+
+describe('penjualanApi.getByReceiptNumber', () => {
+	it('reads one stored Penjualan by its Nomor Struk', async () => {
+		mock.onGet('/penjualan/7').reply(200, { data: { sale: { ...sale, receipt_number: 7 } } });
+
+		await expect(penjualanApi.getByReceiptNumber(7)).resolves.toEqual({
+			...sale,
+			receipt_number: 7
+		});
+		expect(mock.history.get[0]!.url).toBe('/penjualan/7');
+	});
+
+	it('reads the items and the Pembayaran of the stored sale, Kembalian and all', async () => {
+		mock.onGet('/penjualan/7').reply(200, { data: { sale: { ...sale, receipt_number: 7 } } });
+
+		const found = await penjualanApi.getByReceiptNumber(7);
+
+		expect(found.items).toEqual(sale.items);
+		expect(found.payment).toEqual(sale.payment);
+	});
+
+	it('refuses a number that is not a Nomor Struk before the request is sent', async () => {
+		mock.onGet('/penjualan/0').reply(200, { data: { sale } });
+
+		await expect(penjualanApi.getByReceiptNumber(0)).rejects.toThrow();
+		expect(mock.history.get).toHaveLength(0);
+	});
+
+	it('surfaces a Nomor Struk that names nothing as the readable 404 Go sent', async () => {
+		mock.onGet('/penjualan/999').reply(404, {
+			message: 'Penjualan tidak ditemukan.',
+			error: 'sale_not_found'
+		});
+
+		await expect(penjualanApi.getByReceiptNumber(999)).rejects.toMatchObject({
+			status: 404,
+			code: 'sale_not_found',
+			message: 'Penjualan tidak ditemukan.'
+		});
+	});
+
+	it('fails loudly when the answer is not a Penjualan', async () => {
+		mock.onGet('/penjualan/7').reply(200, { data: { sale: { receipt_number: 'tujuh' } } });
+
+		await expect(penjualanApi.getByReceiptNumber(7)).rejects.toThrow();
+	});
+});

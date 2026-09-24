@@ -4,8 +4,13 @@
 // `queries/` or `schemas/` directly (ADR-0006). The till's own components are
 // inside the domain, so they keep importing the factory from `queries/`.
 export { default as Kasir } from './components/Kasir.svelte';
+export { default as PencarianPenjualan } from './components/PencarianPenjualan.svelte';
 
-export { penjualanKeys, createCheckoutMutation } from './queries/penjualan.queries';
+export {
+	penjualanKeys,
+	createCheckoutMutation,
+	createPenjualanDetailQuery
+} from './queries/penjualan.queries';
 
 export {
 	CheckoutInputSchema,
@@ -15,6 +20,7 @@ export {
 	METODE_LABEL,
 	METODE_URUT,
 	MetodePembayaranSchema,
+	NomorStrukSchema,
 	PembayaranSchema,
 	PenjualanEnvelopeSchema,
 	PenjualanSchema,
@@ -22,6 +28,7 @@ export {
 	type CheckoutItem,
 	type ItemPenjualan,
 	type MetodePembayaran,
+	type NomorStruk,
 	type Pembayaran,
 	type Penjualan
 } from './schemas/penjualan.schema';

@@ -1,8 +1,10 @@
 import { apiClient } from '$lib/api/client';
 import {
 	CheckoutInputSchema,
+	NomorStrukSchema,
 	PenjualanEnvelopeSchema,
 	type CheckoutInput,
+	type NomorStruk,
 	type Penjualan
 } from '../schemas/penjualan.schema';
 
@@ -22,11 +24,24 @@ export interface PenjualanApi {
 	 * Kembalian — none of which this side sends or decides.
 	 */
 	checkout(input: CheckoutInput): Promise<Penjualan>;
+	/**
+	 * One stored Penjualan, read by its Nomor Struk — what a reprint or a look-up
+	 * arrives with. Whether the number names a Penjualan is Go's answer: a number
+	 * that names nothing comes back as a normalized 404 ("Penjualan tidak
+	 * ditemukan."), not as an empty Penjualan.
+	 */
+	getByReceiptNumber(nomorStruk: NomorStruk): Promise<Penjualan>;
 }
 
 export const penjualanApi: PenjualanApi = {
 	async checkout(input: CheckoutInput): Promise<Penjualan> {
 		const { data } = await apiClient.post('/penjualan', CheckoutInputSchema.parse(input));
+
+		return PenjualanEnvelopeSchema.parse(data).data.sale;
+	},
+
+	async getByReceiptNumber(nomorStruk: NomorStruk): Promise<Penjualan> {
+		const { data } = await apiClient.get(`/penjualan/${NomorStrukSchema.parse(nomorStruk)}`);
 
 		return PenjualanEnvelopeSchema.parse(data).data.sale;
 	}

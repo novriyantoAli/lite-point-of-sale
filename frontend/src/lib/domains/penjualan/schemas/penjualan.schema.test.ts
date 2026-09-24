@@ -4,6 +4,7 @@ import {
 	CheckoutItemSchema,
 	JumlahBayarSchema,
 	METODE_LABEL,
+	NomorStrukSchema,
 	PenjualanEnvelopeSchema,
 	PenjualanSchema,
 	punyaKembalian
@@ -56,6 +57,40 @@ describe('PenjualanSchema', () => {
 describe('PenjualanEnvelopeSchema', () => {
 	it('reads the envelope the API answers with', () => {
 		expect(PenjualanEnvelopeSchema.parse({ data: { sale } }).data.sale).toEqual(sale);
+	});
+
+	it('reads the stored sale a lookup answers with, non-tunai Pembayaran and all', () => {
+		const qris = { ...sale, payment: { method: 'qris', amount: 36000, change: 0 } };
+
+		const parsed = PenjualanEnvelopeSchema.parse({ data: { sale: qris } }).data.sale;
+
+		expect(parsed.receipt_number).toBe(sale.receipt_number);
+		expect(parsed.items).toEqual(sale.items);
+		expect(parsed.payment.method).toBe('qris');
+	});
+});
+
+describe('NomorStrukSchema', () => {
+	it('reads the number a person types into the lookup field', () => {
+		expect(NomorStrukSchema.parse('7')).toBe(7);
+		expect(NomorStrukSchema.parse(7)).toBe(7);
+	});
+
+	it('refuses zero and a negative number: a Nomor Struk starts at one', () => {
+		expect(() => NomorStrukSchema.parse('0')).toThrow();
+		expect(() => NomorStrukSchema.parse('-1')).toThrow();
+	});
+
+	it('refuses a blank field rather than reading it as 0', () => {
+		expect(() => NomorStrukSchema.parse('')).toThrow();
+	});
+
+	it('refuses what is not a number at all, so the field need not ask the API', () => {
+		expect(() => NomorStrukSchema.parse('abc')).toThrow();
+	});
+
+	it('refuses a thousand separator instead of reading 1.000 as 1', () => {
+		expect(() => NomorStrukSchema.parse('1.000')).toThrow();
 	});
 });
 
