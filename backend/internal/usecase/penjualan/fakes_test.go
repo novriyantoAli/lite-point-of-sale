@@ -82,6 +82,9 @@ type fakeSales struct {
 	next     int64
 	// err, when set, is returned by Create — for error propagation.
 	err error
+	// reportErr, when set, is returned by ListSales and DailyRevenue — for the
+	// path where the report cannot be read.
+	reportErr error
 }
 
 func newFakeSales() *fakeSales {
@@ -113,6 +116,91 @@ func (f *fakeSales) FindByReceiptNumber(_ context.Context, receiptNumber int64) 
 	}
 
 	return domainpenjualan.Sale{}, domainpenjualan.ErrSaleNotFound
+}
+
+// ListSales answers the sales of the filter's day, newest first — the same order
+// the SQL repository answers in.
+func (f *fakeSales) ListSales(_ context.Context, filter domainpenjualan.ReportFilter) ([]domainpenjualan.SaleSummary, error) {
+	if f.reportErr != nil {
+		return nil, f.reportErr
+	}
+
+	sales := []domainpenjualan.SaleSummary{}
+	for i := len(f.recorded) - 1; i >= 0; i-- {
+		sale := f.recorded[i]
+		if !f.onDay(sale, filter) {
+			continue
+		}
+		sales = append(sales, domainpenjualan.SaleSummary{
+			ReceiptNumber: sale.ReceiptNumber,
+			CreatedAt:     sale.CreatedAt,
+			CashierID:     sale.CashierID,
+			CashierName:   sale.CashierName,
+			Total:         sale.Total,
+			Method:        sale.Payment.Method,
+		})
+	}
+
+	return sales, nil
+}
+
+// DailyRevenue aggregates the recorded sales the way the SQL repository does:
+// only the methods that appear, with the rule that every method is answered left
+// to the use case.
+func (f *fakeSales) DailyRevenue(_ context.Context, filter domainpenjualan.ReportFilter) (domainpenjualan.DailyRevenue, error) {
+	if f.reportErr != nil {
+		return domainpenjualan.DailyRevenue{}, f.reportErr
+	}
+
+	report := domainpenjualan.DailyRevenue{Date: filter.Date}
+	methods := map[domainpenjualan.PaymentMethod]*domainpenjualan.MethodTotal{}
+	cashiers := map[int64]*domainpenjualan.CashierTotal{}
+
+	for _, sale := range f.recorded {
+		if !f.onDay(sale, filter) {
+			continue
+		}
+
+		report.Total += sale.Total
+		report.Transactions++
+
+		total, ok := methods[sale.Payment.Method]
+		if !ok {
+			total = &domainpenjualan.MethodTotal{Method: sale.Payment.Method}
+			methods[sale.Payment.Method] = total
+		}
+		total.Total += sale.Total
+		total.Transactions++
+
+		cashier, ok := cashiers[sale.CashierID]
+		if !ok {
+			cashier = &domainpenjualan.CashierTotal{CashierID: sale.CashierID, CashierName: sale.CashierName}
+			cashiers[sale.CashierID] = cashier
+		}
+		cashier.CashierName = sale.CashierName
+		cashier.Total += sale.Total
+		cashier.Transactions++
+	}
+
+	report.ByMethod = []domainpenjualan.MethodTotal{}
+	for _, total := range methods {
+		report.ByMethod = append(report.ByMethod, *total)
+	}
+
+	report.ByCashier = []domainpenjualan.CashierTotal{}
+	for _, total := range cashiers {
+		report.ByCashier = append(report.ByCashier, *total)
+	}
+
+	return report, nil
+}
+
+// onDay reports whether a recorded sale falls on the filter's day. The fake
+// stamps every sale with `fakeCreatedAt`, so a test picks the day it wants by
+// naming that date; an empty filter matches everything, which is what a test of
+// the aggregation itself wants.
+func (f *fakeSales) onDay(sale domainpenjualan.Sale, filter domainpenjualan.ReportFilter) bool {
+	return filter.Date == "" || sale.CreatedAt[:10] == filter.Date
 }
 
 // fakeSettings is an in-memory ReceiptSettings: the store's one Pengaturan row,

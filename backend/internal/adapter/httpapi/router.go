@@ -77,6 +77,13 @@ func NewRouter(healthChecker HealthChecker, auth AuthService, products ProductSe
 	// — CONTEXT.md gives the Kasir "cetak Struk" — so this is the one part of the
 	// API behind the token check but no role guard.
 	mux.Handle("POST /api/penjualan", authenticated(checkoutHandler(sales, logger)))
+	// The reports of #9 are the Admin's to read, so the sales list and the daily
+	// omzet sit behind the Admin role guard. Both are literals next to the
+	// `{receiptNumber}` wildcard below, and a literal is the more specific pattern:
+	// `/api/penjualan/omzet` is a report, not a Penjualan whose Nomor Struk happens
+	// to read "omzet".
+	mux.Handle("GET /api/penjualan", adminOnly(listSalesHandler(sales, logger)))
+	mux.Handle("GET /api/penjualan/omzet", adminOnly(dailyRevenueHandler(sales, logger)))
 	mux.Handle("GET /api/penjualan/{receiptNumber}", authenticated(saleHandler(sales, logger)))
 	// A sub-resource of the sale, like POST /api/produk/{id}/stok: the Struk is the
 	// thing produced, and the Nomor Struk is what identifies the Penjualan.

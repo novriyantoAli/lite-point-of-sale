@@ -8,9 +8,13 @@ import {
 	JumlahBayarSchema,
 	METODE_LABEL,
 	NomorStrukSchema,
+	OmzetHarianEnvelopeSchema,
 	PenjualanEnvelopeSchema,
+	PenjualanListSchema,
 	PenjualanSchema,
+	TanggalLaporanSchema,
 	punyaKembalian,
+	tanggalHariIni,
 	type NomorStruk
 } from './penjualan.schema';
 
@@ -252,5 +256,87 @@ describe('punyaKembalian', () => {
 		for (const method of ['qris', 'debit', 'transfer'] as const) {
 			expect(punyaKembalian(method)).toBe(false);
 		}
+	});
+});
+
+describe('PenjualanListSchema', () => {
+	const row = {
+		receipt_number: 7,
+		created_at: '2026-09-23 10:00:00',
+		cashier_id: 1,
+		cashier_name: 'kasir1',
+		total: 36000,
+		method: 'cash'
+	};
+
+	it('reads a sales list as the API answers it', () => {
+		expect(PenjualanListSchema.parse({ data: [row] })).toEqual({ data: [row] });
+	});
+
+	it('rejects a row whose method the API does not know', () => {
+		expect(() => PenjualanListSchema.parse({ data: [{ ...row, method: 'bitcoin' }] })).toThrow();
+	});
+
+	it('rejects a row missing its Nomor Struk', () => {
+		const withoutReceipt: Partial<typeof row> = { ...row };
+		delete withoutReceipt.receipt_number;
+
+		expect(() => PenjualanListSchema.parse({ data: [withoutReceipt] })).toThrow();
+	});
+});
+
+describe('OmzetHarianEnvelopeSchema', () => {
+	const omzet = {
+		date: '2026-09-23',
+		total: 72000,
+		transactions: 3,
+		by_method: [
+			{ method: 'cash', total: 36000, transactions: 2 },
+			{ method: 'qris', total: 36000, transactions: 1 },
+			{ method: 'debit', total: 0, transactions: 0 },
+			{ method: 'transfer', total: 0, transactions: 0 }
+		],
+		by_cashier: [{ cashier_id: 1, cashier_name: 'kasir1', total: 72000, transactions: 3 }]
+	};
+
+	it('reads the omzet of a day, zero rows and all', () => {
+		expect(OmzetHarianEnvelopeSchema.parse({ data: omzet }).data).toEqual(omzet);
+	});
+
+	it('rejects a fractional amount: money is whole rupiah in this app', () => {
+		expect(() => OmzetHarianEnvelopeSchema.parse({ data: { ...omzet, total: 72000.5 } })).toThrow();
+	});
+
+	it('rejects a breakdown that names a method the API does not know', () => {
+		expect(() =>
+			OmzetHarianEnvelopeSchema.parse({
+				data: { ...omzet, by_method: [{ method: 'bitcoin', total: 1, transactions: 1 }] }
+			})
+		).toThrow();
+	});
+});
+
+describe('TanggalLaporanSchema', () => {
+	it('accepts a store-local calendar date', () => {
+		expect(TanggalLaporanSchema.parse(' 2026-09-23 ')).toBe('2026-09-23');
+	});
+
+	it('rejects a date in another order', () => {
+		expect(() => TanggalLaporanSchema.parse('23-09-2026')).toThrow();
+	});
+
+	it('rejects a day that does not exist', () => {
+		// "2026-02-30" would roll over to March if it were trusted as a Date.
+		expect(() => TanggalLaporanSchema.parse('2026-02-30')).toThrow();
+	});
+});
+
+describe('tanggalHariIni', () => {
+	it('writes today in the shape the report API reads', () => {
+		expect(tanggalHariIni(new Date(2026, 8, 23))).toBe('2026-09-23');
+	});
+
+	it('pads a single-digit month and day', () => {
+		expect(tanggalHariIni(new Date(2026, 0, 5))).toBe('2026-01-05');
 	});
 });

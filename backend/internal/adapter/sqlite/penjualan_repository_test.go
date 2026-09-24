@@ -277,3 +277,150 @@ func TestFindByReceiptNumberReportsAMissingSale(t *testing.T) {
 		t.Fatalf("find a missing Penjualan: got %v, want ErrSaleNotFound", err)
 	}
 }
+
+// seedCashier inserts a Pengguna the report can attribute a sale to. Raw SQL for
+// the same reason as the seeded Admin: this test is about the report, not about
+// how a Pengguna is created.
+func seedCashier(t *testing.T, db *sql.DB, ctx context.Context, id int64, username string) {
+	t.Helper()
+
+	if _, err := db.ExecContext(ctx,
+		`INSERT INTO pengguna (id, username, password_hash, role) VALUES (?, ?, 'x', 'kasir')`,
+		id, username); err != nil {
+		t.Fatalf("seed Kasir %s: %v", username, err)
+	}
+}
+
+// reportSale is one sale of a Produk, attributed to a Kasir and paid by a
+// method — the raw material of a report test.
+func reportSale(product domainproduk.Product, quantity, cashierID int64, cashierName string, method domainpenjualan.PaymentMethod) domainpenjualan.Sale {
+	sale := saleOf(product, quantity)
+	sale.CashierID = cashierID
+	sale.CashierName = cashierName
+	sale.Payment.Method = method
+	sale.Payment.Amount = sale.Total
+	sale.Payment.Change = 0
+
+	return sale
+}
+
+func TestSaleRepositoryListsTheDaysSalesNewestFirst(t *testing.T) {
+	sales, products, _, ctx := newSaleRepository(t)
+	kopi := seedProduct(t, products, ctx, domainproduk.Product{Name: "Kopi", Price: 18000, Stock: 10, Active: true})
+
+	first, err := sales.Create(ctx, reportSale(kopi, 1, 1, "admin", domainpenjualan.PaymentCash))
+	if err != nil {
+		t.Fatalf("first Penjualan: %v", err)
+	}
+	second, err := sales.Create(ctx, reportSale(kopi, 2, 1, "admin", domainpenjualan.PaymentQRIS))
+	if err != nil {
+		t.Fatalf("second Penjualan: %v", err)
+	}
+
+	// The day the store's own clock stamped them with.
+	listed, err := sales.ListSales(ctx, domainpenjualan.ReportFilter{Date: first.CreatedAt[:10]})
+	if err != nil {
+		t.Fatalf("list Penjualan: %v", err)
+	}
+
+	if len(listed) != 2 {
+		t.Fatalf("sales: got %d, want 2", len(listed))
+	}
+	if listed[0].ReceiptNumber != second.ReceiptNumber || listed[1].ReceiptNumber != first.ReceiptNumber {
+		t.Errorf("order: got %d then %d, want newest first", listed[0].ReceiptNumber, listed[1].ReceiptNumber)
+	}
+	if listed[0].Method != domainpenjualan.PaymentQRIS || listed[0].Total != 36000 {
+		t.Errorf("row: got %+v, want the method and total that were stored", listed[0])
+	}
+	if listed[0].CashierName != "admin" {
+		t.Errorf("cashier: got %q, want %q", listed[0].CashierName, "admin")
+	}
+}
+
+func TestSaleRepositoryDailyRevenueAggregatesTheDay(t *testing.T) {
+	sales, products, db, ctx := newSaleRepository(t)
+	kopi := seedProduct(t, products, ctx, domainproduk.Product{Name: "Kopi", Price: 18000, Stock: 20, Active: true})
+	seedCashier(t, db, ctx, 2, "kasir1")
+
+	made := []domainpenjualan.Sale{
+		reportSale(kopi, 1, 1, "admin", domainpenjualan.PaymentCash),  // 18000
+		reportSale(kopi, 2, 1, "admin", domainpenjualan.PaymentQRIS),  // 36000
+		reportSale(kopi, 1, 2, "kasir1", domainpenjualan.PaymentCash), // 18000
+	}
+	for i, sale := range made {
+		created, err := sales.Create(ctx, sale)
+		if err != nil {
+			t.Fatalf("create Penjualan %d: %v", i, err)
+		}
+		made[i] = created
+	}
+
+	report, err := sales.DailyRevenue(ctx, domainpenjualan.ReportFilter{Date: made[0].CreatedAt[:10]})
+	if err != nil {
+		t.Fatalf("daily revenue: %v", err)
+	}
+
+	if report.Date != made[0].CreatedAt[:10] {
+		t.Errorf("date: got %q, want %q", report.Date, made[0].CreatedAt[:10])
+	}
+	if report.Total != 72000 || report.Transactions != 3 {
+		t.Errorf("totals: got %d/%d, want 72000/3", report.Total, report.Transactions)
+	}
+
+	byMethod := map[domainpenjualan.PaymentMethod]domainpenjualan.MethodTotal{}
+	for _, total := range report.ByMethod {
+		byMethod[total.Method] = total
+	}
+	if got := byMethod[domainpenjualan.PaymentCash]; got.Total != 36000 || got.Transactions != 2 {
+		t.Errorf("Tunai: got %+v, want 36000 in 2 Penjualan", got)
+	}
+	if got := byMethod[domainpenjualan.PaymentQRIS]; got.Total != 36000 || got.Transactions != 1 {
+		t.Errorf("QRIS: got %+v, want 36000 in 1 Penjualan", got)
+	}
+	// Only the methods that appeared: filling in the zero rows is the use case's
+	// rule, not the adapter's.
+	if len(report.ByMethod) != 2 {
+		t.Errorf("by method: got %d rows, want the 2 that appeared", len(report.ByMethod))
+	}
+
+	if len(report.ByCashier) != 2 {
+		t.Fatalf("by Kasir: got %d rows, want 2", len(report.ByCashier))
+	}
+	// Biggest first.
+	if report.ByCashier[0].CashierID != 1 || report.ByCashier[0].Total != 54000 || report.ByCashier[0].Transactions != 2 {
+		t.Errorf("by Kasir[0]: got %+v, want admin with 54000 in 2 Penjualan", report.ByCashier[0])
+	}
+	if report.ByCashier[1].CashierID != 2 || report.ByCashier[1].Total != 18000 {
+		t.Errorf("by Kasir[1]: got %+v, want kasir1 with 18000", report.ByCashier[1])
+	}
+}
+
+func TestSaleRepositoryReportsAnEmptyDay(t *testing.T) {
+	sales, products, _, ctx := newSaleRepository(t)
+	kopi := seedProduct(t, products, ctx, domainproduk.Product{Name: "Kopi", Price: 18000, Stock: 10, Active: true})
+
+	if _, err := sales.Create(ctx, saleOf(kopi, 1)); err != nil {
+		t.Fatalf("create Penjualan: %v", err)
+	}
+
+	yesterday := domainpenjualan.ReportFilter{Date: "2000-01-01"}
+
+	listed, err := sales.ListSales(ctx, yesterday)
+	if err != nil {
+		t.Fatalf("list Penjualan: %v", err)
+	}
+	if len(listed) != 0 {
+		t.Errorf("sales: got %d, want none", len(listed))
+	}
+
+	report, err := sales.DailyRevenue(ctx, yesterday)
+	if err != nil {
+		t.Fatalf("daily revenue: %v", err)
+	}
+	if report.Total != 0 || report.Transactions != 0 {
+		t.Errorf("totals: got %d/%d, want 0/0", report.Total, report.Transactions)
+	}
+	if len(report.ByMethod) != 0 || len(report.ByCashier) != 0 {
+		t.Errorf("breakdowns: got %d/%d rows, want none", len(report.ByMethod), len(report.ByCashier))
+	}
+}

@@ -71,3 +71,11 @@ _Avoid_: Archived, inactive, hidden
 **Nomor Struk**:
 Nomor urut global yang unik pada setiap Penjualan — tercetak di Struk dan dipakai untuk reprint/buka ulang transaksi. Tidak pernah dipakai ulang, tidak reset harian.
 _Avoid_: Invoice number, nomor nota
+
+**Laporan**:
+Rekap Penjualan yang dibaca Admin — **Omzet harian** dan daftar Penjualan (dengan Nomor Struk, bisa dibuka dan di-reprint). Bukan layar Kasir, dan bukan grafik/analitik.
+_Avoid_: Report, analitik
+
+**Omzet harian**:
+Total uang yang masuk dari Penjualan pada satu tanggal lokal toko, beserta jumlah transaksi dan pecahannya per metode **Pembayaran** dan per **Kasir**. Bukan laba, bukan jumlah Item terjual.
+_Avoid_: Pendapatan, revenue, omset

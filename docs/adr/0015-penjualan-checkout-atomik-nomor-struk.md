@@ -75,6 +75,6 @@ Sebelum ini, sebuah usecase yang menulis pesan sendiri selalu dijawab 400. Penol
 ## Consequences
 
 - #7 (non-tunai) memperluas `paymentMethod` di usecase, bukan mengubah skema: kolom `method` sudah menerima keempatnya, dan `MetodePembayaranSchema` di frontend juga.
-- #8 (Struk) dan #9 (laporan) membangun di atas `GET /api/penjualan/{nomorStruk}` dan `FindByReceiptNumber`; keduanya belum punya pembaca di frontend.
+- #8 (Struk) dan #9 (laporan) membangun di atas `GET /api/penjualan/{nomorStruk}` dan `FindByReceiptNumber`. Keduanya sudah mendarat dan pembacanya ada: layar `/penjualan` (#29) untuk lookup dan reprint, layar `/laporan` (#9) untuk omzet harian dan daftar Penjualan — lihat ADR-0018.
 - Ambang Stok menipis tetap konstanta domain (ADR-0014); Penjualan yang menurunkan Stok membuat daftar itu berubah, jadi mutasi checkout meng-invalidate seluruh subtree cache `produk`.
 - Tes yang menjaga keputusan ini: `backend/internal/usecase/penjualan/checkout_test.go` (aturan: merge baris, blokir Stok, Kembalian, Tunai saja), `backend/internal/adapter/sqlite/penjualan_repository_test.go` (satu transaksi, rollback, Nomor Struk, `sold`), `backend/tests/e2e/penjualan_test.go` (seam REST: 401, atomicity, blokir Stok, kembalian, keunikan Nomor Struk, 409 hapus Produk terjual), `frontend/src/lib/domains/penjualan/{schemas,api,state,components}/*.test.ts`, dan `frontend/tests/e2e/penjualan.spec.ts` (browser sungguhan: jual, cari via Kode & nama, blokir, Kembalian, Nomor Struk, peran, 409).

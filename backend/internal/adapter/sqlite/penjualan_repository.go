@@ -145,3 +145,119 @@ func (r *SaleRepository) FindByReceiptNumber(ctx context.Context, receiptNumber 
 
 	return sale, nil
 }
+
+// ListSales satisfies domain/penjualan.SaleRepository. The rows are the list
+// view of a day, newest Nomor Struk first, and they carry no Item lines: a list
+// that read the Items of every sale would be a query per row for a screen that
+// never shows them.
+func (r *SaleRepository) ListSales(ctx context.Context, filter domainpenjualan.ReportFilter) ([]domainpenjualan.SaleSummary, error) {
+	rows, err := r.db.QueryContext(ctx,
+		`SELECT receipt_number, created_at, cashier_id, cashier_name, total, method
+		 FROM penjualan WHERE date(created_at) = ? ORDER BY receipt_number DESC`, filter.Date)
+	if err != nil {
+		return nil, fmt.Errorf("list Penjualan of %s: %w", filter.Date, err)
+	}
+	defer rows.Close()
+
+	sales := []domainpenjualan.SaleSummary{}
+	for rows.Next() {
+		var (
+			summary domainpenjualan.SaleSummary
+			method  string
+		)
+		if err := rows.Scan(&summary.ReceiptNumber, &summary.CreatedAt, &summary.CashierID,
+			&summary.CashierName, &summary.Total, &method); err != nil {
+			return nil, fmt.Errorf("read Penjualan row of %s: %w", filter.Date, err)
+		}
+		summary.Method = domainpenjualan.PaymentMethod(method)
+		sales = append(sales, summary)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("read Penjualan rows of %s: %w", filter.Date, err)
+	}
+
+	return sales, nil
+}
+
+// DailyRevenue satisfies domain/penjualan.SaleRepository. It runs three
+// aggregates over the day's Penjualan — the totals, the split by method and the
+// split by Kasir — and leaves the rule that every method is answered (a zero row
+// for one nobody used) to the use case, where it is testable without a database.
+//
+// The three run inside one read transaction. A checkout landing between them
+// would otherwise leave the total disagreeing with the breakdowns it is supposed
+// to be the sum of, and the Admin reading the report is exactly who the Kasir is
+// selling alongside. SQLite reads in WAL mode, so the transaction holds a
+// consistent snapshot without blocking the till's write.
+//
+// The cashier breakdown groups by Pengguna id rather than by the copied name, so
+// one Kasir is one row. The name is the one snapshotted on their sales; a
+// Pengguna cannot be renamed in this app, so the MAX is a formality that keeps
+// the query valid rather than a choice between names.
+func (r *SaleRepository) DailyRevenue(ctx context.Context, filter domainpenjualan.ReportFilter) (domainpenjualan.DailyRevenue, error) {
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return domainpenjualan.DailyRevenue{}, fmt.Errorf("begin omzet report of %s: %w", filter.Date, err)
+	}
+	// Rollback after a successful commit is a no-op, so this one defer covers
+	// every early return below.
+	defer tx.Rollback()
+
+	report := domainpenjualan.DailyRevenue{Date: filter.Date}
+
+	if err := tx.QueryRowContext(ctx,
+		`SELECT COUNT(*), COALESCE(SUM(total), 0) FROM penjualan WHERE date(created_at) = ?`, filter.Date).
+		Scan(&report.Transactions, &report.Total); err != nil {
+		return domainpenjualan.DailyRevenue{}, fmt.Errorf("total omzet of %s: %w", filter.Date, err)
+	}
+
+	methods, err := tx.QueryContext(ctx,
+		`SELECT method, COUNT(*), COALESCE(SUM(total), 0)
+		 FROM penjualan WHERE date(created_at) = ? GROUP BY method`, filter.Date)
+	if err != nil {
+		return domainpenjualan.DailyRevenue{}, fmt.Errorf("omzet per method of %s: %w", filter.Date, err)
+	}
+	defer methods.Close()
+
+	report.ByMethod = []domainpenjualan.MethodTotal{}
+	for methods.Next() {
+		var (
+			total  domainpenjualan.MethodTotal
+			method string
+		)
+		if err := methods.Scan(&method, &total.Transactions, &total.Total); err != nil {
+			return domainpenjualan.DailyRevenue{}, fmt.Errorf("read omzet per method of %s: %w", filter.Date, err)
+		}
+		total.Method = domainpenjualan.PaymentMethod(method)
+		report.ByMethod = append(report.ByMethod, total)
+	}
+	if err := methods.Err(); err != nil {
+		return domainpenjualan.DailyRevenue{}, fmt.Errorf("read omzet per method rows of %s: %w", filter.Date, err)
+	}
+
+	cashiers, err := tx.QueryContext(ctx,
+		`SELECT cashier_id, MAX(cashier_name) AS name, COUNT(*) AS sales, COALESCE(SUM(total), 0) AS revenue
+		 FROM penjualan WHERE date(created_at) = ? GROUP BY cashier_id ORDER BY revenue DESC, name`, filter.Date)
+	if err != nil {
+		return domainpenjualan.DailyRevenue{}, fmt.Errorf("omzet per Kasir of %s: %w", filter.Date, err)
+	}
+	defer cashiers.Close()
+
+	report.ByCashier = []domainpenjualan.CashierTotal{}
+	for cashiers.Next() {
+		var total domainpenjualan.CashierTotal
+		if err := cashiers.Scan(&total.CashierID, &total.CashierName, &total.Transactions, &total.Total); err != nil {
+			return domainpenjualan.DailyRevenue{}, fmt.Errorf("read omzet per Kasir of %s: %w", filter.Date, err)
+		}
+		report.ByCashier = append(report.ByCashier, total)
+	}
+	if err := cashiers.Err(); err != nil {
+		return domainpenjualan.DailyRevenue{}, fmt.Errorf("read omzet per Kasir rows of %s: %w", filter.Date, err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return domainpenjualan.DailyRevenue{}, fmt.Errorf("commit omzet report of %s: %w", filter.Date, err)
+	}
+
+	return report, nil
+}

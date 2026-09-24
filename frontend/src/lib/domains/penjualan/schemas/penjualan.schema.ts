@@ -211,3 +211,104 @@ export const NomorStrukSchema = z
 		positiveWholeNumber('Nomor Struk harus bilangan bulat.', 'Nomor Struk harus lebih dari nol.')
 	);
 export type NomorStruk = z.infer<typeof NomorStrukSchema>;
+
+/**
+ * One row of the sales list (#9): the Nomor Struk and the few fields the list
+ * shows, without the Item lines a detail read carries. Opening a row reads the
+ * full Penjualan by its Nomor Struk through `PenjualanSchema` — the list is a
+ * view over the same record, not a second copy of it.
+ */
+export const PenjualanRingkasSchema = z.object({
+	receipt_number: z.number().int(),
+	created_at: z.string(),
+	cashier_id: z.number().int(),
+	cashier_name: z.string(),
+	total: z.number().int(),
+	method: MetodePembayaranSchema
+});
+export type PenjualanRingkas = z.infer<typeof PenjualanRingkasSchema>;
+
+/** The answer to the sales list: one row per Penjualan of the day. */
+export const PenjualanListSchema = z.object({
+	data: z.array(PenjualanRingkasSchema)
+});
+
+/**
+ * What one Pembayaran method contributed to a day: how many Penjualan and how
+ * much. A method nobody used is a zero row, not a missing one — the API answers
+ * all four (CONTEXT.md, Pembayaran), so the screen renders the same rows every
+ * day.
+ */
+export const RingkasanMetodeSchema = z.object({
+	method: MetodePembayaranSchema,
+	total: z.number().int(),
+	transactions: z.number().int()
+});
+export type RingkasanMetode = z.infer<typeof RingkasanMetodeSchema>;
+
+/** What one Kasir rang up in a day. */
+export const RingkasanKasirSchema = z.object({
+	cashier_id: z.number().int(),
+	cashier_name: z.string(),
+	total: z.number().int(),
+	transactions: z.number().int()
+});
+export type RingkasanKasir = z.infer<typeof RingkasanKasirSchema>;
+
+/**
+ * The omzet of one store-local day (#9): the total, the number of Penjualan, and
+ * the breakdown by Pembayaran method and by Kasir.
+ */
+export const OmzetHarianSchema = z.object({
+	date: z.string(),
+	total: z.number().int(),
+	transactions: z.number().int(),
+	by_method: z.array(RingkasanMetodeSchema),
+	by_cashier: z.array(RingkasanKasirSchema)
+});
+export type OmzetHarian = z.infer<typeof OmzetHarianSchema>;
+
+/** Every answer that carries the omzet of a day under `data`. */
+export const OmzetHarianEnvelopeSchema = z.object({
+	data: OmzetHarianSchema
+});
+
+/**
+ * The day a report is over: a store-local calendar date (`YYYY-MM-DD`), the shape
+ * the API reads. It is its own schema so the date field can refuse a malformed
+ * day before it becomes a query key — Go refuses one too, and it is the same
+ * rule in both places (ADR-0015).
+ */
+export const TanggalLaporanSchema = z
+	.string()
+	.trim()
+	.refine(isCalendarDate, 'Tanggal laporan tidak valid.');
+export type TanggalLaporan = z.infer<typeof TanggalLaporanSchema>;
+
+/**
+ * Whether `value` is a real `YYYY-MM-DD` date. The round-trip through `Date`
+ * rejects a day that does not exist ("2026-02-30" rolls over to March), and the
+ * `Z` keeps the check in UTC so a store east of Greenwich cannot see yesterday.
+ */
+function isCalendarDate(value: string): boolean {
+	if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+		return false;
+	}
+
+	const date = new Date(`${value}T00:00:00Z`);
+
+	return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+}
+
+/**
+ * The store-local date of "today", in the shape the report API reads. One store
+ * and one terminal (ADR-0002): the browser's calendar is the store's calendar,
+ * and the API writes `created_at` with the same local clock (ADR-0015).
+ */
+export function tanggalHariIni(now: Date = new Date()): string {
+	const year = now.getFullYear();
+	const month = String(now.getMonth() + 1).padStart(2, '0');
+	const day = String(now.getDate()).padStart(2, '0');
+
+	return `${year}-${month}-${day}`;
+}

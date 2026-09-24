@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"strconv"
+	"strings"
 
 	domainauth "github.com/novriyantoAli/lite-point-of-sale/backend/internal/domain/auth"
 	domainpenjualan "github.com/novriyantoAli/lite-point-of-sale/backend/internal/domain/penjualan"
@@ -18,6 +19,8 @@ type SaleService interface {
 	Checkout(ctx context.Context, cashier domainauth.PublicUser, input usecasepenjualan.CheckoutInput) (usecasepenjualan.CheckoutResult, error)
 	FindByReceiptNumber(ctx context.Context, receiptNumber int64) (domainpenjualan.Sale, error)
 	PrintReceipt(ctx context.Context, receiptNumber int64) (usecasepenjualan.PrintResult, error)
+	ListSales(ctx context.Context, filter domainpenjualan.ReportFilter) ([]domainpenjualan.SaleSummary, error)
+	DailyRevenue(ctx context.Context, filter domainpenjualan.ReportFilter) (domainpenjualan.DailyRevenue, error)
 }
 
 // checkoutRequest is the cart a Kasir posts. The Items carry the Produk id and
@@ -118,6 +121,43 @@ type printEnvelope struct {
 	Print printResponse `json:"print"`
 }
 
+// saleSummaryResponse is one row of the sales list (#9): the Nomor Struk and the
+// few fields the list shows, without the Item lines a detail read carries.
+type saleSummaryResponse struct {
+	ReceiptNumber int64  `json:"receipt_number"`
+	CreatedAt     string `json:"created_at"`
+	CashierID     int64  `json:"cashier_id"`
+	CashierName   string `json:"cashier_name"`
+	Total         int64  `json:"total"`
+	Method        string `json:"method"`
+}
+
+// methodTotalResponse is what one Pembayaran method contributed to a day: how
+// many Penjualan and how much.
+type methodTotalResponse struct {
+	Method       string `json:"method"`
+	Total        int64  `json:"total"`
+	Transactions int64  `json:"transactions"`
+}
+
+// cashierTotalResponse is what one Kasir rang up in a day.
+type cashierTotalResponse struct {
+	CashierID    int64  `json:"cashier_id"`
+	CashierName  string `json:"cashier_name"`
+	Total        int64  `json:"total"`
+	Transactions int64  `json:"transactions"`
+}
+
+// revenueResponse is the omzet of one store-local day (#9): the total, the number
+// of Penjualan, and the breakdown by Pembayaran method and by Kasir.
+type revenueResponse struct {
+	Date         string                 `json:"date"`
+	Total        int64                  `json:"total"`
+	Transactions int64                  `json:"transactions"`
+	ByMethod     []methodTotalResponse  `json:"by_method"`
+	ByCashier    []cashierTotalResponse `json:"by_cashier"`
+}
+
 func newPrintResponse(print usecasepenjualan.PrintResult) printResponse {
 	return printResponse{Printed: print.Printed, Message: print.Message}
 }
@@ -146,6 +186,55 @@ func newSaleResponse(sale domainpenjualan.Sale) saleResponse {
 			Amount: sale.Payment.Amount,
 			Change: sale.Payment.Change,
 		},
+	}
+}
+
+// newSaleSummaryResponses renders the sales list of a day. It answers an empty
+// list rather than null for a day with no sales, so the screen can iterate it
+// without a guard.
+func newSaleSummaryResponses(sales []domainpenjualan.SaleSummary) []saleSummaryResponse {
+	responses := make([]saleSummaryResponse, 0, len(sales))
+	for _, sale := range sales {
+		responses = append(responses, saleSummaryResponse{
+			ReceiptNumber: sale.ReceiptNumber,
+			CreatedAt:     sale.CreatedAt,
+			CashierID:     sale.CashierID,
+			CashierName:   sale.CashierName,
+			Total:         sale.Total,
+			Method:        string(sale.Method),
+		})
+	}
+
+	return responses
+}
+
+// newRevenueResponse renders the omzet of a day, with both breakdowns.
+func newRevenueResponse(report domainpenjualan.DailyRevenue) revenueResponse {
+	methods := make([]methodTotalResponse, 0, len(report.ByMethod))
+	for _, total := range report.ByMethod {
+		methods = append(methods, methodTotalResponse{
+			Method:       string(total.Method),
+			Total:        total.Total,
+			Transactions: total.Transactions,
+		})
+	}
+
+	cashiers := make([]cashierTotalResponse, 0, len(report.ByCashier))
+	for _, total := range report.ByCashier {
+		cashiers = append(cashiers, cashierTotalResponse{
+			CashierID:    total.CashierID,
+			CashierName:  total.CashierName,
+			Total:        total.Total,
+			Transactions: total.Transactions,
+		})
+	}
+
+	return revenueResponse{
+		Date:         report.Date,
+		Total:        report.Total,
+		Transactions: report.Transactions,
+		ByMethod:     methods,
+		ByCashier:    cashiers,
 	}
 }
 
@@ -242,4 +331,45 @@ func receiptNumberParam(w http.ResponseWriter, r *http.Request, logger *slog.Log
 	}
 
 	return receiptNumber, true
+}
+
+// listSalesHandler answers the Penjualan of one store-local day: the sales list
+// an Admin reads, newest Nomor Struk first. The day is `?date=YYYY-MM-DD` and
+// defaults to today, which the use case resolves (ADR-0015).
+//
+// It is a literal next to the `{receiptNumber}` wildcard of the sale read, and a
+// literal is the more specific pattern — the same reason `/api/produk/kategori`
+// wins over `/api/produk/{id}`. "omzet" is not a Nomor Struk either.
+func listSalesHandler(service SaleService, logger *slog.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		sales, err := service.ListSales(r.Context(), reportFilter(r))
+		if err != nil {
+			writeError(w, err, logger)
+			return
+		}
+
+		writeJSON(w, http.StatusOK, dataResponse{Data: newSaleSummaryResponses(sales)}, logger)
+	}
+}
+
+// dailyRevenueHandler answers the omzet of one store-local day: the total, the
+// number of Penjualan, and the breakdown by Pembayaran method and by Kasir. Like
+// the sales list it is Admin-only and defaults to today.
+func dailyRevenueHandler(service SaleService, logger *slog.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		report, err := service.DailyRevenue(r.Context(), reportFilter(r))
+		if err != nil {
+			writeError(w, err, logger)
+			return
+		}
+
+		writeJSON(w, http.StatusOK, dataResponse{Data: newRevenueResponse(report)}, logger)
+	}
+}
+
+// reportFilter reads the day of a report off the query string. An absent date is
+// left empty for the use case to read as today; a malformed one is refused there
+// with a message, rather than silently matching nothing here.
+func reportFilter(r *http.Request) domainpenjualan.ReportFilter {
+	return domainpenjualan.ReportFilter{Date: strings.TrimSpace(r.URL.Query().Get("date"))}
 }

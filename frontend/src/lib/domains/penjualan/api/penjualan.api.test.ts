@@ -219,3 +219,104 @@ describe('penjualanApi.cetakStruk', () => {
 		await expect(penjualanApi.cetakStruk(7)).rejects.toThrow();
 	});
 });
+
+describe('penjualanApi.list', () => {
+	const row = {
+		receipt_number: 7,
+		created_at: '2026-09-23 10:00:00',
+		cashier_id: 1,
+		cashier_name: 'kasir1',
+		total: 36000,
+		method: 'cash'
+	};
+
+	it('reads the sales list of a day and sends the date it was given', async () => {
+		mock.onGet('/penjualan').reply(200, { data: [row] });
+
+		await expect(penjualanApi.list('2026-09-23')).resolves.toEqual([row]);
+		expect(mock.history.get[0]!.params).toEqual({ date: '2026-09-23' });
+	});
+
+	it('reads a summary row, which carries no Item lines', async () => {
+		mock.onGet('/penjualan').reply(200, { data: [row] });
+
+		const [listed] = await penjualanApi.list('2026-09-23');
+
+		expect(listed).not.toHaveProperty('items');
+		expect(listed).not.toHaveProperty('payment');
+	});
+
+	it('refuses a date that is not a report day before the request is sent', async () => {
+		mock.onGet('/penjualan').reply(200, { data: [] });
+
+		await expect(penjualanApi.list('23-09-2026')).rejects.toThrow();
+		expect(mock.history.get).toHaveLength(0);
+	});
+
+	it('surfaces a refused Peran as a normalized AppError', async () => {
+		mock.onGet('/penjualan').reply(403, {
+			message: 'Anda tidak berhak melakukan tindakan ini.',
+			error: 'forbidden'
+		});
+
+		await expect(penjualanApi.list('2026-09-23')).rejects.toMatchObject({
+			status: 403,
+			code: 'forbidden'
+		});
+	});
+
+	it('fails loudly when the answer is not a sales list', async () => {
+		mock.onGet('/penjualan').reply(200, { data: { sales: [] } });
+
+		await expect(penjualanApi.list('2026-09-23')).rejects.toThrow();
+	});
+});
+
+describe('penjualanApi.omzetHarian', () => {
+	const omzet = {
+		date: '2026-09-23',
+		total: 72000,
+		transactions: 3,
+		by_method: [
+			{ method: 'cash', total: 36000, transactions: 2 },
+			{ method: 'qris', total: 36000, transactions: 1 },
+			{ method: 'debit', total: 0, transactions: 0 },
+			{ method: 'transfer', total: 0, transactions: 0 }
+		],
+		by_cashier: [{ cashier_id: 1, cashier_name: 'kasir1', total: 72000, transactions: 3 }]
+	};
+
+	it('reads the omzet of a day and sends the date it was given', async () => {
+		mock.onGet('/penjualan/omzet').reply(200, { data: omzet });
+
+		await expect(penjualanApi.omzetHarian('2026-09-23')).resolves.toEqual(omzet);
+		expect(mock.history.get[0]!.params).toEqual({ date: '2026-09-23' });
+	});
+
+	it('refuses a date that is not a report day before the request is sent', async () => {
+		mock.onGet('/penjualan/omzet').reply(200, { data: omzet });
+
+		await expect(penjualanApi.omzetHarian('kemarin')).rejects.toThrow();
+		expect(mock.history.get).toHaveLength(0);
+	});
+
+	it('fails loudly when a breakdown names a method the API does not know', async () => {
+		mock.onGet('/penjualan/omzet').reply(200, {
+			data: { ...omzet, by_method: [{ method: 'bitcoin', total: 1, transactions: 1 }] }
+		});
+
+		await expect(penjualanApi.omzetHarian('2026-09-23')).rejects.toThrow();
+	});
+
+	it('surfaces a refused Peran as a normalized AppError', async () => {
+		mock.onGet('/penjualan/omzet').reply(403, {
+			message: 'Anda tidak berhak melakukan tindakan ini.',
+			error: 'forbidden'
+		});
+
+		await expect(penjualanApi.omzetHarian('2026-09-23')).rejects.toMatchObject({
+			status: 403,
+			code: 'forbidden'
+		});
+	});
+});

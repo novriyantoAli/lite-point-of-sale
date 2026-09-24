@@ -93,6 +93,64 @@ type Sale struct {
 	Payment     Payment
 }
 
+// SaleSummary is one row of the sales list (#9): the Nomor Struk, when and by
+// whom it was rung up, its total and how it was paid. It is deliberately not a
+// Sale — the list shows no Item lines, and reading them per row would be a query
+// per sale.
+type SaleSummary struct {
+	ReceiptNumber int64
+	CreatedAt     string
+	CashierID     int64
+	CashierName   string
+	Total         int64
+	Method        PaymentMethod
+}
+
+// MethodTotal is what one Pembayaran method contributed to a store-local day:
+// how many Penjualan and how much.
+type MethodTotal struct {
+	Method       PaymentMethod
+	Total        int64
+	Transactions int64
+}
+
+// CashierTotal is what one Kasir rang up in a store-local day. Attribution is by
+// Pengguna id, so one Kasir is one row; CashierName is the name copied onto their
+// sales, because that is the name the Struk printed. (A Pengguna cannot be
+// renamed in this app, so there is only ever one such name to answer with.)
+type CashierTotal struct {
+	CashierID    int64
+	CashierName  string
+	Total        int64
+	Transactions int64
+}
+
+// DailyRevenue is the omzet of one store-local day (#9): what came in, how many
+// Penjualan made it, and the two breakdowns an Admin reads it by.
+//
+// Date is a store-local calendar date (`YYYY-MM-DD`), because `created_at` is
+// store-local time and a UTC instant would read as yesterday for a sale rung up
+// early in the morning (ADR-0015).
+type DailyRevenue struct {
+	Date         string
+	Total        int64
+	Transactions int64
+	// ByMethod is the day's split by Pembayaran method. The repository answers only
+	// the methods that were used; the use case fills in a zero row for the rest, so
+	// a caller of the use case always sees every method in the till's order.
+	ByMethod []MethodTotal
+	// ByCashier has one entry per Kasir who rang something up that day, biggest
+	// first. A day with no sales has none.
+	ByCashier []CashierTotal
+}
+
+// ReportFilter narrows the sales list and the daily report to one store-local
+// day (`YYYY-MM-DD`). An empty Date means the store's today, which the use case
+// resolves: the domain says what a report is over, not what day it is.
+type ReportFilter struct {
+	Date string
+}
+
 // Sentinel errors the use cases return and the HTTP adapter maps to status
 // codes. Keep the set small and meaningful.
 var (
@@ -119,4 +177,13 @@ type SaleRepository interface {
 	// they were rung up. It is how the till reads a sale back, and what a
 	// reprint (#8) and the sales list (#9) build on.
 	FindByReceiptNumber(ctx context.Context, receiptNumber int64) (Sale, error)
+
+	// ListSales answers the Penjualan of one store-local day, newest Nomor Struk
+	// first: the sales list of #9. Each row is a SaleSummary rather than a full
+	// Sale, so the list costs one query instead of one per sale.
+	ListSales(ctx context.Context, filter ReportFilter) ([]SaleSummary, error)
+
+	// DailyRevenue answers the omzet of one store-local day: the total, the number
+	// of Penjualan, and the breakdown by Pembayaran method and by Kasir (#9).
+	DailyRevenue(ctx context.Context, filter ReportFilter) (DailyRevenue, error)
 }

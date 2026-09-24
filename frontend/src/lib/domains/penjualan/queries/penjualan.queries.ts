@@ -8,18 +8,23 @@ import type {
 	HasilCetak,
 	HasilCheckout,
 	NomorStruk,
-	Penjualan
+	OmzetHarian,
+	Penjualan,
+	PenjualanRingkas,
+	TanggalLaporan
 } from '../schemas/penjualan.schema';
 
 /**
  * The cache keys of the Penjualan domain, in the one scheme every domain shares:
  * `["<domain>", "<shape>", ...]`. The mutation invalidates the subtree, and the
- * lookup screen (#29) reads `detail`; the sales list (#9) builds on the same
- * root rather than inventing a second scheme.
+ * lookup screen (#29) reads `detail`; the sales list and the omzet report (#9)
+ * build on the same root rather than inventing a second scheme.
  */
 export const penjualanKeys = {
 	all: ['penjualan'] as const,
-	detail: (nomorStruk: NomorStruk) => [...penjualanKeys.all, 'detail', nomorStruk] as const
+	detail: (nomorStruk: NomorStruk) => [...penjualanKeys.all, 'detail', nomorStruk] as const,
+	list: (tanggal: TanggalLaporan) => [...penjualanKeys.all, 'list', tanggal] as const,
+	omzet: (tanggal: TanggalLaporan) => [...penjualanKeys.all, 'omzet', tanggal] as const
 };
 
 /**
@@ -42,6 +47,33 @@ export function createPenjualanDetailQuery(nomorStruk: () => NomorStruk) {
 		// other failure (502, a dropped connection) keeps the app's one retry —
 		// the `retry: 1` the root QueryClient sets (ADR-0006 conventions).
 		retry: (failureCount, error) => error.status !== 404 && failureCount < 1
+	}));
+}
+
+/**
+ * The Penjualan of one store-local day, newest Nomor Struk first: the sales list
+ * of the Laporan screen (#9). `tanggal` is a thunk so the query re-derives when
+ * the day the Admin picked changes (§6.3).
+ */
+export function createPenjualanListQuery(tanggal: () => TanggalLaporan) {
+	return createQuery<PenjualanRingkas[], AppError>(() => ({
+		queryKey: penjualanKeys.list(tanggal()),
+		queryFn: () => penjualanApi.list(tanggal()),
+		enabled: browser
+	}));
+}
+
+/**
+ * The omzet of one store-local day, with its breakdown by Pembayaran method and
+ * by Kasir (#9). It is a query of its own rather than a sum over the sales list:
+ * the aggregation is the API's to compute, and the list carries no Item lines to
+ * compute it from anyway.
+ */
+export function createOmzetHarianQuery(tanggal: () => TanggalLaporan) {
+	return createQuery<OmzetHarian, AppError>(() => ({
+		queryKey: penjualanKeys.omzet(tanggal()),
+		queryFn: () => penjualanApi.omzetHarian(tanggal()),
+		enabled: browser
 	}));
 }
 

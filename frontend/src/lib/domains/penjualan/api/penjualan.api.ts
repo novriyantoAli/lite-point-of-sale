@@ -4,12 +4,18 @@ import {
 	CheckoutEnvelopeSchema,
 	CheckoutInputSchema,
 	NomorStrukSchema,
+	OmzetHarianEnvelopeSchema,
 	PenjualanEnvelopeSchema,
+	PenjualanListSchema,
+	TanggalLaporanSchema,
 	type CheckoutInput,
 	type HasilCetak,
 	type HasilCheckout,
 	type NomorStruk,
-	type Penjualan
+	type OmzetHarian,
+	type Penjualan,
+	type PenjualanRingkas,
+	type TanggalLaporan
 } from '../schemas/penjualan.schema';
 
 /**
@@ -45,6 +51,17 @@ export interface PenjualanApi {
 	 * whose first print failed retries through this one (ADR-0017, keputusan 5).
 	 */
 	cetakStruk(nomorStruk: NomorStruk): Promise<HasilCetak>;
+	/**
+	 * The Penjualan of one store-local day, newest Nomor Struk first: the sales list
+	 * of #9. Each row is a summary — opening one reads the full Penjualan by its
+	 * Nomor Struk through `getByReceiptNumber`.
+	 */
+	list(tanggal: TanggalLaporan): Promise<PenjualanRingkas[]>;
+	/**
+	 * The omzet of one store-local day: the total, the number of Penjualan, and the
+	 * breakdown by Pembayaran method and by Kasir (#9).
+	 */
+	omzetHarian(tanggal: TanggalLaporan): Promise<OmzetHarian>;
 }
 
 export const penjualanApi: PenjualanApi = {
@@ -64,5 +81,21 @@ export const penjualanApi: PenjualanApi = {
 		const { data } = await apiClient.post(`/penjualan/${NomorStrukSchema.parse(nomorStruk)}/struk`);
 
 		return CetakEnvelopeSchema.parse(data).data.print;
+	},
+
+	async list(tanggal: TanggalLaporan): Promise<PenjualanRingkas[]> {
+		const { data } = await apiClient.get('/penjualan', {
+			params: { date: TanggalLaporanSchema.parse(tanggal) }
+		});
+
+		return PenjualanListSchema.parse(data).data;
+	},
+
+	async omzetHarian(tanggal: TanggalLaporan): Promise<OmzetHarian> {
+		const { data } = await apiClient.get('/penjualan/omzet', {
+			params: { date: TanggalLaporanSchema.parse(tanggal) }
+		});
+
+		return OmzetHarianEnvelopeSchema.parse(data).data;
 	}
 };
