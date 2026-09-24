@@ -16,23 +16,29 @@ import (
 // hands the sale to the repository, which stores the Penjualan, the Item
 // snapshots and the Stok decrement in one transaction (CONTEXT.md, Penjualan).
 //
+// Once the Penjualan is stored it prints the Struk, and answers the sale together
+// with the outcome of that print. Printing runs *after* the write and never
+// inside it: if the printer is missing or fails, the sale stays recorded and the
+// result says so — the money has already moved, and a Struk is a document that can
+// be reissued (ADR-0017, keputusan 1).
+//
 // cashier is the Pengguna ringing it up. Their username is copied onto the sale,
 // because that is the name the Struk prints — a later rename must not rewrite a
 // Struk that was already handed over.
-func (s *Service) Checkout(ctx context.Context, cashier domainauth.PublicUser, input CheckoutInput) (domainpenjualan.Sale, error) {
+func (s *Service) Checkout(ctx context.Context, cashier domainauth.PublicUser, input CheckoutInput) (CheckoutResult, error) {
 	lines, err := mergeLines(input.Items)
 	if err != nil {
-		return domainpenjualan.Sale{}, err
+		return CheckoutResult{}, err
 	}
 
 	method, err := paymentMethod(input.Payment)
 	if err != nil {
-		return domainpenjualan.Sale{}, err
+		return CheckoutResult{}, err
 	}
 
 	items, total, err := s.price(ctx, lines)
 	if err != nil {
-		return domainpenjualan.Sale{}, err
+		return CheckoutResult{}, err
 	}
 
 	// The Pembayaran is recorded as it was taken, and what each method accepts
@@ -48,11 +54,11 @@ func (s *Service) Checkout(ctx context.Context, cashier domainauth.PublicUser, i
 	var change int64
 	if method == domainpenjualan.PaymentCash {
 		if input.Payment.Amount < total {
-			return domainpenjualan.Sale{}, InputError{Message: "Jumlah bayar kurang dari total Penjualan."}
+			return CheckoutResult{}, InputError{Message: "Jumlah bayar kurang dari total Penjualan."}
 		}
 		change = input.Payment.Amount - total
 	} else if input.Payment.Amount != total {
-		return domainpenjualan.Sale{}, InputError{
+		return CheckoutResult{}, InputError{
 			Message: fmt.Sprintf("Pembayaran non-tunai harus sebesar total Penjualan: %d.", total),
 		}
 	}
@@ -69,7 +75,20 @@ func (s *Service) Checkout(ctx context.Context, cashier domainauth.PublicUser, i
 		},
 	}
 
-	return s.sales.Create(ctx, sale)
+	stored, err := s.sales.Create(ctx, sale)
+	if err != nil {
+		return CheckoutResult{}, err
+	}
+
+	printed, err := s.printStruk(ctx, stored)
+	if err != nil {
+		// The template could not be read, so there was nothing to print. The
+		// Penjualan is stored either way: a print that could not even be composed is
+		// a failed print, never a failed sale (ADR-0017, keputusan 1).
+		printed = PrintResult{Printed: false, Message: composeFailureMessage}
+	}
+
+	return CheckoutResult{Sale: stored, Print: printed}, nil
 }
 
 // mergeLines validates the cart and folds repeated Produk into one line.

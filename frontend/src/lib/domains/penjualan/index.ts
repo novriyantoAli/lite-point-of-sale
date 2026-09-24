@@ -9,12 +9,16 @@ export { default as PencarianPenjualan } from './components/PencarianPenjualan.s
 export {
 	penjualanKeys,
 	createCheckoutMutation,
+	createCetakStrukMutation,
 	createPenjualanDetailQuery
 } from './queries/penjualan.queries';
 
 export {
+	CetakEnvelopeSchema,
+	CheckoutEnvelopeSchema,
 	CheckoutInputSchema,
 	CheckoutItemSchema,
+	HasilCetakSchema,
 	ItemPenjualanSchema,
 	JumlahBayarSchema,
 	METODE_LABEL,
@@ -26,6 +30,8 @@ export {
 	PenjualanSchema,
 	type CheckoutInput,
 	type CheckoutItem,
+	type HasilCetak,
+	type HasilCheckout,
 	type ItemPenjualan,
 	type MetodePembayaran,
 	type NomorStruk,

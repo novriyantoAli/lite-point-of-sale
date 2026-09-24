@@ -72,11 +72,15 @@ func NewRouter(healthChecker HealthChecker, auth AuthService, products ProductSe
 	mux.Handle("PATCH /api/produk/{id}", adminOnly(setProductActiveHandler(products, logger)))
 	mux.Handle("DELETE /api/produk/{id}", adminOnly(deleteProductHandler(products, logger)))
 
-	// The till: turning a cart into a Penjualan, and reading one back by its
-	// Nomor Struk. Both Peran sell at a one-terminal store, so this is the one
-	// part of the API behind the token check but no role guard.
+	// The till: turning a cart into a Penjualan, reading one back by its Nomor
+	// Struk, and printing its Struk. All three Peran share at a one-terminal store
+	// — CONTEXT.md gives the Kasir "cetak Struk" — so this is the one part of the
+	// API behind the token check but no role guard.
 	mux.Handle("POST /api/penjualan", authenticated(checkoutHandler(sales, logger)))
 	mux.Handle("GET /api/penjualan/{receiptNumber}", authenticated(saleHandler(sales, logger)))
+	// A sub-resource of the sale, like POST /api/produk/{id}/stok: the Struk is the
+	// thing produced, and the Nomor Struk is what identifies the Penjualan.
+	mux.Handle("POST /api/penjualan/{receiptNumber}/struk", authenticated(printSaleHandler(sales, logger)))
 
 	// Pengaturan is the store's settings an Admin changes (CONTEXT.md): the Struk
 	// template and the ambang Stok menipis. Read and write are both Admin-only.

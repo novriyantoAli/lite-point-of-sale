@@ -15,6 +15,19 @@ const BACKEND_DIR = fileURLToPath(new URL('../backend', import.meta.url));
 const E2E_DB_PATH = fileURLToPath(
 	new URL(`../backend/data/e2e-${process.pid}.db`, import.meta.url)
 );
+/**
+ * The file that stands in for the thermal printer of the Go process.
+ *
+ * `POS_PRINTER_DEVICE` points at it, so a checkout really writes ESC/POS bytes
+ * through the device adapter — the success path of a print runs in the browser
+ * suite instead of only ever the failure (ADR-0017). global-setup.ts creates it
+ * and global-teardown.ts removes it, both from this one metadata entry: the
+ * adapter opens a device path and deliberately never creates one, because a typo
+ * in POS_PRINTER_DEVICE has to fail loudly rather than print into a new file.
+ */
+const E2E_PRINTER_PATH = fileURLToPath(
+	new URL(`../backend/data/e2e-printer-${process.pid}.bin`, import.meta.url)
+);
 
 const SVELTEKIT_PORT = 3000;
 const GO_API_PORT = 8080;
@@ -40,9 +53,10 @@ const E2E_TOKEN_SECRET = 'rahasia-uji-e2e';
  */
 export default defineConfig({
 	testDir: './tests/e2e',
-	// The store this run uses; global-teardown.ts reads it from here — one
-	// source of truth for a path both files need.
-	metadata: { e2eDbPath: E2E_DB_PATH },
+	// The store this run uses and the printer file it prints to; global-teardown.ts
+	// reads both from here — one source of truth for paths two files need.
+	metadata: { e2eDbPath: E2E_DB_PATH, e2ePrinterPath: E2E_PRINTER_PATH },
+	globalSetup: './tests/e2e/global-setup.ts',
 	globalTeardown: './tests/e2e/global-teardown.ts',
 	forbidOnly: !!process.env.CI,
 	retries: process.env.CI ? 1 : 0,
@@ -61,7 +75,9 @@ export default defineConfig({
 				POS_DB_PATH: E2E_DB_PATH,
 				POS_TOKEN_SECRET: E2E_TOKEN_SECRET,
 				POS_ADMIN_USERNAME: E2E_ADMIN_USERNAME,
-				POS_ADMIN_PASSWORD: E2E_ADMIN_PASSWORD
+				POS_ADMIN_PASSWORD: E2E_ADMIN_PASSWORD,
+				// The printer the suite prints to: the file above, not a device.
+				POS_PRINTER_DEVICE: E2E_PRINTER_PATH
 			},
 			url: `http://127.0.0.1:${GO_API_PORT}/api/health`,
 			reuseExistingServer: false,

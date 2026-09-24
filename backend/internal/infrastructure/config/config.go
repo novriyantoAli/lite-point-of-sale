@@ -30,6 +30,12 @@ type Config struct {
 	// creates a Pengguna is itself Admin-only.
 	AdminUsername string
 	AdminPassword string
+	// PrinterDevice is the path of the thermal printer a Struk is written to,
+	// e.g. /dev/usb/lp0. There is deliberately no default: /dev/usb/lp0 is only
+	// right on Linux, and a wrong guess is worse than an honest "not configured"
+	// (ADR-0017, keputusan 2). Empty means the null printer, which reports every
+	// print as a failure rather than crashing or succeeding silently.
+	PrinterDevice string
 }
 
 // Default returns the configuration a development machine runs with. Tests
@@ -42,6 +48,8 @@ func Default() Config {
 		SessionTTL:    12 * time.Hour,
 		AdminUsername: "admin",
 		AdminPassword: DevAdminPassword,
+		// No printer is configured by default: see Config.PrinterDevice.
+		PrinterDevice: "",
 	}
 }
 
@@ -55,6 +63,7 @@ func Load() Config {
 	cfg.SessionTTL = durationOr("POS_SESSION_TTL", cfg.SessionTTL)
 	cfg.AdminUsername = envOr("POS_ADMIN_USERNAME", cfg.AdminUsername)
 	cfg.AdminPassword = envOr("POS_ADMIN_PASSWORD", cfg.AdminPassword)
+	cfg.PrinterDevice = envOr("POS_PRINTER_DEVICE", cfg.PrinterDevice)
 
 	return cfg
 }

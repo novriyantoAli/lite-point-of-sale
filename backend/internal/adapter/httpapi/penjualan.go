@@ -15,8 +15,9 @@ import (
 // it here, next to the handlers that use it, keeps this package testable with a
 // fake service and keeps the dependency pointing inward (ADR-0004).
 type SaleService interface {
-	Checkout(ctx context.Context, cashier domainauth.PublicUser, input usecasepenjualan.CheckoutInput) (domainpenjualan.Sale, error)
+	Checkout(ctx context.Context, cashier domainauth.PublicUser, input usecasepenjualan.CheckoutInput) (usecasepenjualan.CheckoutResult, error)
 	FindByReceiptNumber(ctx context.Context, receiptNumber int64) (domainpenjualan.Sale, error)
+	CetakStruk(ctx context.Context, receiptNumber int64) (usecasepenjualan.PrintResult, error)
 }
 
 // checkoutRequest is the cart a Kasir posts. The Items carry the Produk id and
@@ -88,9 +89,37 @@ type paymentResponse struct {
 	Change int64  `json:"change"`
 }
 
-// saleEnvelope wraps a Penjualan, the same way productEnvelope wraps a Produk.
+// saleEnvelope wraps one stored Penjualan: the answer to reading a sale by its
+// Nomor Struk.
 type saleEnvelope struct {
 	Sale saleResponse `json:"sale"`
+}
+
+// printResponse is the outcome of printing one Struk. `printed` is what the till
+// branches on; `message` is the reason a Kasir can read when it is false. It is
+// the same shape on both print paths — the automatic print a checkout answers and
+// the reprint endpoint (ADR-0017, keputusan 5).
+type printResponse struct {
+	Printed bool   `json:"printed"`
+	Message string `json:"message,omitempty"`
+}
+
+// checkoutEnvelope wraps the Penjualan a checkout stored together with the
+// outcome of the Struk print that followed it. The print is reported, never
+// allowed to fail the sale: the money has already moved (ADR-0017, keputusan 1).
+type checkoutEnvelope struct {
+	Sale  saleResponse  `json:"sale"`
+	Print printResponse `json:"print"`
+}
+
+// printEnvelope wraps the outcome of a reprint, which is all the `/penjualan`
+// screen needs: it already has the sale on screen.
+type printEnvelope struct {
+	Print printResponse `json:"print"`
+}
+
+func newPrintResponse(print usecasepenjualan.PrintResult) printResponse {
+	return printResponse{Printed: print.Printed, Message: print.Message}
 }
 
 func newSaleResponse(sale domainpenjualan.Sale) saleResponse {
@@ -124,6 +153,10 @@ func newSaleResponse(sale domainpenjualan.Sale) saleResponse {
 // the sale, snapshots each Item's name and price, and takes the Stok out
 // (CONTEXT.md, Penjualan).
 //
+// The answer carries the sale and the outcome of the Struk print that followed
+// it. A print that failed is reported here, not turned into an error: the
+// Penjualan is stored either way (ADR-0017, keputusan 1).
+//
 // Any signed-in Pengguna may ring one up. Both Peran of CONTEXT.md sell at a
 // one-terminal store — the Admin is the owner behind the counter as often as the
 // Kasir is — so this route is the one part of the API without a role guard.
@@ -139,14 +172,15 @@ func checkoutHandler(service SaleService, logger *slog.Logger) http.HandlerFunc 
 			return
 		}
 
-		sale, err := service.Checkout(r.Context(), cashier, request.input())
+		result, err := service.Checkout(r.Context(), cashier, request.input())
 		if err != nil {
 			writeError(w, err, logger)
 			return
 		}
 
-		writeJSON(w, http.StatusCreated, dataResponse{Data: saleEnvelope{
-			Sale: newSaleResponse(sale),
+		writeJSON(w, http.StatusCreated, dataResponse{Data: checkoutEnvelope{
+			Sale:  newSaleResponse(result.Sale),
+			Print: newPrintResponse(result.Print),
 		}}, logger)
 	}
 }
@@ -168,6 +202,32 @@ func saleHandler(service SaleService, logger *slog.Logger) http.HandlerFunc {
 
 		writeJSON(w, http.StatusOK, dataResponse{Data: saleEnvelope{
 			Sale: newSaleResponse(sale),
+		}}, logger)
+	}
+}
+
+// printSaleHandler prints the Struk of one stored Penjualan: the reprint the till
+// offers after a print failed, and the one `/penjualan` offers for an old sale.
+//
+// It is the same use case the checkout runs automatically, so the answer is the
+// same shape as the print result a checkout reports (ADR-0017, keputusan 5). Like
+// the checkout and the sale read, it carries no role guard: CONTEXT.md gives the
+// Kasir "cetak Struk".
+func printSaleHandler(service SaleService, logger *slog.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		receiptNumber, ok := receiptNumberParam(w, r, logger)
+		if !ok {
+			return
+		}
+
+		printed, err := service.CetakStruk(r.Context(), receiptNumber)
+		if err != nil {
+			writeError(w, err, logger)
+			return
+		}
+
+		writeJSON(w, http.StatusOK, dataResponse{Data: printEnvelope{
+			Print: newPrintResponse(printed),
 		}}, logger)
 	}
 }

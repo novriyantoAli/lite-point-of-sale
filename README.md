@@ -34,8 +34,11 @@ go run ./cmd/server
 | `POS_SESSION_TTL` | `12h` | masa berlaku token sesi (ADR-0010) |
 | `POS_ADMIN_USERNAME` | `admin` | username Admin pertama |
 | `POS_ADMIN_PASSWORD` | `admin123` | password Admin pertama (dipakai hanya saat database masih kosong) |
+| `POS_PRINTER_DEVICE` | _(kosong)_ | path perangkat printer thermal, mis. `/dev/usb/lp0` — **tidak ada default** (ADR-0017) |
 
 Saat start, store yang belum punya Admin akan **menyemai satu Admin** dari `POS_ADMIN_*` — itu satu-satunya cara membuat Pengguna pertama, karena endpoint pembuat Pengguna sendiri hanya boleh dipanggil Admin. Kalau `POS_TOKEN_SECRET` atau `POS_ADMIN_PASSWORD` masih default, server mencatat peringatan di log.
+
+`POS_PRINTER_DEVICE` sengaja **tidak punya nilai default**: `/dev/usb/lp0` hanya benar di Linux, dan tebakan yang salah lebih buruk daripada keadaan "belum diatur" yang jujur. Kalau dibiarkan kosong, printer menjadi **null**: setiap cetak dilaporkan gagal dengan pesan "Printer belum diatur." di layar Kasir — Penjualan tetap tersimpan, dan tombol **Cetak ulang** di layar `/penjualan` (atau di panel setelah checkout) bisa dipakai setelah perangkatnya disetel (ADR-0017).
 
 **2. UI SvelteKit** (`:5173`):
 
@@ -50,7 +53,7 @@ pnpm dev
 | `BACKEND_URL` | `http://localhost:8080` | base URL API Go yang diproksi BFF |
 | `SESSION_MAX_AGE_SECONDS` | `43200` (12 jam) | umur cookie sesi — setidaknya sebesar `POS_SESSION_TTL` |
 
-Buka <http://localhost:5173> — tanpa sesi kamu diarahkan ke **/login**. Login dengan `admin` / `admin123` (atau nilai `POS_ADMIN_*` yang kamu set). Setelah masuk, kartu **Status layanan** menampilkan `OK` yang berasal dari Go lewat BFF (`/api/health` → Go → SQLite). Menu **Kasir** ada untuk kedua peran — temukan Produk lewat Kode (scan/ketik) atau nama, susun keranjang, lalu bayar Tunai atau non-tunai (QRIS/Debit/Transfer); Penjualan tersimpan bersama Nomor Struk, dan Stok berkurang sendiri. Tunai menghasilkan Kembalian; non-tunai dicatat sebesar total tanpa gateway (ADR-0016). Admin punya menu **Pengguna** untuk menambah Kasir atau menonaktifkan akun, menu **Produk** untuk mengelola katalog (tambah, ubah, Nonaktifkan, atau hapus selama belum pernah terjual), serta menu **Stok** untuk mencatat barang masuk dan melihat Produk yang Stok-nya menipis atau habis.
+Buka <http://localhost:5173> — tanpa sesi kamu diarahkan ke **/login**. Login dengan `admin` / `admin123` (atau nilai `POS_ADMIN_*` yang kamu set). Setelah masuk, kartu **Status layanan** menampilkan `OK` yang berasal dari Go lewat BFF (`/api/health` → Go → SQLite). Menu **Kasir** ada untuk kedua peran — temukan Produk lewat Kode (scan/ketik) atau nama, susun keranjang, lalu bayar Tunai atau non-tunai (QRIS/Debit/Transfer); Penjualan tersimpan bersama Nomor Struk, Stok berkurang sendiri, dan **Struk tercetak otomatis** ke printer thermal (ESC/POS) setelah Penjualan tersimpan. Tunai menghasilkan Kembalian; non-tunai dicatat sebesar total tanpa gateway (ADR-0016). Cetak yang gagal tidak menggagalkan Penjualan: pesannya muncul di layar dengan tombol **Cetak ulang**, dan menu **Penjualan** bisa membuka Penjualan lama lewat Nomor Struk lalu mencetaknya kembali memakai template Pengaturan saat ini (ADR-0017). Admin punya menu **Pengguna** untuk menambah Kasir atau menonaktifkan akun, menu **Produk** untuk mengelola katalog (tambah, ubah, Nonaktifkan, atau hapus selama belum pernah terjual), menu **Stok** untuk mencatat barang masuk dan melihat Produk yang Stok-nya menipis atau habis, serta menu **Pengaturan** untuk mengatur blok header/footer Struk, lebar kertas 58/80 mm, dan ambang Stok menipis.
 
 Sesi dipegang SvelteKit sebagai cookie httpOnly berisi token internal dari Go: browser tidak pernah melihat tokennya (ADR-0001, ADR-0006, ADR-0010).
 

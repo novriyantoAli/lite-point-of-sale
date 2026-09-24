@@ -41,20 +41,31 @@ func nonTunai(method string, productID, quantity, amount int64) CheckoutInput {
 	}
 }
 
+// saleOf runs a checkout and answers the Penjualan it stored, failing the test
+// when the checkout was refused. What the checkout printed is the subject of
+// cetak_test.go.
+func saleOf(t *testing.T, service *Service, input CheckoutInput) domainpenjualan.Sale {
+	t.Helper()
+
+	result, err := service.Checkout(context.Background(), kasir, input)
+	if err != nil {
+		t.Fatalf("checkout: %v", err)
+	}
+
+	return result.Sale
+}
+
 func TestCheckoutPricesTheCartFromTheCatalogue(t *testing.T) {
 	products := newFakeProducts(kopi(), teh())
 	sales := newFakeSales()
 
-	sale, err := newTestService(products, sales).Checkout(context.Background(), kasir, CheckoutInput{
+	sale := saleOf(t, newTestService(products, sales), CheckoutInput{
 		Items: []ItemInput{
 			{ProductID: 1, Quantity: 2},
 			{ProductID: 2, Quantity: 3},
 		},
 		Payment: PaymentInput{Method: "cash", Amount: 60000},
 	})
-	if err != nil {
-		t.Fatalf("checkout: %v", err)
-	}
 
 	if sale.Total != 2*18000+3*6000 {
 		t.Errorf("total: got %d, want %d", sale.Total, 2*18000+3*6000)
@@ -83,10 +94,7 @@ func TestCheckoutCopiesTheCashierAndAnswersTheStoredSale(t *testing.T) {
 	products := newFakeProducts(kopi())
 	sales := newFakeSales()
 
-	sale, err := newTestService(products, sales).Checkout(context.Background(), kasir, tunai(1, 1, 18000))
-	if err != nil {
-		t.Fatalf("checkout: %v", err)
-	}
+	sale := saleOf(t, newTestService(products, sales), tunai(1, 1, 18000))
 
 	if sale.CashierID != kasir.ID || sale.CashierName != kasir.Username {
 		t.Errorf("cashier: got %d/%q, want %d/%q", sale.CashierID, sale.CashierName, kasir.ID, kasir.Username)
@@ -156,10 +164,7 @@ func TestCheckoutAcceptsAPaymentOfExactlyTheTotal(t *testing.T) {
 	products := newFakeProducts(kopi())
 	sales := newFakeSales()
 
-	sale, err := newTestService(products, sales).Checkout(context.Background(), kasir, tunai(1, 1, 18000))
-	if err != nil {
-		t.Fatalf("checkout paid exactly: %v", err)
-	}
+	sale := saleOf(t, newTestService(products, sales), tunai(1, 1, 18000))
 
 	if sale.Payment.Change != 0 {
 		t.Errorf("Kembalian: got %d, want 0", sale.Payment.Change)
@@ -210,16 +215,13 @@ func TestCheckoutMergesRepeatedProdukIntoOneItem(t *testing.T) {
 	products := newFakeProducts(kopi())
 	sales := newFakeSales()
 
-	sale, err := newTestService(products, sales).Checkout(context.Background(), kasir, CheckoutInput{
+	sale := saleOf(t, newTestService(products, sales), CheckoutInput{
 		Items: []ItemInput{
 			{ProductID: 1, Quantity: 2},
 			{ProductID: 1, Quantity: 3},
 		},
 		Payment: PaymentInput{Method: "cash", Amount: 90000},
 	})
-	if err != nil {
-		t.Fatalf("checkout: %v", err)
-	}
 
 	// One Item of the summed quantity: an Item is one Produk (CONTEXT.md, Item).
 	if len(sale.Items) != 1 || sale.Items[0].Quantity != 5 {
@@ -300,11 +302,7 @@ func TestCheckoutRecordsANonTunaiPembayaran(t *testing.T) {
 
 			// The nominal of a non-tunai Pembayaran is the total of the Penjualan it
 			// pays for: one sale, one Pembayaran, no split (CONTEXT.md, Pembayaran).
-			sale, err := newTestService(products, sales).Checkout(context.Background(), kasir,
-				nonTunai(string(test.method), 1, 2, 36000))
-			if err != nil {
-				t.Fatalf("checkout: %v", err)
-			}
+			sale := saleOf(t, newTestService(products, sales), nonTunai(string(test.method), 1, 2, 36000))
 
 			if sale.Payment.Method != test.method {
 				t.Errorf("method: got %q, want %q", sale.Payment.Method, test.method)
@@ -411,10 +409,7 @@ func TestFindByReceiptNumberAnswersAStoredSale(t *testing.T) {
 	sales := newFakeSales()
 	service := newTestService(products, sales)
 
-	created, err := service.Checkout(context.Background(), kasir, tunai(1, 1, 18000))
-	if err != nil {
-		t.Fatalf("checkout: %v", err)
-	}
+	created := saleOf(t, service, tunai(1, 1, 18000))
 
 	stored, err := service.FindByReceiptNumber(context.Background(), created.ReceiptNumber)
 	if err != nil {

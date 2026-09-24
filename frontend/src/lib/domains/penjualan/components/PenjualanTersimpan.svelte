@@ -2,6 +2,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { createPenjualanDetailQuery } from '../queries/penjualan.queries';
 	import type { NomorStruk } from '../schemas/penjualan.schema';
+	import CetakStruk from './CetakStruk.svelte';
 	import RincianPenjualan from './RincianPenjualan.svelte';
 
 	/**
@@ -9,6 +10,9 @@
 	 * explicit: a skeleton while Go is answering, the message Go gave on a failure
 	 * (a Nomor Struk that names nothing is its readable 404, "Penjualan tidak
 	 * ditemukan."), and the record itself.
+	 *
+	 * The record carries the reprint: the way back to a Struk that was lost, and the
+	 * one the Kasir presses after a print that failed (ADR-0017, keputusan 5).
 	 */
 	let { nomorStruk }: { nomorStruk: NomorStruk } = $props();
 
@@ -28,7 +32,15 @@
 		<Button variant="outline" size="sm" onclick={() => void detail.refetch()}>Coba lagi</Button>
 	</div>
 {:else if detail.data}
-	<section class="rounded-lg border p-4" aria-label="Penjualan tersimpan">
+	<section class="space-y-4 rounded-lg border p-4" aria-label="Penjualan tersimpan">
 		<RincianPenjualan sale={detail.data} />
+
+		<!--
+			Keyed by the Nomor Struk: a second lookup is a different sale, and the
+			print result of the first must not follow it onto the screen.
+		-->
+		{#key nomorStruk}
+			<CetakStruk {nomorStruk} />
+		{/key}
 	</section>
 {/if}

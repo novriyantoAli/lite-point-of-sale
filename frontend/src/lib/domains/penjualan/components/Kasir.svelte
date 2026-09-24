@@ -3,7 +3,7 @@
 	import Pembayaran from './Pembayaran.svelte';
 	import PencarianProduk from './PencarianProduk.svelte';
 	import StrukPenjualan from './StrukPenjualan.svelte';
-	import type { Penjualan } from '../schemas/penjualan.schema';
+	import type { HasilCheckout } from '../schemas/penjualan.schema';
 	import { keranjangState } from '../state/keranjang.state.svelte';
 
 	/**
@@ -16,17 +16,17 @@
 	 * lookup and the payment form both work on the same draft without props threaded
 	 * between them.
 	 */
-	let sale = $state<Penjualan | null>(null);
+	let hasil = $state<HasilCheckout | null>(null);
 
-	function checkedOut(penjualan: Penjualan) {
-		sale = penjualan;
+	function checkedOut(checkedOut: HasilCheckout) {
+		hasil = checkedOut;
 		// The keranjang is emptied only once the Penjualan is stored: a refused
 		// checkout leaves the Kasir's work exactly where it was.
 		keranjangState.clear();
 	}
 
 	function startNew() {
-		sale = null;
+		hasil = null;
 	}
 </script>
 
@@ -38,8 +38,8 @@
 		</p>
 	</div>
 
-	{#if sale}
-		<StrukPenjualan {sale} onBaru={startNew} />
+	{#if hasil}
+		<StrukPenjualan sale={hasil.sale} cetak={hasil.print} onBaru={startNew} />
 	{:else}
 		<PencarianProduk onAdd={(produk) => keranjangState.add(produk)} />
 		<Keranjang />

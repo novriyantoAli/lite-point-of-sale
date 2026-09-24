@@ -325,7 +325,7 @@ describe('Kasir', () => {
 	it('records a non-tunai Pembayaran for the total, with nothing to type and no Kembalian', async () => {
 		serveCatalogue();
 		const qris = { ...sale, payment: { method: 'qris', amount: 36000, change: 0 } };
-		mock.onPost('/penjualan').reply(201, { data: { sale: qris } });
+		mock.onPost('/penjualan').reply(201, { data: { sale: qris, print: { printed: true } } });
 		const user = userEvent.setup();
 
 		renderKasir();
@@ -358,7 +358,7 @@ describe('Kasir', () => {
 
 	it('checks the keranjang out and shows the Penjualan that was recorded', async () => {
 		serveCatalogue();
-		mock.onPost('/penjualan').reply(201, { data: { sale } });
+		mock.onPost('/penjualan').reply(201, { data: { sale, print: { printed: true } } });
 		const user = userEvent.setup();
 
 		renderKasir();
@@ -390,6 +390,35 @@ describe('Kasir', () => {
 		await user.click(struk().getByRole('button', { name: 'Penjualan Baru' }));
 
 		expect(await screen.findByText(/Keranjang kosong/)).toBeInTheDocument();
+	});
+
+	it('shows a Struk that failed to print, with a button that prints it again', async () => {
+		serveCatalogue();
+		mock.onPost('/penjualan').reply(201, {
+			data: { sale, print: { printed: false, message: 'Printer belum diatur.' } }
+		});
+		mock.onPost('/penjualan/1/struk').reply(200, { data: { print: { printed: true } } });
+		const user = userEvent.setup();
+
+		renderKasir();
+		await screen.findByText(/Kopi Susu/);
+		await tambah(user, 'Kopi Susu');
+
+		await user.type(pembayaran().getByLabelText('Jumlah bayar'), '50000');
+		await user.click(pembayaran().getByRole('button', { name: 'Bayar & Simpan Penjualan' }));
+
+		// The sale is stored and on screen, and the failed print is reported with the
+		// message the API wrote — never swallowed (ADR-0017, keputusan 1).
+		expect(await struk().findByRole('alert')).toHaveTextContent('Printer belum diatur.');
+
+		// The retry goes through the same endpoint the automatic print used, and a
+		// print that succeeds clears the complaint.
+		await user.click(struk().getByRole('button', { name: 'Cetak ulang Struk' }));
+
+		await waitFor(() => expect(mock.history.post).toHaveLength(2));
+		expect(mock.history.post[1]!.url).toBe('/penjualan/1/struk');
+		expect(await struk().findByText('Struk tercetak.')).toBeInTheDocument();
+		expect(struk().queryByRole('alert')).not.toBeInTheDocument();
 	});
 
 	it('keeps the keranjang when the API refuses the checkout', async () => {

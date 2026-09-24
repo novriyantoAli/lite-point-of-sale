@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	domainpengaturan "github.com/novriyantoAli/lite-point-of-sale/backend/internal/domain/pengaturan"
 	domainpenjualan "github.com/novriyantoAli/lite-point-of-sale/backend/internal/domain/penjualan"
 	domainproduk "github.com/novriyantoAli/lite-point-of-sale/backend/internal/domain/produk"
 )
@@ -114,7 +115,49 @@ func (f *fakeSales) FindByReceiptNumber(_ context.Context, receiptNumber int64) 
 	return domainpenjualan.Sale{}, domainpenjualan.ErrSaleNotFound
 }
 
-// newTestService wires a Service over fresh fakes.
+// fakeSettings is an in-memory ReceiptSettings: the store's one Pengaturan row,
+// which is where the Struk template and paper width are read from. The use cases
+// are tested against this instead of SQLite (ADR-0007).
+type fakeSettings struct {
+	settings domainpengaturan.Settings
+	// err, when set, is returned by Get — for the path where the template cannot
+	// be read at all.
+	err error
+}
+
+func newFakeSettings() *fakeSettings {
+	return &fakeSettings{settings: domainpengaturan.Settings{ID: 1, PaperWidth: 80}}
+}
+
+func (f *fakeSettings) Get(context.Context) (domainpengaturan.Settings, error) {
+	if f.err != nil {
+		return domainpengaturan.Settings{}, f.err
+	}
+
+	return f.settings, nil
+}
+
+// fakePrinter records the lines it was asked to print, so a use case test can
+// assert on what the Struk said without a device (ADR-0017, keputusan 2).
+type fakePrinter struct {
+	printed [][]string
+	// err, when set, is returned by Print — the printer that is missing or broken.
+	err error
+}
+
+func (f *fakePrinter) Print(_ context.Context, lines []string) error {
+	if f.err != nil {
+		return f.err
+	}
+
+	f.printed = append(f.printed, lines)
+
+	return nil
+}
+
+// newTestService wires a Service over fresh fakes, with a printer that works and
+// the seeded Pengaturan. Tests that need to steer the printer or the settings
+// build the Service themselves.
 func newTestService(products *fakeProducts, sales *fakeSales) *Service {
-	return NewService(products, sales)
+	return NewService(products, sales, newFakeSettings(), &fakePrinter{})
 }

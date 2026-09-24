@@ -1,9 +1,13 @@
 import { apiClient } from '$lib/api/client';
 import {
+	CetakEnvelopeSchema,
+	CheckoutEnvelopeSchema,
 	CheckoutInputSchema,
 	NomorStrukSchema,
 	PenjualanEnvelopeSchema,
 	type CheckoutInput,
+	type HasilCetak,
+	type HasilCheckout,
 	type NomorStruk,
 	type Penjualan
 } from '../schemas/penjualan.schema';
@@ -22,8 +26,12 @@ export interface PenjualanApi {
 	 * Checks a cart out into a finished Penjualan. The API prices the Items from
 	 * the catalogue, refuses a cart the Stok cannot cover, and works out the
 	 * Kembalian — none of which this side sends or decides.
+	 *
+	 * It also prints the Struk, so the answer carries the sale *and* the outcome of
+	 * that print. A print that failed is reported, not turned into a failed
+	 * checkout (ADR-0017, keputusan 1).
 	 */
-	checkout(input: CheckoutInput): Promise<Penjualan>;
+	checkout(input: CheckoutInput): Promise<HasilCheckout>;
 	/**
 	 * One stored Penjualan, read by its Nomor Struk — what a reprint or a look-up
 	 * arrives with. Whether the number names a Penjualan is Go's answer: a number
@@ -31,18 +39,30 @@ export interface PenjualanApi {
 	 * ditemukan."), not as an empty Penjualan.
 	 */
 	getByReceiptNumber(nomorStruk: NomorStruk): Promise<Penjualan>;
+	/**
+	 * Prints the Struk of one stored Penjualan again, and answers whether the paper
+	 * came out. It is the same use case the checkout runs automatically, so a Kasir
+	 * whose first print failed retries through this one (ADR-0017, keputusan 5).
+	 */
+	cetakStruk(nomorStruk: NomorStruk): Promise<HasilCetak>;
 }
 
 export const penjualanApi: PenjualanApi = {
-	async checkout(input: CheckoutInput): Promise<Penjualan> {
+	async checkout(input: CheckoutInput): Promise<HasilCheckout> {
 		const { data } = await apiClient.post('/penjualan', CheckoutInputSchema.parse(input));
 
-		return PenjualanEnvelopeSchema.parse(data).data.sale;
+		return CheckoutEnvelopeSchema.parse(data).data;
 	},
 
 	async getByReceiptNumber(nomorStruk: NomorStruk): Promise<Penjualan> {
 		const { data } = await apiClient.get(`/penjualan/${NomorStrukSchema.parse(nomorStruk)}`);
 
 		return PenjualanEnvelopeSchema.parse(data).data.sale;
+	},
+
+	async cetakStruk(nomorStruk: NomorStruk): Promise<HasilCetak> {
+		const { data } = await apiClient.post(`/penjualan/${NomorStrukSchema.parse(nomorStruk)}/struk`);
+
+		return CetakEnvelopeSchema.parse(data).data.print;
 	}
 };

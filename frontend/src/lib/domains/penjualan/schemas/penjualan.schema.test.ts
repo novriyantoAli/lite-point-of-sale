@@ -1,7 +1,10 @@
 import { describe, expect, expectTypeOf, it } from 'vitest';
 import {
+	CetakEnvelopeSchema,
+	CheckoutEnvelopeSchema,
 	CheckoutInputSchema,
 	CheckoutItemSchema,
+	HasilCetakSchema,
 	JumlahBayarSchema,
 	METODE_LABEL,
 	NomorStrukSchema,
@@ -72,6 +75,48 @@ describe('PenjualanEnvelopeSchema', () => {
 		expect(parsed.receipt_number).toBe(sale.receipt_number);
 		expect(parsed.items).toEqual(sale.items);
 		expect(parsed.payment.method).toBe('qris');
+	});
+});
+
+describe('HasilCetakSchema', () => {
+	it('reads a Struk that printed, with no message', () => {
+		expect(HasilCetakSchema.parse({ printed: true })).toEqual({ printed: true });
+	});
+
+	it('reads a Struk that did not print, with the reason a Kasir can read', () => {
+		expect(HasilCetakSchema.parse({ printed: false, message: 'Printer belum diatur.' })).toEqual({
+			printed: false,
+			message: 'Printer belum diatur.'
+		});
+	});
+
+	it('refuses an answer that does not say whether the Struk printed', () => {
+		expect(() => HasilCetakSchema.parse({ message: 'entah' })).toThrow();
+	});
+});
+
+describe('CheckoutEnvelopeSchema', () => {
+	it('reads the sale a checkout stored together with the result of its print', () => {
+		const parsed = CheckoutEnvelopeSchema.parse({
+			data: { sale, print: { printed: false, message: 'Printer belum diatur.' } }
+		});
+
+		expect(parsed.data.sale).toEqual(sale);
+		expect(parsed.data.print).toEqual({ printed: false, message: 'Printer belum diatur.' });
+	});
+
+	it('refuses a checkout answer with no print result', () => {
+		// A checkout always prints, so an answer that does not say how that went
+		// would hide a failed print from the Kasir (ADR-0017, keputusan 1).
+		expect(() => CheckoutEnvelopeSchema.parse({ data: { sale } })).toThrow();
+	});
+});
+
+describe('CetakEnvelopeSchema', () => {
+	it('reads the outcome of a reprint', () => {
+		expect(CetakEnvelopeSchema.parse({ data: { print: { printed: true } } }).data.print).toEqual({
+			printed: true
+		});
 	});
 });
 

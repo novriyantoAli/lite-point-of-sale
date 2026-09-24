@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/novriyantoAli/lite-point-of-sale/backend/internal/adapter/escpos"
 	"github.com/novriyantoAli/lite-point-of-sale/backend/internal/adapter/httpapi"
 	"github.com/novriyantoAli/lite-point-of-sale/backend/internal/adapter/password"
 	adaptersqlite "github.com/novriyantoAli/lite-point-of-sale/backend/internal/adapter/sqlite"
@@ -88,7 +89,17 @@ func New(ctx context.Context, cfg config.Config, logger *slog.Logger) (*App, err
 	settingsService := usecasepengaturan.NewService(adaptersqlite.NewSettingsRepository(db))
 	productService := usecaseproduk.NewService(productRepository, settingsService)
 
-	saleService := usecasepenjualan.NewService(productRepository, adaptersqlite.NewSaleRepository(db))
+	// The printer of this store: a device path when POS_PRINTER_DEVICE is set, and
+	// the honest null printer when it is not (ADR-0017, keputusan 2). The same
+	// Pengaturan service is read by the checkout for the Struk template.
+	printer := escpos.New(cfg.PrinterDevice)
+
+	saleService := usecasepenjualan.NewService(
+		productRepository,
+		adaptersqlite.NewSaleRepository(db),
+		settingsService,
+		printer,
+	)
 
 	return &App{
 		handler:  httpapi.NewRouter(healthChecker, authService, productService, saleService, settingsService, logger),

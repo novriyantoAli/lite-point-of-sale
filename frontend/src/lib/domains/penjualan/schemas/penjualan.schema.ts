@@ -144,6 +144,44 @@ export const PenjualanEnvelopeSchema = z.object({
 });
 
 /**
+ * The outcome of printing a Struk: whether the paper came out, and — when it did
+ * not — the reason a Kasir can read.
+ *
+ * Both print paths answer this same shape (ADR-0017, keputusan 5): the automatic
+ * print a checkout reports, and the reprint of a sale that already happened.
+ */
+export const HasilCetakSchema = z.object({
+	printed: z.boolean(),
+	/**
+	 * The reason a Struk did not come out, written for the person at the till. The
+	 * API leaves it out on success, so it is optional rather than an empty string.
+	 */
+	message: z.string().optional()
+});
+export type HasilCetak = z.infer<typeof HasilCetakSchema>;
+
+/**
+ * The answer to a checkout: the Penjualan it stored, and the result of the Struk
+ * print that followed it.
+ *
+ * The print is reported, never allowed to fail the sale — the money has already
+ * moved, and a Struk is a document that can be issued again (ADR-0017,
+ * keputusan 1).
+ */
+export const CheckoutEnvelopeSchema = z.object({
+	data: z.object({
+		sale: PenjualanSchema,
+		print: HasilCetakSchema
+	})
+});
+export type HasilCheckout = z.infer<typeof CheckoutEnvelopeSchema>['data'];
+
+/** The answer to a reprint: the outcome of the print, and nothing else. */
+export const CetakEnvelopeSchema = z.object({
+	data: z.object({ print: HasilCetakSchema })
+});
+
+/**
  * The Nomor Struk a person types into the lookup screen. It is the rule Go
  * applies to the path itself (`receiptNumberParam`): a whole number more than
  * zero. Keeping it here lets the field refuse "abc" without a round trip, while

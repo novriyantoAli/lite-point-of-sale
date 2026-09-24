@@ -9,6 +9,7 @@ import (
 
 	domainpenjualan "github.com/novriyantoAli/lite-point-of-sale/backend/internal/domain/penjualan"
 	domainproduk "github.com/novriyantoAli/lite-point-of-sale/backend/internal/domain/produk"
+	domainstruk "github.com/novriyantoAli/lite-point-of-sale/backend/internal/domain/struk"
 )
 
 // ItemInput is one line of a cart: which Produk, and how many units.
@@ -71,11 +72,23 @@ type Service struct {
 	// interface over the same table would be a second thing to keep in step.
 	products domainproduk.ProductRepository
 	sales    domainpenjualan.SaleRepository
+	// settings answers the store's Pengaturan, which is where the Struk template
+	// and paper width live (ADR-0017).
+	settings ReceiptSettings
+	// printer is the thermal printer a Struk is sent to. A store with no printer
+	// configured still has a printer: the null one, which reports a failure rather
+	// than crashing or pretending (ADR-0017, keputusan 2).
+	printer domainstruk.Printer
 }
 
 // NewService wires the Penjualan use cases to their ports.
-func NewService(products domainproduk.ProductRepository, sales domainpenjualan.SaleRepository) *Service {
-	return &Service{products: products, sales: sales}
+func NewService(
+	products domainproduk.ProductRepository,
+	sales domainpenjualan.SaleRepository,
+	settings ReceiptSettings,
+	printer domainstruk.Printer,
+) *Service {
+	return &Service{products: products, sales: sales, settings: settings, printer: printer}
 }
 
 // FindByReceiptNumber answers one stored Penjualan by its Nomor Struk. It is the

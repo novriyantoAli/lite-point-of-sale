@@ -3,7 +3,13 @@ import { createMutation, createQuery, useQueryClient } from '@tanstack/svelte-qu
 import type { AppError } from '$lib/api/errors';
 import { produkKeys } from '$lib/domains/produk';
 import { penjualanApi } from '../api/penjualan.api';
-import type { CheckoutInput, NomorStruk, Penjualan } from '../schemas/penjualan.schema';
+import type {
+	CheckoutInput,
+	HasilCetak,
+	HasilCheckout,
+	NomorStruk,
+	Penjualan
+} from '../schemas/penjualan.schema';
 
 /**
  * The cache keys of the Penjualan domain, in the one scheme every domain shares:
@@ -53,11 +59,27 @@ export function createPenjualanDetailQuery(nomorStruk: () => NomorStruk) {
 export function createCheckoutMutation() {
 	const queryClient = useQueryClient();
 
-	return createMutation<Penjualan, AppError, CheckoutInput>(() => ({
+	return createMutation<HasilCheckout, AppError, CheckoutInput>(() => ({
 		mutationFn: (input: CheckoutInput) => penjualanApi.checkout(input),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: produkKeys.all });
 			queryClient.invalidateQueries({ queryKey: penjualanKeys.all });
 		}
+	}));
+}
+
+/**
+ * Prints the Struk of one stored Penjualan again: what the Kasir presses when the
+ * automatic print failed, and what `/penjualan` offers for a sale that already
+ * happened. It is the same endpoint the checkout's automatic print goes through,
+ * so both answer the same `{printed, message}` (ADR-0017, keputusan 5).
+ *
+ * Nothing is invalidated: printing changes no server state the app caches. The
+ * Penjualan and the catalogue are exactly as they were, and the print result is
+ * the answer the caller shows.
+ */
+export function createCetakStrukMutation() {
+	return createMutation<HasilCetak, AppError, NomorStruk>(() => ({
+		mutationFn: (nomorStruk: NomorStruk) => penjualanApi.cetakStruk(nomorStruk)
 	}));
 }

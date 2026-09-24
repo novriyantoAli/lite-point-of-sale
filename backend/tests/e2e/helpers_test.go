@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"path/filepath"
 	"strconv"
 	"testing"
@@ -32,16 +33,29 @@ const testSecret = "rahasia-uji-e2e"
 
 // newTestConfig is config.Default() with what a test has to decide itself: an
 // ephemeral database, an ephemeral port and credentials of its own.
+//
+// It also points POS_PRINTER_DEVICE at a file of its own. That file stands in for
+// the thermal printer, so the e2e suite exercises the *success* path of a print —
+// the bytes really reach a device — instead of only ever testing the failure
+// (ADR-0017). A test that wants no printer clears PrinterDevice.
 func newTestConfig(t *testing.T) config.Config {
 	t.Helper()
 
+	dir := t.TempDir()
+
 	cfg := config.Default()
 	cfg.HTTPAddr = ":0"
-	cfg.DBPath = filepath.Join(t.TempDir(), "pos.db")
+	cfg.DBPath = filepath.Join(dir, "pos.db")
 	cfg.TokenSecret = testSecret
 	cfg.SessionTTL = time.Hour
 	cfg.AdminUsername = seededAdmin
 	cfg.AdminPassword = testAdminPassword
+
+	printer := filepath.Join(dir, "printer.bin")
+	if err := os.WriteFile(printer, nil, 0o600); err != nil {
+		t.Fatalf("create the printer file: %v", err)
+	}
+	cfg.PrinterDevice = printer
 
 	return cfg
 }

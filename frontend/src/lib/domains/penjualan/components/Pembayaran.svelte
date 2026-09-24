@@ -9,8 +9,8 @@
 		METODE_LABEL,
 		METODE_URUT,
 		punyaKembalian,
-		type MetodePembayaran,
-		type Penjualan
+		type HasilCheckout,
+		type MetodePembayaran
 	} from '../schemas/penjualan.schema';
 	import { keranjangState } from '../state/keranjang.state.svelte';
 
@@ -25,7 +25,7 @@
 	 * (CONTEXT.md, Pembayaran). That is why the amount field and the Kembalian
 	 * belong to Tunai alone.
 	 */
-	let { onCheckedOut }: { onCheckedOut: (sale: Penjualan) => void } = $props();
+	let { onCheckedOut }: { onCheckedOut: (hasil: HasilCheckout) => void } = $props();
 
 	const checkout = createCheckoutMutation();
 
@@ -117,14 +117,14 @@
 		}
 
 		try {
-			const sale = await checkout.mutateAsync({
+			const hasil = await checkout.mutateAsync({
 				items: keranjangState.items.map((item) => ({
 					product_id: item.produk.id,
 					quantity: item.qty
 				})),
 				payment: { method, amount: paid }
 			});
-			onCheckedOut(sale);
+			onCheckedOut(hasil);
 		} catch {
 			// `checkout.error` carries the normalized message, rendered below.
 		}

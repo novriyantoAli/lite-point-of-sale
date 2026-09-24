@@ -4,11 +4,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import QueryClientHarness from '$lib/testing/QueryClientHarness.svelte';
 import PencarianPenjualan from './PencarianPenjualan.svelte';
 
-const { getByReceiptNumber } = vi.hoisted(() => ({ getByReceiptNumber: vi.fn() }));
+const { cetakStruk, getByReceiptNumber } = vi.hoisted(() => ({
+	cetakStruk: vi.fn(),
+	getByReceiptNumber: vi.fn()
+}));
 
 // The api layer is the seam: components never see axios (ADR-0007).
 vi.mock('../api/penjualan.api', () => ({
-	penjualanApi: { checkout: vi.fn(), getByReceiptNumber }
+	penjualanApi: { checkout: vi.fn(), getByReceiptNumber, cetakStruk }
 }));
 
 /** A Penjualan stored under Nomor Struk 7, paid in Tunai with 14000 back. */
@@ -213,5 +216,23 @@ describe('PencarianPenjualan', () => {
 
 		expect(await screen.findByText('Nomor Struk harus lebih dari nol.')).toBeInTheDocument();
 		expect(getByReceiptNumber).not.toHaveBeenCalled();
+	});
+
+	it('prints the Struk of the found Penjualan, and reports a print that failed', async () => {
+		getByReceiptNumber.mockResolvedValue(sale);
+		cetakStruk.mockResolvedValue({ printed: false, message: 'Printer belum diatur.' });
+		const user = userEvent.setup();
+
+		renderScreen();
+		await cari(user, '7');
+
+		const record = await hasil();
+		await user.click(record.getByRole('button', { name: 'Cetak Struk' }));
+
+		// The reprint goes through the sale's own Nomor Struk, and the failure is
+		// shown on the screen with a button that prints again (ADR-0017).
+		expect(cetakStruk).toHaveBeenCalledWith(7);
+		expect(await record.findByRole('alert')).toHaveTextContent('Printer belum diatur.');
+		expect(await record.findByRole('button', { name: 'Cetak ulang Struk' })).toBeEnabled();
 	});
 });
