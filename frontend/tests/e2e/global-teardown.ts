@@ -15,11 +15,18 @@ import type { FullConfig } from '@playwright/test';
 export default async function globalTeardown(config: FullConfig) {
 	const dbPath = config.metadata.e2eDbPath as string;
 	const printerPath = config.metadata.e2ePrinterPath as string;
+	const backupDir = config.metadata.e2eBackupDir as string;
 
 	// WAL mode leaves -wal and -shm beside the database; all three go. `force`
 	// makes a missing file a no-op. The printer file is a plain file of ESC/POS
-	// bytes.
-	await Promise.all(
-		[dbPath, `${dbPath}-wal`, `${dbPath}-shm`, printerPath].map((file) => rm(file, { force: true }))
-	);
+	// bytes. The backup folder is removed whole: the snapshots are test data.
+	await Promise.all([
+		...[
+			dbPath,
+			`${dbPath}-wal`,
+			`${dbPath}-shm`,
+			printerPath
+		].map((file) => rm(file, { force: true })),
+		rm(backupDir, { recursive: true, force: true })
+	]);
 }

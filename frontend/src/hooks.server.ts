@@ -6,7 +6,7 @@ import { readSession } from '$lib/server/backend';
  * can type a URL — so the check runs here, on the server, before anything is
  * rendered.
  */
-const ADMIN_ONLY = ['/produk', '/stok', '/pengguna', '/pengaturan', '/laporan'];
+const ADMIN_ONLY = ['/produk', '/stok', '/pengguna', '/pengaturan', '/laporan', '/backup'];
 
 const LOGIN_ROUTE = '/login';
 

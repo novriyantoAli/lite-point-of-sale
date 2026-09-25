@@ -3,6 +3,7 @@ package config
 
 import (
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -36,6 +37,12 @@ type Config struct {
 	// (ADR-0017, keputusan 2). Empty means the null printer, which reports every
 	// print as a failure rather than crashing or succeeding silently.
 	PrinterDevice string
+	// BackupDir is the folder snapshots of the database are written to (issue
+	// #10). One store, one terminal (ADR-0002), so one folder holds all of them.
+	BackupDir string
+	// BackupRetentionDays is how many days of backups to keep before the oldest
+	// are pruned. It has to be at least one: a window of zero would keep nothing.
+	BackupRetentionDays int
 }
 
 // Default returns the configuration a development machine runs with. Tests
@@ -49,7 +56,9 @@ func Default() Config {
 		AdminUsername: "admin",
 		AdminPassword: DevAdminPassword,
 		// No printer is configured by default: see Config.PrinterDevice.
-		PrinterDevice: "",
+		PrinterDevice:       "",
+		BackupDir:           "./data/backup",
+		BackupRetentionDays: 7,
 	}
 }
 
@@ -64,6 +73,8 @@ func Load() Config {
 	cfg.AdminUsername = envOr("POS_ADMIN_USERNAME", cfg.AdminUsername)
 	cfg.AdminPassword = envOr("POS_ADMIN_PASSWORD", cfg.AdminPassword)
 	cfg.PrinterDevice = envOr("POS_PRINTER_DEVICE", cfg.PrinterDevice)
+	cfg.BackupDir = envOr("POS_BACKUP_DIR", cfg.BackupDir)
+	cfg.BackupRetentionDays = intOr("POS_BACKUP_RETENTION_DAYS", cfg.BackupRetentionDays)
 
 	return cfg
 }
@@ -86,6 +97,24 @@ func durationOr(key string, fallback time.Duration) time.Duration {
 	}
 
 	parsed, err := time.ParseDuration(value)
+	if err != nil || parsed <= 0 {
+		return fallback
+	}
+
+	return parsed
+}
+
+// intOr reads a positive integer such as "7". A value that does not parse, or
+// is not positive, falls back rather than stopping the process — a backup window
+// of zero or less would silently keep no backups at all, which is a worse
+// failure than running the default.
+func intOr(key string, fallback int) int {
+	value := os.Getenv(key)
+	if value == "" {
+		return fallback
+	}
+
+	parsed, err := strconv.Atoi(value)
 	if err != nil || parsed <= 0 {
 		return fallback
 	}

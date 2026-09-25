@@ -27,7 +27,7 @@ type HealthChecker interface {
 }
 
 // NewRouter returns the API router with every route the service exposes.
-func NewRouter(healthChecker HealthChecker, auth AuthService, products ProductService, sales SaleService, settings SettingsService, logger *slog.Logger) http.Handler {
+func NewRouter(healthChecker HealthChecker, auth AuthService, products ProductService, sales SaleService, settings SettingsService, backups BackupService, logger *slog.Logger) http.Handler {
 	mux := http.NewServeMux()
 
 	// Public: a liveness and readiness probe, and the one route the UI reads
@@ -93,6 +93,12 @@ func NewRouter(healthChecker HealthChecker, auth AuthService, products ProductSe
 	// template and the ambang Stok menipis. Read and write are both Admin-only.
 	mux.Handle("GET /api/pengaturan", adminOnly(getSettingsHandler(settings, logger)))
 	mux.Handle("PUT /api/pengaturan", adminOnly(updateSettingsHandler(settings, logger)))
+
+	// Backup is the Admin's safety net (issue #10): a manual export now, and the
+	// list of what the store has kept. The daily automatic backup is driven by
+	// the scheduler, not by this route — but both take the same snapshot.
+	mux.Handle("GET /api/backup", adminOnly(listBackupHandler(backups, logger)))
+	mux.Handle("POST /api/backup", adminOnly(createBackupHandler(backups, logger)))
 
 	return mux
 }

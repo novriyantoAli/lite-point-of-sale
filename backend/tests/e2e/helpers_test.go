@@ -57,6 +57,10 @@ func newTestConfig(t *testing.T) config.Config {
 	}
 	cfg.PrinterDevice = printer
 
+	// The daily backup writes here, so the test's snapshots stay inside the
+	// ephemeral dir instead of leaking into the repo's ./data/backup.
+	cfg.BackupDir = filepath.Join(dir, "backup")
+
 	return cfg
 }
 

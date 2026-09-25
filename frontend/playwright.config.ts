@@ -28,6 +28,16 @@ const E2E_DB_PATH = fileURLToPath(
 const E2E_PRINTER_PATH = fileURLToPath(
 	new URL(`../backend/data/e2e-printer-${process.pid}.bin`, import.meta.url)
 );
+/**
+ * The folder the Go API writes its automatic and manual backup snapshots into.
+ * Pointing it here keeps a browser run from writing into the repo's
+ * ./data/backup — the suite gets a folder of its own, removed by
+ * global-teardown.ts. The adapter creates it on its first snapshot, so there is
+ * no setup hook for it.
+ */
+const E2E_BACKUP_DIR = fileURLToPath(
+	new URL(`../backend/data/e2e-backup-${process.pid}`, import.meta.url)
+);
 
 const SVELTEKIT_PORT = 3000;
 const GO_API_PORT = 8080;
@@ -55,7 +65,7 @@ export default defineConfig({
 	testDir: './tests/e2e',
 	// The store this run uses and the printer file it prints to; global-teardown.ts
 	// reads both from here — one source of truth for paths two files need.
-	metadata: { e2eDbPath: E2E_DB_PATH, e2ePrinterPath: E2E_PRINTER_PATH },
+	metadata: { e2eDbPath: E2E_DB_PATH, e2ePrinterPath: E2E_PRINTER_PATH, e2eBackupDir: E2E_BACKUP_DIR },
 	globalSetup: './tests/e2e/global-setup.ts',
 	globalTeardown: './tests/e2e/global-teardown.ts',
 	forbidOnly: !!process.env.CI,
@@ -77,7 +87,10 @@ export default defineConfig({
 				POS_ADMIN_USERNAME: E2E_ADMIN_USERNAME,
 				POS_ADMIN_PASSWORD: E2E_ADMIN_PASSWORD,
 				// The printer the suite prints to: the file above, not a device.
-				POS_PRINTER_DEVICE: E2E_PRINTER_PATH
+				POS_PRINTER_DEVICE: E2E_PRINTER_PATH,
+				// The backup folder the suite snapshots into: a run of its own,
+				// not the repo's default.
+				POS_BACKUP_DIR: E2E_BACKUP_DIR
 			},
 			url: `http://127.0.0.1:${GO_API_PORT}/api/health`,
 			reuseExistingServer: false,

@@ -10,15 +10,19 @@ import (
 	"log/slog"
 	"net/http"
 	"sync"
+	"time"
 
+	adapterbackup "github.com/novriyantoAli/lite-point-of-sale/backend/internal/adapter/backup"
 	"github.com/novriyantoAli/lite-point-of-sale/backend/internal/adapter/escpos"
 	"github.com/novriyantoAli/lite-point-of-sale/backend/internal/adapter/httpapi"
 	"github.com/novriyantoAli/lite-point-of-sale/backend/internal/adapter/password"
 	adaptersqlite "github.com/novriyantoAli/lite-point-of-sale/backend/internal/adapter/sqlite"
 	"github.com/novriyantoAli/lite-point-of-sale/backend/internal/adapter/token"
 	"github.com/novriyantoAli/lite-point-of-sale/backend/internal/infrastructure/config"
+	"github.com/novriyantoAli/lite-point-of-sale/backend/internal/infrastructure/scheduler"
 	"github.com/novriyantoAli/lite-point-of-sale/backend/internal/infrastructure/sqlite"
 	usecaseauth "github.com/novriyantoAli/lite-point-of-sale/backend/internal/usecase/auth"
+	usecasebackup "github.com/novriyantoAli/lite-point-of-sale/backend/internal/usecase/backup"
 	usecasehealth "github.com/novriyantoAli/lite-point-of-sale/backend/internal/usecase/health"
 	usecasepengaturan "github.com/novriyantoAli/lite-point-of-sale/backend/internal/usecase/pengaturan"
 	usecasepenjualan "github.com/novriyantoAli/lite-point-of-sale/backend/internal/usecase/penjualan"
@@ -30,9 +34,19 @@ type App struct {
 	handler  http.Handler
 	database *sql.DB
 
+	// backupCancel stops the daily backup goroutine; backupDone reports it has
+	// exited, so Close can release the database without racing a snapshot.
+	backupCancel context.CancelFunc
+	backupDone   chan struct{}
+
 	closeOnce sync.Once
 	closeErr  error
 }
+
+// backupInterval is how often the automatic backup runs: once a day. The
+// scheduler runs it once at startup too, so a fresh store already has a
+// snapshot before its first sale (issue #10).
+const backupInterval = 24 * time.Hour
 
 // New opens the database, applies migrations, seeds the first Admin Pengguna if
 // the store has none, and wires the HTTP API.
@@ -101,9 +115,29 @@ func New(ctx context.Context, cfg config.Config, logger *slog.Logger) (*App, err
 		printer,
 	)
 
+	// Backup is the store's safety net: a manual export through the API and a
+	// daily snapshot driven by the scheduler. Both take the same snapshot, so a
+	// backup is a backup regardless of who asked for it (issue #10).
+	backupService := usecasebackup.NewService(
+		adapterbackup.NewRepository(db, cfg.BackupDir),
+		cfg.BackupRetentionDays,
+	)
+
+	backupCtx, backupCancel := context.WithCancel(context.Background())
+	backupDone := make(chan struct{})
+	go func() {
+		defer close(backupDone)
+		scheduler.Run(backupCtx, func(ctx context.Context) error {
+			_, err := backupService.Create(ctx)
+			return err
+		}, backupInterval, logger)
+	}()
+
 	return &App{
-		handler:  httpapi.NewRouter(healthChecker, authService, productService, saleService, settingsService, logger),
-		database: db,
+		handler:      httpapi.NewRouter(healthChecker, authService, productService, saleService, settingsService, backupService, logger),
+		database:     db,
+		backupCancel: backupCancel,
+		backupDone:   backupDone,
 	}, nil
 }
 
@@ -112,9 +146,12 @@ func (a *App) Handler() http.Handler {
 	return a.handler
 }
 
-// Close releases the database. It is safe to call more than once.
+// Close releases the database. It is safe to call more than once. The daily
+// backup goroutine is stopped first and joined, so no snapshot races the close.
 func (a *App) Close() error {
 	a.closeOnce.Do(func() {
+		a.backupCancel()
+		<-a.backupDone
 		a.closeErr = a.database.Close()
 	})
 	return a.closeErr

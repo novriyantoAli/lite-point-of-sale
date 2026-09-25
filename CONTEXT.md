@@ -60,6 +60,10 @@ _Avoid_: Manager, owner
 Setelan satu toko yang diubah Admin — template **Struk** (blok header & footer, lebar kertas 58/80 mm) dan ambang **Stok menipis**. Disimpan sebagai satu baris.
 _Avoid_: konfigurasi, preferensi
 
+**Backup**:
+Snapshot file SQLite toko yang disimpan ke folder backup — dibuat otomatis setiap hari dan bisa diambil manual oleh Admin (disebut juga *export* manual). Hanya snapshot N hari terakhir yang disimpan; yang lebih tua dihapus.
+_Avoid_: Cadangan (sebagai istilah terpisah)
+
 **Kategori**:
 Label opsional satu level untuk mengelompokkan Produk; hanya untuk filter/pengelompokan di daftar produk, tidak memengaruhi harga.
 _Avoid_: Group, jenis
