@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="id">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Beranda — Japanese High-Density Grid</title>
+		<link rel="stylesheet" href="../sistem/style.css" />
+	</head>
+	<body>
+		<div class="bar">
+			<p>
+				<b>Prototipe arah</b> — dunia <b>Japanese High-Density Grid</b>, layar Beranda. Isi di
+				sini <b>contoh</b>, bukan data toko.
+			</p>
+			<p><a href="../kasir/index.html">layar Kasir</a></p>
+		</div>
+
+		<nav class="rail" aria-label="Navigasi utama">
+			<div class="rail__top">
+				<span class="rail__brand">Lite Point of Sale</span>
+				<span class="rail__who">
+					<span class="tnum">admin</span>
+					<span class="tag tag--quiet">Admin</span>
+					<button class="btn" type="button">Keluar</button>
+				</span>
+			</div>
+			<div class="rail__row">
+				<a class="tab" href="../beranda/index.html" aria-current="page">Beranda</a>
+				<a class="tab" href="../kasir/index.html">Kasir</a>
+				<a class="tab" href="../penjualan/index.html">Penjualan</a>
+			</div>
+			<div class="rail__row">
+				<a class="tab" href="../produk/index.html">Produk <span class="tab__n">24</span></a>
+				<a class="tab" href="../stok/index.html">Stok <span class="tab__n">4</span></a>
+				<a class="tab" href="../laporan/index.html">Laporan</a>
+				<a class="tab" href="../pengguna/index.html">Pengguna</a>
+				<a class="tab" href="../pengaturan/index.html">Pengaturan</a>
+				<a class="tab" href="../backup/index.html">Backup</a>
+			</div>
+		</nav>
+
+		<main class="board board--full">
+			<div class="strip">
+				<h1 class="strip__title">Beranda</h1>
+				<p class="strip__desc">Kasir untuk satu toko, satu terminal.</p>
+			</div>
+
+			<section class="col" aria-labelledby="status-judul">
+				<div class="mod mod--head">
+					<h2 class="mod__title" id="status-judul">Status layanan</h2>
+					<span class="mod__note">diperiksa dari API Go</span>
+				</div>
+				<div class="mod">
+					<span class="tag">OK</span>
+					<p class="note" style="margin-top: 6px">
+						Basis data: SQLite · siap dipakai. Printer termal belum diatur.
+					</p>
+				</div>
+			</section>
+
+			<section class="col" aria-labelledby="mulai-judul" style="margin-top: 8px">
+				<div class="mod mod--head">
+					<h2 class="mod__title" id="mulai-judul">Dari satu layar</h2>
+					<span class="mod__note">tanpa menu tersembunyi</span>
+				</div>
+				<div class="mod">
+					<p class="note">
+						Semua pekerjaan toko ada di rel atas: <b>Kasir</b> untuk melayani pembeli,
+						<b>Produk</b> dan <b>Stok</b> untuk barang, <b>Laporan</b> untuk omzet harian, lalu
+						<b>Pengguna</b>, <b>Pengaturan</b>, dan <b>Backup</b>.
+					</p>
+				</div>
+			</section>
+		</main>
+	</body>
+</html>

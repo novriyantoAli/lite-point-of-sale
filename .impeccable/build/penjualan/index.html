@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="id">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Penjualan — Japanese High-Density Grid</title>
+		<link rel="stylesheet" href="../sistem/style.css" />
+	</head>
+	<body>
+		<div class="bar">
+			<p>
+				<b>Prototipe arah</b> — dunia <b>Japanese High-Density Grid</b>, layar Penjualan. Isi di
+				sini <b>contoh</b>, bukan data toko.
+			</p>
+			<p><a href="../kasir/index.html">layar Kasir</a></p>
+		</div>
+
+		<nav class="rail" aria-label="Navigasi utama">
+			<div class="rail__top">
+				<span class="rail__brand">Lite Point of Sale</span>
+				<span class="rail__who">
+					<span class="tnum">admin</span>
+					<span class="tag tag--quiet">Admin</span>
+					<button class="btn" type="button">Keluar</button>
+				</span>
+			</div>
+			<div class="rail__row">
+				<a class="tab" href="../beranda/index.html">Beranda</a>
+				<a class="tab" href="../kasir/index.html">Kasir</a>
+				<a class="tab" href="../penjualan/index.html" aria-current="page">Penjualan</a>
+			</div>
+			<div class="rail__row">
+				<a class="tab" href="../produk/index.html">Produk <span class="tab__n">24</span></a>
+				<a class="tab" href="../stok/index.html">Stok <span class="tab__n">4</span></a>
+				<a class="tab" href="../laporan/index.html">Laporan</a>
+				<a class="tab" href="../pengguna/index.html">Pengguna</a>
+				<a class="tab" href="../pengaturan/index.html">Pengaturan</a>
+				<a class="tab" href="../backup/index.html">Backup</a>
+			</div>
+		</nav>
+
+		<main class="board board--full">
+			<div class="strip">
+				<h1 class="strip__title">Penjualan</h1>
+				<p class="strip__desc">Buka Penjualan yang tersimpan lewat Nomor Struk-nya.</p>
+			</div>
+
+			<section class="col" aria-labelledby="cari-judul">
+				<div class="mod mod--head">
+					<h2 class="mod__title" id="cari-judul">Cari Penjualan</h2>
+					<span class="mod__note">Nomor Struk tercetak di Struk</span>
+				</div>
+				<div class="mod">
+					<div class="formgrid">
+						<div class="field">
+							<label class="field__label" for="nomor">Nomor Struk</label>
+							<input id="nomor" class="input tnum" inputmode="numeric" autocomplete="off" value="6" />
+						</div>
+						<div class="field" style="align-self: end">
+							<button class="btn btn--solid" type="button">Cari</button>
+						</div>
+					</div>
+					<p class="note" style="margin-top: 6px">
+						Angka yang sama dipakai untuk cetak ulang Struk.
+					</p>
+				</div>
+			</section>
+
+			<section class="col" aria-labelledby="tersimpan-judul" style="margin-top: 8px">
+				<div class="mod mod--head">
+					<h2 class="mod__title" id="tersimpan-judul">Penjualan tersimpan</h2>
+					<span class="tag">tersegel</span>
+				</div>
+				<div class="mod">
+					<p class="note">
+						Nomor Struk <b class="tnum">6</b> · 2026-09-25 14:30 · Kasir admin
+					</p>
+				</div>
+				<div class="stack">
+					<div class="row" style="grid-template-columns: 1fr auto">
+						<span class="row__name">Kabel NYM 3x2.5 mm <span class="tnum">· 5 × Rp 18.500</span></span>
+						<span class="row__sub tnum">Rp 92.500</span>
+					</div>
+					<div class="row" style="grid-template-columns: 1fr auto">
+						<span class="row__name">Saklar Panasonic 1 Gang <span class="tnum">· 2 × Rp 22.000</span></span>
+						<span class="row__sub tnum">Rp 44.000</span>
+					</div>
+				</div>
+				<div class="total">
+					<span class="total__label">Total</span>
+					<span class="total__value tnum">Rp 136.500</span>
+				</div>
+				<div class="mod">
+					<p class="field__label">Bayar · Tunai</p>
+					<p class="figure tnum" style="margin-top: 3px">Rp 150.000</p>
+				</div>
+				<div class="mod">
+					<p class="field__label">Kembalian</p>
+					<p class="figure tnum" style="margin-top: 3px">Rp 13.500</p>
+				</div>
+				<div class="mod">
+					<p class="note note--warn">Printer belum diatur. Penjualan tetap tersimpan.</p>
+					<button class="btn btn--solid" type="button" style="margin-top: 8px">Cetak ulang Struk</button>
+				</div>
+			</section>
+		</main>
+	</body>
+</html>
