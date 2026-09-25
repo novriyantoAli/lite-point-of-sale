@@ -1,6 +1,7 @@
 import { apiClient } from '$lib/api/client';
 import {
 	PengaturanEnvelopeSchema,
+	StoreNameEnvelopeSchema,
 	UpdatePengaturanInputSchema,
 	type Pengaturan,
 	type UpdatePengaturanInput
@@ -17,6 +18,8 @@ import {
  */
 export interface PengaturanApi {
 	get(): Promise<Pengaturan>;
+	/** The store's name, the one value readable before login (ADR-0019). */
+	storeName(): Promise<string>;
 	update(input: UpdatePengaturanInput): Promise<Pengaturan>;
 }
 
@@ -25,6 +28,12 @@ export const pengaturanApi: PengaturanApi = {
 		const { data } = await apiClient.get('/pengaturan');
 
 		return PengaturanEnvelopeSchema.parse(data).data.settings;
+	},
+
+	async storeName(): Promise<string> {
+		const { data } = await apiClient.get('/store-name');
+
+		return StoreNameEnvelopeSchema.parse(data).data.store_name;
 	},
 
 	async update(input: UpdatePengaturanInput): Promise<Pengaturan> {

@@ -11,7 +11,8 @@ import type { Pengaturan, UpdatePengaturanInput } from '../schemas/pengaturan.sc
  */
 export const pengaturanKeys = {
 	all: ['pengaturan'] as const,
-	current: () => [...pengaturanKeys.all, 'current'] as const
+	current: () => [...pengaturanKeys.all, 'current'] as const,
+	storeName: () => [...pengaturanKeys.all, 'store-name'] as const
 };
 
 /**
@@ -23,6 +24,19 @@ export function createPengaturanQuery() {
 	return createQuery<Pengaturan, AppError>(() => ({
 		queryKey: pengaturanKeys.current(),
 		queryFn: () => pengaturanApi.get(),
+		enabled: browser
+	}));
+}
+
+/**
+ * The store's name, shown before login. `enabled: browser` for the same reason
+ * as the rest; while the store has no name yet it answers the empty string, and
+ * the screen falls back to the product name.
+ */
+export function createStoreNameQuery() {
+	return createQuery<string, AppError>(() => ({
+		queryKey: pengaturanKeys.storeName(),
+		queryFn: () => pengaturanApi.storeName(),
 		enabled: browser
 	}));
 }

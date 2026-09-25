@@ -98,10 +98,10 @@ Batas yang mengikat:
 - **Tidak ada gateway pembayaran**; tidak ada pajak, diskon, atau promo di schema.
 - **Laporan = rekap**, bukan grafik/analitik, dan bukan laba; yang ada hanya Omzet
   harian (per metode Pembayaran dan per Kasir) plus daftar Penjualan.
-- **Nama toko tidak punya field terstruktur.** Ia hidup sebagai teks di dalam blok
-  `header` Pengaturan. Keputusan terbuka: bagaimana layar membaca nama toko dari blok
-  bebas itu (baris pertama? field baru di schema?) — dan mengubah schema berarti
-  perubahan kontrak Go ↔ frontend.
+- **Nama toko tidak punya field terstruktur.** Ia tetap teks bebas: baris pertama
+  yang tidak kosong dari blok `header` Pengaturan adalah nama tokonya. Layar Masuk
+  membacanya lewat endpoint publik `GET /api/store-name`, yang hanya menjawab nama
+  itu — bukan Pengaturan selebihnya (ADR-0019).
 - **Keputusan terbuka:** apakah toko akan punya pegawai Kasir yang login sendiri;
   aset visual toko (logo/warna) belum ada; tidak ada kebutuhan aksesibilitas spesifik
   yang ditetapkan pemilik.

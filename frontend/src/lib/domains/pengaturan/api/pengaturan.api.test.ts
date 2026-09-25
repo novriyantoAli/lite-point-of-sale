@@ -44,6 +44,20 @@ describe('pengaturanApi.get', () => {
 	});
 });
 
+describe('pengaturanApi.storeName', () => {
+	it('returns the store name the public endpoint answers', async () => {
+		mock.onGet('/store-name').reply(200, { data: { store_name: 'Toko Kopi' } });
+
+		await expect(pengaturanApi.storeName()).resolves.toBe('Toko Kopi');
+	});
+
+	it('fails loudly when the answer is not a store name', async () => {
+		mock.onGet('/store-name').reply(200, { data: { store_name: 42 } });
+
+		await expect(pengaturanApi.storeName()).rejects.toThrow();
+	});
+});
+
 describe('pengaturanApi.update', () => {
 	it('puts the new Pengaturan and returns the stored one', async () => {
 		mock.onPut('/pengaturan').reply(200, {

@@ -70,3 +70,13 @@ export type UpdatePengaturanInput = z.infer<typeof UpdatePengaturanInputSchema>;
 export const PengaturanEnvelopeSchema = z.object({
 	data: z.object({ settings: PengaturanSchema })
 });
+
+/**
+ * The store's name as the public endpoint answers it — the one value the login
+ * screen may read before a session exists (ADR-0019). Go derives it from the
+ * first non-empty line of the Struk header; this schema only mirrors what comes
+ * back, so an unnamed store is the empty string rather than a missing key.
+ */
+export const StoreNameEnvelopeSchema = z.object({
+	data: z.object({ store_name: z.string() })
+});

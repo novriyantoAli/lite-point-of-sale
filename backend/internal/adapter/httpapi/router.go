@@ -37,6 +37,11 @@ func NewRouter(healthChecker HealthChecker, auth AuthService, products ProductSe
 	// SvelteKit needs no token to log in — it is asking for one.
 	mux.Handle("POST /api/auth/login", loginHandler(auth, logger))
 
+	// The store's name, read by the /login screen before a session exists. It is
+	// the one Pengaturan-derived value that is public: only the name, never the
+	// paper width or the ambang (ADR-0019).
+	mux.Handle("GET /api/store-name", storeNameHandler(settings, logger))
+
 	// Every other route runs behind the token check first, then the role check.
 	authenticated := func(next http.HandlerFunc) http.HandlerFunc {
 		return withAuthentication(auth, logger, next)

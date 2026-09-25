@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
 	PengaturanEnvelopeSchema,
 	PengaturanSchema,
+	StoreNameEnvelopeSchema,
 	UpdatePengaturanInputSchema
 } from './pengaturan.schema';
 
@@ -103,5 +104,23 @@ describe('PengaturanEnvelopeSchema', () => {
 
 	it('rejects an answer that carries no Pengaturan', () => {
 		expect(() => PengaturanEnvelopeSchema.parse({ data: {} })).toThrow();
+	});
+});
+
+describe('StoreNameEnvelopeSchema', () => {
+	it('reads the name the public endpoint answers', () => {
+		expect(
+			StoreNameEnvelopeSchema.parse({ data: { store_name: 'Toko Kopi' } }).data.store_name
+		).toBe('Toko Kopi');
+	});
+
+	it('reads an unnamed store as the empty string', () => {
+		expect(
+			StoreNameEnvelopeSchema.parse({ data: { store_name: '' } }).data.store_name
+		).toBe('');
+	});
+
+	it('rejects an answer that carries no name', () => {
+		expect(() => StoreNameEnvelopeSchema.parse({ data: {} })).toThrow();
 	});
 });
