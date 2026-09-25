@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="id">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Kasir — Japanese High-Density Grid</title>
+		<link rel="stylesheet" href="style.css" />
+	</head>
+	<body>
+		<div class="bar">
+			<p>
+				<b>Prototipe arah</b> — dunia <b>Japanese High-Density Grid</b>, layar Kasir. Isi katalog
+				dan Penjualan di sini <b>contoh</b>, bukan data toko.
+			</p>
+			<p><a href="../../reference/japanese-high-density-web.webp">QUALITY BAR board</a></p>
+		</div>
+
+		<!-- Rel navigasi: mendatar, dua baris, menempel di tepi atas -->
+		<nav class="rail" aria-label="Navigasi utama">
+			<div class="rail__top">
+				<span class="rail__brand">Lite Point of Sale</span>
+				<span class="rail__who">
+					<span class="tnum">admin</span>
+					<span class="tag tag--quiet">Admin</span>
+					<button class="btn" type="button">Keluar</button>
+				</span>
+			</div>
+			<div class="rail__row">
+				<a class="tab" href="#">Beranda</a>
+				<a class="tab" href="#" aria-current="page">Kasir</a>
+				<a class="tab" href="#">Penjualan</a>
+			</div>
+			<div class="rail__row">
+				<a class="tab" href="#">Produk <span class="tab__n">24</span></a>
+				<a class="tab" href="#">Stok <span class="tab__n">4</span></a>
+				<a class="tab" href="#">Laporan</a>
+				<a class="tab" href="#">Pengguna</a>
+				<a class="tab" href="#">Pengaturan</a>
+				<a class="tab" href="#">Backup</a>
+			</div>
+		</nav>
+
+		<main class="board">
+			<!-- Kolom kiri: pencarian, dua petak -->
+			<div class="strip">
+				<h1 class="strip__title">Kasir</h1>
+				<p class="strip__desc">
+					Temukan Produk, susun keranjang, lalu bayar. Stok berkurang sendiri saat Penjualan
+					tersimpan.
+				</p>
+			</div>
+
+			<section class="col" aria-labelledby="cari-judul">
+				<div class="mod mod--head">
+					<h2 class="mod__title" id="cari-judul">Cari Produk</h2>
+					<span class="mod__note">Kasir</span>
+				</div>
+				<div class="mod">
+					<div class="field">
+						<label class="field__label" for="kode">Kode</label>
+						<input id="kode" class="input" name="code" autocomplete="off" value="NYM325" />
+					</div>
+					<p class="note">Scan barcode atau ketik Kode.</p>
+				</div>
+				<div class="mod">
+					<div class="field">
+						<label class="field__label" for="nama">Nama</label>
+						<input id="nama" class="input" name="name" autocomplete="off" />
+					</div>
+					<p class="note">Produk tanpa Kode dicari lewat namanya.</p>
+				</div>
+				<div class="mod">
+					<p class="note">
+						Menyaring <b class="tnum" id="jumlah-hasil">24</b> Produk Aktif. Saringan berlaku
+						saat Anda mengetik.
+					</p>
+				</div>
+				<div class="mod">
+					<p class="note">
+						Ambang Stok menipis <b class="tnum">5</b>. Produk di angka itu ke bawah ditandai.
+					</p>
+				</div>
+			</section>
+
+			<!-- Kolom tengah: mosaik katalog -->
+			<section class="col" aria-labelledby="katalog-judul">
+				<div class="mod mod--head">
+					<h2 class="mod__title" id="katalog-judul">Katalog</h2>
+					<span class="mod__note">tekan satu petak untuk menambah</span>
+				</div>
+				<div class="mosaic" id="mosaic" aria-label="Katalog Produk">
+					<button class="tile" type="button" data-add="0" aria-label="Tambah Kabel NYM 3x2.5 mm ke keranjang">
+						<span class="tag tile__kode tnum">NYM325</span>
+						<span class="tile__name">Kabel NYM 3x2.5 mm</span>
+						<span class="tile__foot">
+							<span class="tile__stock tnum">Stok 120</span>
+							<span class="tile__price">Rp 18.500</span>
+						</span>
+					</button>
+					<button class="tile" type="button" data-add="1" aria-label="Tambah Saklar Panasonic 1 Gang ke keranjang">
+						<span class="tag tile__kode tnum">WEG5001</span>
+						<span class="tile__name">Saklar Panasonic 1 Gang</span>
+						<span class="tile__foot">
+							<span class="tile__stock tnum">Stok 34</span>
+							<span class="tile__price">Rp 22.000</span>
+						</span>
+					</button>
+					<button class="tile" type="button" data-add="2" aria-label="Tambah MCB Schneider 10A ke keranjang">
+						<span class="tag tile__kode tnum">SCH10A</span>
+						<span class="tile__name">MCB Schneider 10A</span>
+						<span class="tile__foot">
+							<span class="tile__stock tnum">Stok 12</span>
+							<span class="tile__price">Rp 65.000</span>
+						</span>
+					</button>
+					<button class="tile" type="button" data-add="3" aria-label="Tambah Lampu LED Philips 12W ke keranjang">
+						<span class="tag tile__kode tnum">PHL12W</span>
+						<span class="tile__name">Lampu LED Philips 12W</span>
+						<span class="tile__foot">
+							<span class="tile__stock tnum">Stok 48</span>
+							<span class="tile__price">Rp 32.000</span>
+						</span>
+					</button>
+					<button class="tile" type="button" data-add="4" aria-label="Tambah Stop Kontak Broco 2 Lubang ke keranjang">
+						<span class="tag tile__kode tnum">BRC2L</span>
+						<span class="tile__name">Stop Kontak Broco 2 Lubang</span>
+						<span class="tile__foot">
+							<span class="tile__stock tnum">Stok 60</span>
+							<span class="tile__price">Rp 15.500</span>
+						</span>
+					</button>
+					<button class="tile" type="button" data-add="5" aria-label="Tambah Kabel NYA 1x1.5 mm ke keranjang">
+						<span class="tag tag--quiet tile__kode">tanpa Kode</span>
+						<span class="tile__name">Kabel NYA 1x1.5 mm</span>
+						<span class="tile__foot">
+							<span class="tile__stock tnum">Stok 300</span>
+							<span class="tile__price">Rp 4.200</span>
+						</span>
+					</button>
+					<button class="tile" type="button" data-add="6" disabled aria-label="Steker Tanam Legrand Stok habis">
+						<span class="tag tile__kode tnum">LEGST</span>
+						<span class="tile__name">Steker Tanam Legrand</span>
+						<span class="tile__foot">
+							<span class="tile__stock tnum">Stok habis</span>
+							<span class="tile__price">Rp 28.000</span>
+						</span>
+					</button>
+					<button class="tile" type="button" data-add="7" aria-label="Tambah Gland Kabel 3/4 inci ke keranjang">
+						<span class="tag tag--quiet tile__kode">tanpa Kode</span>
+						<span class="tile__name">Gland Kabel 3/4 inci</span>
+						<span class="tile__foot">
+							<span class="tile__stock tnum">Stok 90</span>
+							<span class="tile__price">Rp 3.500</span>
+						</span>
+					</button>
+					<button class="tile" type="button" data-add="8" aria-label="Tambah Sekring 2A ke keranjang">
+						<span class="tag tile__kode tnum">SKR2A</span>
+						<span class="tile__name">Sekring 2A</span>
+						<span class="tile__foot">
+							<span class="tile__stock tnum">Stok 150</span>
+							<span class="tile__price">Rp 1.500</span>
+						</span>
+					</button>
+					<button class="tile" type="button" data-add="9" aria-label="Tambah Tespen ke keranjang">
+						<span class="tag tile__kode tnum">TSP01</span>
+						<span class="tile__name">Tespen</span>
+						<span class="tile__foot">
+							<span class="tile__stock tnum">Stok 25</span>
+							<span class="tile__price">Rp 12.000</span>
+						</span>
+					</button>
+					<button class="tile" type="button" data-add="10" aria-label="Tambah Isolasi Nitto 3M ke keranjang">
+						<span class="tag tile__kode tnum">NIT3M</span>
+						<span class="tile__name">Isolasi Nitto 3M</span>
+						<span class="tile__foot">
+							<span class="tile__stock tnum">Stok 40</span>
+							<span class="tile__price">Rp 8.000</span>
+						</span>
+					</button>
+					<button class="tile" type="button" data-add="11" aria-label="Tambah Terminal Skun 1.5 mm ke keranjang">
+						<span class="tag tile__kode tnum">SKN15</span>
+						<span class="tile__name">Terminal Skun 1.5 mm</span>
+						<span class="tile__foot">
+							<span class="tile__stock tnum">Stok 500</span>
+							<span class="tile__price">Rp 500</span>
+						</span>
+					</button>
+					<button class="tile" type="button" data-add="12" aria-label="Tambah Pipa Konduit 20 mm ke keranjang">
+						<span class="tag tile__kode tnum">KND20</span>
+						<span class="tile__name">Pipa Konduit 20 mm</span>
+						<span class="tile__foot">
+							<span class="tile__stock tnum">Stok 75</span>
+							<span class="tile__price">Rp 9.500</span>
+						</span>
+					</button>
+					<button class="tile" type="button" data-add="13" aria-label="Tambah Baut Fisher 8 mm ke keranjang">
+						<span class="tag tile__kode tnum">FSH8</span>
+						<span class="tile__name">Baut Fisher 8 mm</span>
+						<span class="tile__foot">
+							<span class="tile__stock tnum">Stok 200</span>
+							<span class="tile__price">Rp 1.000</span>
+						</span>
+					</button>
+					<button class="tile" type="button" data-add="14" aria-label="Tambah Trafo 5A ke keranjang">
+						<span class="tag tile__kode tnum">TRF5A</span>
+						<span class="tile__name">Trafo 5A</span>
+						<span class="tile__foot">
+							<span class="tile__stock tnum">Stok 4 · menipis</span>
+							<span class="tile__price">Rp 145.000</span>
+						</span>
+					</button>
+					<button class="tile" type="button" data-add="15" aria-label="Tambah Box Panel 20x30 ke keranjang">
+						<span class="tag tile__kode tnum">BOX2030</span>
+						<span class="tile__name">Box Panel 20x30</span>
+						<span class="tile__foot">
+							<span class="tile__stock tnum">Stok 6</span>
+							<span class="tile__price">Rp 85.000</span>
+						</span>
+					</button>
+					<button class="tile" type="button" data-add="16" aria-label="Tambah Klem Kabel 10 mm ke keranjang">
+						<span class="tag tile__kode tnum">KLM10</span>
+						<span class="tile__name">Klem Kabel 10 mm</span>
+						<span class="tile__foot">
+							<span class="tile__stock tnum">Stok 180</span>
+							<span class="tile__price">Rp 1.200</span>
+						</span>
+					</button>
+					<button class="tile" type="button" data-add="17" aria-label="Tambah Timer Lampu ke keranjang">
+						<span class="tag tile__kode tnum">TMR01</span>
+						<span class="tile__name">Timer Lampu</span>
+						<span class="tile__foot">
+							<span class="tile__stock tnum">Stok 9</span>
+							<span class="tile__price">Rp 55.000</span>
+						</span>
+					</button>
+					<button class="tile" type="button" data-add="18" aria-label="Tambah Kabel Roll 50 m ke keranjang">
+						<span class="tag tile__kode tnum">ROL50</span>
+						<span class="tile__name">Kabel Roll 50 m</span>
+						<span class="tile__foot">
+							<span class="tile__stock tnum">Stok 3 · menipis</span>
+							<span class="tile__price">Rp 210.000</span>
+						</span>
+					</button>
+					<button class="tile" type="button" data-add="19" aria-label="Tambah Fitting Lampu ke keranjang">
+						<span class="tag tile__kode tnum">FTG01</span>
+						<span class="tile__name">Fitting Lampu</span>
+						<span class="tile__foot">
+							<span class="tile__stock tnum">Stok 44</span>
+							<span class="tile__price">Rp 6.500</span>
+						</span>
+					</button>
+					<button class="tile" type="button" data-add="20" disabled aria-label="Gergaji Besi Stok habis">
+						<span class="tag tile__kode tnum">GRG02</span>
+						<span class="tile__name">Gergaji Besi</span>
+						<span class="tile__foot">
+							<span class="tile__stock tnum">Stok habis</span>
+							<span class="tile__price">Rp 25.000</span>
+						</span>
+					</button>
+					<button class="tile" type="button" data-add="21" aria-label="Tambah Meteran 5 m ke keranjang">
+						<span class="tag tile__kode tnum">MTR5</span>
+						<span class="tile__name">Meteran 5 m</span>
+						<span class="tile__foot">
+							<span class="tile__stock tnum">Stok 15</span>
+							<span class="tile__price">Rp 18.000</span>
+						</span>
+					</button>
+					<button class="tile" type="button" data-add="22" aria-label="Tambah Tang Kombinasi ke keranjang">
+						<span class="tag tile__kode tnum">TNG01</span>
+						<span class="tile__name">Tang Kombinasi</span>
+						<span class="tile__foot">
+							<span class="tile__stock tnum">Stok 8</span>
+							<span class="tile__price">Rp 45.000</span>
+						</span>
+					</button>
+					<button class="tile" type="button" data-add="23" aria-label="Tambah Multimeter Digital ke keranjang">
+						<span class="tag tile__kode tnum">MMD01</span>
+						<span class="tile__name">Multimeter Digital</span>
+						<span class="tile__foot">
+							<span class="tile__stock tnum">Stok 2 · menipis</span>
+							<span class="tile__price">Rp 125.000</span>
+						</span>
+					</button>
+				</div>
+			</section>
+
+			<!-- Kolom kanan: keranjang, pembayaran, aksi utama -->
+			<section class="col" aria-labelledby="keranjang-judul">
+				<div class="mod mod--head">
+					<h2 class="mod__title" id="keranjang-judul">Keranjang</h2>
+					<span class="mod__note tnum" id="keranjang-ringkas">7 unit · 2 Item</span>
+				</div>
+				<div id="keranjang">
+					<p class="mod note hidden" id="keranjang-kosong">
+						Keranjang kosong. Tekan satu petak di katalog untuk menambah Produk.
+					</p>
+					<div id="keranjang-baris">
+					<div class="row" data-id="1" data-harga="22000" data-stok="34" data-nama="Saklar Panasonic 1 Gang">
+						<span class="row__name">Saklar Panasonic 1 Gang</span>
+						<span class="row__sub tnum" data-subtotal>Rp 44.000</span>
+						<span class="row__meta tnum">Rp 22.000 · Stok 34</span>
+						<span class="row__acts">
+							<span class="qty">
+								<button class="qty__btn" type="button" data-act="minus" aria-label="Kurangi jumlah Saklar Panasonic 1 Gang">−</button>
+								<input class="qty__input" data-act="qty" inputmode="numeric" value="2" aria-label="Jumlah Saklar Panasonic 1 Gang" />
+								<button class="qty__btn" type="button" data-act="plus" aria-label="Tambah jumlah Saklar Panasonic 1 Gang">+</button>
+							</span>
+							<button class="btn" type="button" data-act="hapus" aria-label="Hapus Saklar Panasonic 1 Gang dari keranjang">Hapus</button>
+						</span>
+						<p class="row__warn hidden" data-lebih>Melebihi Stok: tersisa 34. Kurangi jumlahnya sebelum checkout.</p>
+					</div>
+					</div>
+				</div>
+				<div class="total">
+					<span class="total__label">Total</span>
+					<span class="total__value" id="keranjang-total" role="status">Rp 136.500</span>
+				</div>
+				<div class="mod">
+					<h3 class="field__label">Metode pembayaran</h3>
+					<div class="methods" style="margin-top: 4px">
+						<label class="method"><input type="radio" name="method" value="cash" checked />Tunai</label>
+						<label class="method"><input type="radio" name="method" value="qris" />QRIS</label>
+						<label class="method"><input type="radio" name="method" value="debit" />Debit</label>
+						<label class="method"><input type="radio" name="method" value="transfer" />Transfer</label>
+					</div>
+				</div>
+				<div class="mod" id="baris-tunai">
+					<div class="field">
+						<label class="field__label" for="bayar">Jumlah bayar</label>
+						<input id="bayar" class="input tnum" name="amount" inputmode="numeric" autocomplete="off" value="150000" />
+					</div>
+					<p class="note note--warn hidden" id="bayar-error" role="alert"></p>
+				</div>
+				<div class="mod" id="baris-kembalian">
+					<p class="field__label">Kembalian</p>
+					<p class="figure" id="kembalian" role="status" aria-label="Kembalian Rp 13.500">Rp 13.500</p>
+				</div>
+				<div class="mod hidden" id="baris-non-tunai">
+					<p class="field__label">Dibayar</p>
+					<p class="figure" id="dibayar" role="status">QRIS · Rp 136.500</p>
+				</div>
+				<div class="mod">
+					<p class="note note--warn hidden" id="terblokir"></p>
+					<button class="btn btn--commit" type="button" id="tombol-bayar">Bayar &amp; Simpan Penjualan</button>
+				</div>
+			</section>
+		</main>
+		<script>
+			/*
+			 * Perilaku prototipe. Aturan yang ditiru dari aplikasi, termasuk yang
+			 * mudah salah: jumlah bayar hanya menerima digit ("150.000" ditolak),
+			 * dan keranjang baru dikosongkan setelah Penjualan benar-benar tersimpan.
+			 */
+			(() => {
+				const rp = (n) => 'Rp ' + new Intl.NumberFormat('id-ID').format(n);
+				const $ = (s) => document.querySelector(s);
+				const $$ = (s) => [...document.querySelectorAll(s)];
+				const METODE = { cash: 'Tunai', qris: 'QRIS', debit: 'Debit', transfer: 'Transfer' };
+
+				// Produk dibaca dari petaknya sendiri, supaya tidak ada dua daftar yang bisa berbeda.
+				const angka = (t) => Number((t || '').replace(/[^\d]/g, '')) || 0;
+				const PRODUK = {};
+				for (const t of $$('.tile[data-add]')) {
+					const nama = t.querySelector('.tile__name').textContent.trim();
+					const stok = /habis/.test(t.querySelector('.tile__stock').textContent)
+						? 0
+						: angka(t.querySelector('.tile__stock').textContent);
+					PRODUK[t.dataset.add] = {
+						nama,
+						harga: angka(t.querySelector('.tile__price').textContent),
+						stok
+					};
+				}
+
+				const items = [
+					{ id: '0', qty: 5 },
+					{ id: '1', qty: 2 }
+				];
+				let metode = 'cash';
+				let nomorStruk = 6;
+
+				const baris = $('#keranjang-baris');
+				const fieldBayar = $('#bayar');
+
+				const total = () => items.reduce((n, it) => n + PRODUK[it.id].harga * it.qty, 0);
+				const units = () => items.reduce((n, it) => n + it.qty, 0);
+				const melebihi = () => items.some((it) => it.qty > PRODUK[it.id].stok);
+				const blocked = () =>
+					items.length === 0
+						? 'Keranjang masih kosong.'
+						: melebihi()
+							? 'Ada Item yang melebihi Stok. Kurangi jumlahnya lebih dulu.'
+							: '';
+				const nominal = () => {
+					const raw = fieldBayar.value.trim();
+					if (!/^\d+$/.test(raw)) return { ok: false, message: 'Jumlah bayar harus bilangan bulat.' };
+					const v = Number(raw);
+					if (v < total()) return { ok: false, message: 'Jumlah bayar kurang dari total.' };
+					return { ok: true, value: v };
+				};
+
+				function barisHtml(it) {
+					const p = PRODUK[it.id];
+					return `<div class="row" data-id="${it.id}">
+						<span class="row__name">${p.nama}</span>
+						<span class="row__sub tnum" data-subtotal></span>
+						<span class="row__meta tnum">${rp(p.harga)} · Stok ${p.stok}</span>
+						<span class="row__acts">
+							<span class="qty">
+								<button class="qty__btn" type="button" data-act="minus" aria-label="Kurangi jumlah ${p.nama}">−</button>
+								<input class="qty__input" data-act="qty" inputmode="numeric" value="${it.qty}" aria-label="Jumlah ${p.nama}" />
+								<button class="qty__btn" type="button" data-act="plus" aria-label="Tambah jumlah ${p.nama}">+</button>
+							</span>
+							<button class="btn" type="button" data-act="hapus" aria-label="Hapus ${p.nama} dari keranjang">Hapus</button>
+						</span>
+						<p class="row__warn hidden" data-lebih>Melebihi Stok: tersisa ${p.stok}. Kurangi jumlahnya sebelum checkout.</p>
+					</div>`;
+				}
+
+				function render() {
+					// Wadah barisnya saja yang diganti; pesan kosong tidak pernah dimusnahkan.
+					baris.innerHTML = items.map(barisHtml).join('');
+					$('#keranjang-kosong').classList.toggle('hidden', items.length > 0);
+					sync();
+				}
+
+				function sync() {
+					for (const it of items) {
+						const p = PRODUK[it.id];
+						const row = baris.querySelector(`[data-id="${it.id}"]`);
+						if (!row) continue;
+						const q = row.querySelector('[data-act="qty"]');
+						if (document.activeElement !== q) q.value = it.qty;
+						const invalid = it.qty > p.stok;
+						if (invalid) q.setAttribute('aria-invalid', 'true');
+						else q.removeAttribute('aria-invalid');
+						row.querySelector('[data-subtotal]').textContent = rp(p.harga * it.qty);
+						row.querySelector('[data-lebih]').classList.toggle('hidden', !invalid);
+						row.querySelector('[data-act="minus"]').disabled = it.qty <= 1;
+					}
+					const kosong = items.length === 0;
+					$('#keranjang-ringkas').textContent = kosong ? 'kosong' : `${units()} unit · ${items.length} Item`;
+					$('#keranjang-total').textContent = rp(total());
+					syncBayar();
+				}
+
+				function syncBayar() {
+					const t = total();
+					const tunai = metode === 'cash';
+					$('#baris-tunai').classList.toggle('hidden', !tunai);
+					$('#baris-kembalian').classList.toggle('hidden', !tunai);
+					$('#baris-non-tunai').classList.toggle('hidden', tunai);
+					if (tunai) {
+						// Sementara mengetik tidak ada pesan; angkanya berhenti di "—"
+						// sampai tombolnya ditekan, persis seperti Pembayaran.svelte.
+						const h = nominal();
+						const bisa = h.ok && h.value >= t;
+						const kb = $('#kembalian');
+						kb.textContent = bisa ? rp(h.value - t) : '—';
+						kb.setAttribute('aria-label', `Kembalian ${bisa ? rp(h.value - t) : 'belum bisa dihitung'}`);
+					} else {
+						$('#dibayar').textContent = `${METODE[metode]} · ${rp(t)}`;
+					}
+					const pesan = blocked();
+					const bl = $('#terblokir');
+					bl.textContent = pesan;
+					bl.classList.toggle('hidden', pesan === '');
+					$('#tombol-bayar').disabled = pesan !== '';
+				}
+
+				function strukHtml(bayar) {
+					const t = total();
+					const tunai = metode === 'cash';
+					const now = new Date();
+					const pad = (n) => String(n).padStart(2, '0');
+					const stamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+					const barisStruk = items
+						.map((it) => {
+							const p = PRODUK[it.id];
+							return `<span class="row__name">${p.nama} <span class="tnum">· ${it.qty} × ${rp(p.harga)}</span></span><span class="row__sub tnum">${rp(p.harga * it.qty)}</span>`;
+						})
+						.join('');
+					return `
+						<div class="mod mod--head"><h2 class="mod__title">Penjualan tersimpan</h2><span class="tag">tersegel</span></div>
+						<div class="mod"><p class="note">Nomor Struk <b class="tnum">${nomorStruk}</b> · ${stamp} · Kasir admin</p></div>
+						<div class="row" style="grid-template-columns:1fr auto">${barisStruk}</div>
+						<div class="total"><span class="total__label">Total</span><span class="total__value tnum">${rp(t)}</span></div>
+						<div class="mod"><p class="note">Bayar · ${METODE[metode]}</p><p class="figure tnum">${rp(bayar)}</p></div>
+						${tunai ? `<div class="mod"><p class="note">Kembalian</p><p class="figure tnum">${rp(bayar - t)}</p></div>` : ''}
+						<div class="mod"><p class="note note--warn">Printer belum diatur. Penjualan tetap tersimpan.</p></div>
+						<div class="mod"><button class="btn" type="button">Cetak ulang Struk</button></div>
+						<div class="mod"><button class="btn btn--commit" type="button" id="penjualan-baru">Penjualan Baru</button></div>`;
+				}
+
+				$('#mosaic').addEventListener('click', (e) => {
+					const tile = e.target.closest('.tile[data-add]');
+					if (!tile) return;
+					const id = tile.dataset.add;
+					const ada = items.find((it) => it.id === id);
+					if (ada) ada.qty += 1;
+					else items.push({ id, qty: 1 });
+					render();
+				});
+
+				baris.addEventListener('click', (e) => {
+					const b = e.target.closest('button[data-act]');
+					if (!b) return;
+					const id = b.closest('[data-id]').dataset.id;
+					const it = items.find((x) => x.id === id);
+					if (!it) return;
+					if (b.dataset.act === 'plus') it.qty += 1;
+					if (b.dataset.act === 'minus') it.qty = Math.max(1, it.qty - 1);
+					if (b.dataset.act === 'hapus') items.splice(items.indexOf(it), 1);
+					if (b.dataset.act === 'hapus') render();
+					else sync();
+				});
+
+				baris.addEventListener('input', (e) => {
+					const q = e.target.closest('[data-act="qty"]');
+					if (!q) return;
+					const it = items.find((x) => x.id === q.closest('[data-id]').dataset.id);
+					if (!it) return;
+					const typed = Number(q.value);
+					if (Number.isInteger(typed) && typed >= 1) it.qty = typed;
+					sync();
+				});
+
+				$$('input[name="method"]').forEach((r) =>
+					r.addEventListener('change', () => {
+						metode = r.value;
+						$('#bayar-error').classList.add('hidden');
+						fieldBayar.removeAttribute('aria-invalid');
+						syncBayar();
+					})
+				);
+				fieldBayar.addEventListener('input', syncBayar);
+
+				$('#tombol-bayar').addEventListener('click', () => {
+					if (blocked()) return;
+					const err = $('#bayar-error');
+					if (metode === 'cash') {
+						const h = nominal();
+						if (!h.ok) {
+							err.textContent = h.message;
+							err.classList.remove('hidden');
+							fieldBayar.setAttribute('aria-invalid', 'true');
+							return;
+						}
+						nomorStruk += 1;
+						baris.innerHTML = strukHtml(h.value);
+					} else {
+						nomorStruk += 1;
+						baris.innerHTML = strukHtml(total());
+					}
+					err.classList.add('hidden');
+					fieldBayar.removeAttribute('aria-invalid');
+					items.length = 0;
+					fieldBayar.value = '';
+					$('#keranjang-kosong').classList.add('hidden');
+					$('#keranjang-ringkas').textContent = 'tersimpan';
+					$('#keranjang-total').textContent = rp(0);
+					$('#terblokir').classList.add('hidden');
+					$('#tombol-bayar').disabled = true;
+					document.querySelector('#penjualan-baru').addEventListener('click', () => {
+						fieldBayar.value = '';
+						render();
+						$('#kode').focus();
+					});
+				});
+
+				render();
+			})();
+		</script>
+	</body>
+</html>
