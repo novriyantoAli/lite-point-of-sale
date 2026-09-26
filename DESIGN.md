@@ -333,15 +333,17 @@ Petak katalog, dan unit terkecil yang bisa ditekan.
 
 ### Tags
 
-Tinggi 15px, huruf 12px/600, radius 0. **Red tag** untuk Kode Produk dan tab navigasi yang
-aktif. **Quiet tag** (Wash Grey, garis rambut) untuk keadaan yang tenang: tanpa Kode,
-menipis, dan label Peran. Tidak ada tag yang menyampaikan keadaan lewat warnanya saja.
+Tinggi 15px, huruf 12px/600, radius 0. **Red tag** untuk Kode Produk, tab navigasi yang aktif,
+dan `tersegel` — Penjualan yang sudah tersimpan dan tidak bisa dibatalkan. **Quiet tag** (Wash
+Grey, garis rambut) untuk keadaan yang tenang: tanpa Kode, menipis, dan label Peran. Tidak ada
+tag yang menyampaikan keadaan lewat warnanya saja.
 
 ### Tabs
 
 Navigasi adalah tab, bukan daftar: setiap tab adalah sel persegi dengan garis rambut di
-kanannya. Tab yang aktif memakai isian merah penuh dengan teks putih, dan angkanya
-(`tabular-nums`) menuliskan cacah di sebelah namanya.
+kanannya. Tab yang aktif memakai isian merah penuh dengan teks putih. Prototipe menaruh cacah
+(`Produk 24`) di sebelah nama tab sebagai angka contoh; **belum ada cacah yang dikirim** — angka
+aslinya berarti satu permintaan ke API dari kerangka di setiap layar, dan itu belum diputuskan.
 
 ### Fields & Inputs
 
@@ -411,4 +413,4 @@ dulu. Hover hanya mengubah latar dan garis.
 - **Don't** mark a quiet state in red. Red means a price or an active tab; `Nonaktif` and `menipis` are quiet tags, and `Stok habis` is a strike.
 - **Don't** wrap a screen in a card, and never nest one: a module is a ruled region of the grid, and a card is what this system refuses to look like.
 - **Don't** let the mosaic scroll sideways at any width; below 1080px the board stacks.
-- **Don't** treat the header as settled: PRODUCT.md commits that the store's own name leads on screen, and the header still carries the product's name. That is the next visual change, not a system rule.
+- **Don't** re-settle the header: the store's own name leads the rail now, and the product's name is only the fallback for a store that has not been named yet (ADR-0019).

@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { apiClient } from '$lib/api/client';
 import QueryClientHarness from '$lib/testing/QueryClientHarness.svelte';
 import { keranjangState } from '../state/keranjang.state.svelte';
+import { pencarianState } from '../state/pencarian.state.svelte';
 import Kasir from './Kasir.svelte';
 
 /**
@@ -50,6 +51,18 @@ const habis = {
 };
 
 const catalogue = [kopi, teh, habis];
+
+/**
+ * The one row of Pengaturan the till reads: the ambang Stok menipis, stated in
+ * the left column because "menipis" is printed on the tiles (ADR-0008).
+ */
+const pengaturan = {
+	id: 1,
+	header: 'Toko Kopi',
+	footer: 'Terima kasih',
+	paper_width: 80,
+	low_stock_threshold: 5
+};
 
 /** The Penjualan the API answers a checkout of 2 × Kopi Susu with, paid 50000. */
 const sale = {
@@ -108,7 +121,12 @@ async function tambah(user: ReturnType<typeof userEvent.setup>, name: string) {
 
 beforeEach(() => {
 	mock = new MockAdapter(apiClient);
+	mock.onGet('/pengaturan').reply(200, { data: { settings: pengaturan } });
 	keranjangState.clear();
+	// Both are module state now, so they outlive a test's render — a saringan or a
+	// keranjang left over from the test before would be the next test's starting
+	// point, and the first is what each test reads as its own.
+	pencarianState.reset();
 });
 
 afterEach(() => {
@@ -124,8 +142,10 @@ describe('Kasir', () => {
 		expect(await screen.findByText(/Kopi Susu/)).toBeInTheDocument();
 		expect(screen.getByText('Teh Botol')).toBeInTheDocument();
 		// `active: true` is the whole of the kasir lookup: a Nonaktif Produk is not
-		// for sale, so it is never offered (CONTEXT.md, Nonaktif).
-		expect(mock.history.get[0]!.params).toEqual({ active: 'true' });
+		// for sale, so it is never offered (CONTEXT.md, Nonaktif). The request is
+		// picked out by its URL, because the till makes more than one GET.
+		const pencarian = mock.history.get.find((request) => request.url === '/produk');
+		expect(pencarian?.params).toEqual({ active: 'true' });
 	});
 
 	it('says there is nothing to sell when the catalogue has no Aktif Produk', async () => {
@@ -482,5 +502,30 @@ describe('Kasir', () => {
 		expect(keranjangState.items).toEqual([]);
 		expect(screen.getByRole('button', { name: 'Tambah Kopi Susu ke keranjang' })).toBeEnabled();
 		expect(screen.getByRole('button', { name: 'Tambah Teh Botol ke keranjang' })).toBeEnabled();
+	});
+
+	it('starts the next sale with an unsearched catalogue', async () => {
+		serveCatalogue();
+		mock.onPost('/penjualan').reply(201, { data: { sale, print: { printed: true } } });
+		const user = userEvent.setup();
+
+		renderKasir();
+		await screen.findByText(/Kopi Susu/);
+
+		// What a scanner types narrows the mosaic to the one Produk it names.
+		await user.type(screen.getByLabelText('Kode'), 'KOPI-01');
+		await screen.findByRole('button', { name: 'Tambah Kopi Susu ke keranjang' });
+		await tambah(user, 'Kopi Susu');
+
+		await user.type(pembayaran().getByLabelText('Jumlah bayar'), '50000');
+		await user.click(pembayaran().getByRole('button', { name: 'Bayar & Simpan Penjualan' }));
+		await screen.findByText(/Nomor Struk/);
+
+		await user.click(struk().getByRole('button', { name: 'Penjualan Baru' }));
+
+		// The next buyer gets the whole catalogue, not the Produk the previous
+		// buyer's Kode narrowed it to.
+		expect(await screen.findByText('Teh Botol')).toBeInTheDocument();
+		expect(screen.getByLabelText('Kode')).toHaveValue('');
 	});
 });

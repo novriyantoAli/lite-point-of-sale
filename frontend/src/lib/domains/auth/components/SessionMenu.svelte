@@ -46,7 +46,7 @@
 	<Button
 		variant="ghost"
 		size="sm"
-		class="h-[26px] border-border bg-card px-2 text-[13px] font-semibold hover:border-foreground disabled:pointer-events-auto disabled:opacity-100"
+		class="h-[26px] border-border bg-card px-2 text-[13px] font-semibold hover:border-foreground focus-visible:border-foreground disabled:pointer-events-auto disabled:opacity-100"
 		disabled={logout.isPending}
 		onclick={() => void signOut()}
 	>

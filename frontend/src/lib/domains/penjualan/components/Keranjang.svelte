@@ -5,10 +5,10 @@
 	import { keranjangState } from '../state/keranjang.state.svelte';
 
 	/**
-	 * The keranjang: what is being sold right now, with a running total (CONTEXT.md,
-	 * Item). It reads the domain's own runes state, so the lookup above and the
-	 * payment form below both work on the same draft without props threaded between
-	 * them.
+	 * Keranjang: apa yang sedang dijual sekarang, dengan total berjalan
+	 * (CONTEXT.md, Item). Ia membaca keadaan runes milik domainnya sendiri, jadi
+	 * mosaik katalog di kolom tengah dan form Pembayaran di bawahnya bekerja atas
+	 * rancangan yang sama tanpa props yang diuntai di antaranya.
 	 */
 
 	/**
@@ -35,97 +35,108 @@
 			field.value = String(keranjangState.setQuantity(productId, typed));
 		}
 	}
+
+	/**
+	 * Satu tombol operator. Angka dan tombolnya berbagi satu bingkai rambut, jadi
+	 * tidak ada dua garis yang menempel — dan petaknya yang mati kehilangan
+	 * tintanya, bukan opasitasnya (DESIGN.md, State-Is-Not-Faded).
+	 */
+	const OPERATOR =
+		'grid h-[22px] w-[22px] place-items-center border-border text-[13px] leading-none enabled:hover:bg-muted disabled:cursor-not-allowed disabled:text-border';
+	/**
+	 * Field jumlah tinggal di dalam bingkai petaknya: tanpa garis sendiri, tanpa
+	 * cincin cahaya, dan angka putar bawaan browser disembunyikan — ia bagian dari
+	 * peramban yang tidak digambar dunia ini.
+	/**
+	 * Field jumlah tinggal di dalam bingkai petaknya: tanpa garis sendiri dan tanpa
+	 * cincin cahaya — fokusnya digambar oleh aturan dunia di `app.css`, sekali untuk
+	 * seluruh aplikasi. Angka putar bawaan browser disembunyikan: ia bagian dari
+	 * peramban yang tidak digambar dunia ini.
+	 */
+	const JUMLAH =
+		'h-[22px] w-10 border-0 bg-card px-0.5 text-center text-[13px] tabular-nums shadow-none aria-invalid:ring-0 md:text-[13px] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none';
 </script>
 
-<section class="space-y-4" aria-labelledby="kasir-keranjang-judul">
-	<div class="flex flex-wrap items-end justify-between gap-4">
-		<div class="space-y-1">
-			<h2 id="kasir-keranjang-judul" class="font-medium">Keranjang</h2>
-			<p class="text-sm text-muted-foreground">
-				{keranjangState.units === 0
-					? 'Belum ada Item.'
-					: `${keranjangState.units} unit dalam ${keranjangState.items.length} Item.`}
-			</p>
-		</div>
-
-		<Button
-			variant="outline"
-			size="sm"
-			disabled={keranjangState.items.length === 0}
-			onclick={() => keranjangState.clear()}
-		>
-			Kosongkan
-		</Button>
+<section aria-labelledby="kasir-keranjang-judul">
+	<div
+		class="flex items-center justify-between gap-2 border-b border-foreground bg-muted px-2 py-1.5"
+	>
+		<h2 id="kasir-keranjang-judul" class="text-[13px] font-bold tracking-[0.01em]">Keranjang</h2>
+		<span class="text-xs">
+			{keranjangState.units === 0
+				? 'Belum ada Item.'
+				: `${keranjangState.units} unit dalam ${keranjangState.items.length} Item.`}
+		</span>
 	</div>
 
 	{#if keranjangState.items.length === 0}
-		<p class="text-sm text-muted-foreground">
-			Keranjang kosong. Cari Produk di atas, lalu tekan Tambah.
+		<p class="border-b border-border px-2 py-1.5 text-xs">
+			Keranjang kosong. Tekan satu petak di katalog untuk menambah Produk.
 		</p>
 	{:else}
-		<ul class="space-y-2">
+		<ul>
 			{#each keranjangState.items as item (item.produk.id)}
 				{@const terlaluBanyak = item.qty > item.produk.stock}
-				<li class="space-y-2 rounded-lg border p-3">
-					<div class="flex flex-wrap items-start justify-between gap-3">
-						<div class="space-y-1">
-							<p class="font-medium">
-								{item.produk.name}
-								{#if item.produk.code}
-									<span class="text-muted-foreground">· {item.produk.code}</span>
-								{/if}
-							</p>
-							<p class="text-sm text-muted-foreground">
-								{formatRupiah(item.produk.price)} · Stok {item.produk.stock}
-							</p>
-						</div>
+				<li class="grid grid-cols-[1fr_auto] gap-x-2 gap-y-1 border-b border-border px-2 py-1.5">
+					<span class="text-[13px] font-medium">{item.produk.name}</span>
+					<span class="text-right text-[13px] font-semibold tabular-nums">
+						{formatRupiah(item.produk.price * item.qty)}
+					</span>
 
-						<div class="flex items-center gap-2">
-							<Button
-								variant="outline"
-								size="sm"
+					<span class="col-span-2 text-xs tabular-nums">
+						{formatRupiah(item.produk.price)} · Stok {item.produk.stock}
+					</span>
+
+					<span class="col-span-2 flex items-center gap-1">
+						<span class="flex items-center border border-border">
+							<button
+								type="button"
+								class={`${OPERATOR} border-r`}
 								disabled={item.qty <= 1}
 								aria-label={`Kurangi jumlah ${item.produk.name}`}
 								onclick={() => keranjangState.setQuantity(item.produk.id, item.qty - 1)}
 							>
 								−
-							</Button>
+							</button>
 							<Input
-								class="w-20 text-center"
 								type="number"
 								min="1"
 								step="1"
 								inputmode="numeric"
+								class={JUMLAH}
 								value={item.qty}
 								aria-label={`Jumlah ${item.produk.name}`}
 								aria-invalid={terlaluBanyak ? true : undefined}
 								oninput={(event) => setQuantity(event, item.produk.id)}
 							/>
-							<Button
-								variant="outline"
-								size="sm"
+							<button
+								type="button"
+								class={`${OPERATOR} border-l`}
 								aria-label={`Tambah jumlah ${item.produk.name}`}
 								onclick={() => keranjangState.setQuantity(item.produk.id, item.qty + 1)}
 							>
 								+
-							</Button>
-						</div>
+							</button>
+						</span>
 
-						<div class="flex items-center gap-3">
-							<span class="tabular-nums">{formatRupiah(item.produk.price * item.qty)}</span>
-							<Button
-								variant="outline"
-								size="sm"
-								aria-label={`Hapus ${item.produk.name} dari keranjang`}
-								onclick={() => keranjangState.remove(item.produk.id)}
-							>
-								Hapus
-							</Button>
-						</div>
-					</div>
+						<Button
+							variant="ghost"
+							size="sm"
+							class="h-[26px] border-border bg-card px-2 text-[13px] font-semibold hover:border-foreground focus-visible:border-foreground"
+							aria-label={`Hapus ${item.produk.name} dari keranjang`}
+							onclick={() => keranjangState.remove(item.produk.id)}
+						>
+							Hapus
+						</Button>
+					</span>
 
 					{#if terlaluBanyak}
-						<p class="text-sm text-destructive">
+						<!--
+							Barisnya sendiri yang menyebut keadaannya; tanda merahnya dibawa
+							oleh field jumlah di atasnya (DESIGN.md, Fields & Inputs), bukan
+							oleh tint huruf yang harus tetap bisa dibaca.
+						-->
+						<p class="col-span-2 text-xs font-semibold">
 							Melebihi Stok: tersisa {item.produk.stock}. Kurangi jumlahnya sebelum checkout.
 						</p>
 					{/if}
@@ -133,12 +144,33 @@
 			{/each}
 		</ul>
 
-		<p
-			class="text-right text-lg font-semibold"
-			role="status"
-			aria-label={`Total keranjang ${formatRupiah(keranjangState.total)}`}
+		<!--
+			Pita total: satu-satunya angka besar di kolom ini, dan satu-satunya tempat
+			aksi keranjang sendiri berdiri. Garis tintanya yang memisahkannya dari
+			Pembayaran di bawah — bukan bayangan, tidak pernah bayangan.
+		-->
+		<div
+			class="flex items-center justify-between gap-2 border-b border-foreground bg-muted px-2 py-1.5"
 		>
-			Total <span class="tabular-nums">{formatRupiah(keranjangState.total)}</span>
-		</p>
+			<span
+				class="flex items-baseline gap-2"
+				role="status"
+				aria-label={`Total keranjang ${formatRupiah(keranjangState.total)}`}
+			>
+				<span class="text-[13px] font-bold">Total</span>
+				<span class="text-[15px] font-bold tabular-nums">
+					{formatRupiah(keranjangState.total)}
+				</span>
+			</span>
+
+			<Button
+				variant="ghost"
+				size="sm"
+				class="h-[26px] border-border bg-card px-2 text-[13px] font-semibold hover:border-foreground focus-visible:border-foreground"
+				onclick={() => keranjangState.clear()}
+			>
+				Kosongkan
+			</Button>
+		</div>
 	{/if}
 </section>

@@ -50,3 +50,73 @@ katanya saja, tanpa cacah.
 **FORM.** Dunia katalog `japanese-high-density-web`, menang dari tangan yang di-deal pada ronde keempat. Ia bukan kandidat dari daftar grounded saya: dadu menugaskan Cable Tie, dan tangan itu kalah di dua sumbu. Seed key `22ccabe4`.
 
 **FINISH.** unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+
+## Ronde port ke `frontend/src`, 2026-09-26
+
+Prototipe sekarang hidup sebagai kode di `frontend/src/lib/domains/penjualan/components/`:
+`Kasir.svelte` (papan tiga kolom + wajah struk), `PencarianProduk.svelte` (kolom kiri),
+`KatalogProduk.svelte` (kolom tengah, pemilik query katalog), `Keranjang.svelte` +
+`Pembayaran.svelte` (kolom kanan), `StrukPenjualan.svelte`, `RincianPenjualan.svelte`,
+`CetakStruk.svelte`. Saringan katalog pindah ke `state/pencarian.state.svelte.ts` karena dua
+kolom bersebelahan membacanya (skill §6.4).
+
+### Keputusan yang muncul saat port
+
+- **Keadaan memuat diuji dan dijawab** — satu-satunya butir yang prototipe tinggalkan kosong.
+  Muat pertama menggambar 24 petak hantu berukuran sama dengan petak asli (73px) supaya papan
+  tidak melompat saat data tiba; ada `role="status"` yang membacakan "Memuat Produk…" untuk
+  pembaca layar. Saat penyaring berubah, mosaik juga menampilkan kerangka lagi — perilaku yang
+  sama dengan sebelumnya, dan alasannya: menahan daftar lama akan menampilkan Produk yang tidak
+  cocok dengan Kode yang baru diketik.
+- **Nama aksesibilitas petak tetap satu kalimat untuk semua keadaan.** Prototipe memakai
+  `"<nama> Stok habis"` pada petak yang mati; di sini petak yang habis tetap bernama
+  `"Tambah <nama> ke keranjang"` dan yang menyatakan keadaannya adalah kata "Stok habis" +
+  garis coret di dalamnya. Aksi adalah nama tombolnya; keadaan adalah teks yang terlihat.
+- **Wajah struk menggantikan kasir, bukan menemani mosaiknya.** Prototipe menaruh struk di
+  kolom keranjang sementara mosaik tetap hidup — dan itu lubang yang sudah ada di skrip
+  prototipenya sendiri: petak yang ditekan setelah Penjualan tersimpan menambah keranjang yang
+  tidak terlihat. Aksi tersembunyi itu yang DESIGN.md tolak, jadi layar struk berdiri sendiri
+  dengan papan dua kolom: catatan Penjualan di kiri, cetak + "Penjualan Baru" di kanan.
+- **Pesan galat dan peringatan memakai tinta, bukan merah.** `.note--warn` prototipe menggambar
+  garis merah di atas pesan; DESIGN.md (Shapes, Zero-Grey, Three-Percent) hanya mengizinkan
+  merah pada tab, harga, dan tanda field yang tidak valid. Jadi yang membawa merah di sini
+  adalah field qty yang `aria-invalid` (garis + outline merah penuh, terukur `2px solid
+  rgb(204,13,13)`), dan kalimatnya tetap tinta.
+- **Baris keranjang menyebut harga dan Stok, tanpa tab Kode** — anatomi `.row` prototipe.
+  Namanya sudah mengidentifikasi Produk, dan kolomnya hanya 300px.
+- **"Kosongkan" pindah ke pita total**, bukan di kepala kolom: kepalanya tinggal nama modul +
+  ringkasan, dan aksi keranjang berdiri di pita keranjangnya sendiri. Form Pembayaran tidak
+  lagi mengulang "Total yang harus dibayar" — pitanya tepat di atasnya, di kolom yang sama.
+- **Cincin fokus dan field tidak valid dipasang sekali untuk seluruh aplikasi** di `app.css`,
+  di luar layer Tailwind (di dalam layer, `utilities` selalu menang — lihat
+  `docs/solutions/developer-experience/port-layar-ke-dunia-mosaik.md`).
+- **Saringan dikosongkan tiap Penjualan tersimpan.** Dulu saringan itu state komponen, jadi ia
+  ikut terhapus saat komponennya dilepas; sekarang ia state modul, jadi ia harus dikosongkan
+  sendiri — kalau tidak, pembeli berikutnya mewarisi Kode pembeli sebelumnya.
+
+### Angka yang terukur (DOM aplikasi yang berjalan, 1440×900)
+
+| Yang diukur | Hasil | Kontrak |
+| --- | --- | --- |
+| Papan | `232px 892px 300px` | 232 / minmax(0,1fr) / 300 |
+| Petak | 73px, `minmax(154px,1fr)` | 154px ke atas |
+| Satu layar | `scrollHeight 900` vs viewport 900, 14 Produk + keranjang + pembayaran | tanpa menggulir |
+| Kontras | 16 pasangan unik, 0 gagal | AA |
+| Radius selain nol | tidak ada | nol |
+| Bayangan terlihat | tidak ada | nol |
+| Merah | 0,86% dari viewport (putih 91%, tinta 1,41%) | ≤ 3% |
+| Fokus | `2px solid rgb(0,0,0)`, offset −2px, pada field dan pada sel metode | garis tinta ke dalam |
+| Field tidak valid | `2px solid rgb(204,13,13)` + garis merah | merah penuh, bukan tint |
+| 390px | `scrollWidth 390` = `clientWidth 390`, satu kolom 374px | tanpa geser mendatar |
+
+### Raster dan asalnya
+
+Semuanya dari aplikasi SvelteKit yang berjalan (bukan prototipe `file://`), Chromium, device
+scale 1, `font.ready` ditunggu, 2026-09-26:
+
+- `kasir-sveltekit.png` — 1440×900, satu Produk di keranjang, jumlah bayar terisi.
+- `kasir-board-sveltekit.png` — papan saja, potongan dari keadaan yang sama.
+- `kasir-blokir-sveltekit.png` — keadaan terblokir: satu baris melebihi Stok.
+- `kasir-struk-sveltekit.png` — wajah struk setelah Penjualan tersimpan.
+- `kasir-memuat-sveltekit.png` — kerangka 24 petak, dengan `GET /api/produk` ditahan 2,5 detik.
+- `kasir-mobile-sveltekit.png` — 390×844, satu kolom, halaman penuh.

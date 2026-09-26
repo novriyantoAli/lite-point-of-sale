@@ -30,13 +30,20 @@
 	--destructive: #cc0d0d;
 	--border: #e8e8e8;
 	--input: #e8e8e8;
-	--ring: #000000;
+	--ring: transparent;
 	--chart-1: #f5f5f5;
 	--chart-2: #e8e8e8;
 	--chart-3: #000000;
 	--chart-4: #cc0d0d;
 	--chart-5: #fafafa;
 	--radius: 0px;
+	/*
+	 * `--ring` sengaja transparan, bukan tinta: cincin fokus dunia ini adalah outline
+	 * 2px ke DALAM (DESIGN.md, Browser surfaces), dan "tidak pernah glow" berarti
+	 * cincin 3px ala Tailwind milik primitif shadcn tidak boleh menggambar apa pun.
+	 * Yang menggambar cincinnya adalah aturan dasar di bawah, sekali untuk seluruh
+	 * aplikasi, bukan `ring-*` yang ditempel di setiap komponen.
+	 */
 	--sidebar: #ffffff;
 	--sidebar-foreground: #000000;
 	--sidebar-primary: #000000;
@@ -125,7 +132,7 @@
 
 @layer base {
 	* {
-		@apply border-border outline-ring/50;
+		@apply border-border;
 	}
 	body {
 		@apply bg-background text-foreground;
@@ -133,4 +140,34 @@
 	html {
 		@apply font-sans;
 	}
+}
+
+/*
+ * Permukaan peramban (DESIGN.md). Aturan ini sengaja TIDAK di dalam `@layer`:
+ * Tailwind menaruh `utilities` sesudah `base`, jadi apa pun yang ditulis di dalam
+ * layer akan kalah dari `outline-none` milik primitif shadcn, seberapa pun
+ * spesifik selektornya. Di luar layer, aturan ini menang — sekali untuk seluruh
+ * aplikasi, bukan ditempel di setiap komponen.
+ */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
+	outline: 2px solid var(--foreground);
+	outline-offset: -2px;
+}
+
+/*
+ * Field yang tidak valid memakai garis dan outline merah utilitas (DESIGN.md,
+ * Fields & Inputs). Merah penuh, bukan tint 20% — tint itulah yang membuat sistem
+ * sebelumnya kehilangan kontrasnya.
+ */
+input[aria-invalid='true'],
+select[aria-invalid='true'],
+textarea[aria-invalid='true'] {
+	outline: 2px solid var(--destructive);
+	outline-offset: -2px;
 }

@@ -24,6 +24,9 @@
 	 * nominal is the total of the sale rather than something the Kasir types
 	 * (CONTEXT.md, Pembayaran). That is why the amount field and the Kembalian
 	 * belong to Tunai alone.
+	 *
+	 * Total yang harus dibayar tidak diulang di sini: pitanya sudah berdiri tepat
+	 * di atas form ini, di kolom yang sama (DESIGN.md, One-Screen).
 	 */
 	let { onCheckedOut }: { onCheckedOut: (hasil: HasilCheckout) => void } = $props();
 
@@ -129,72 +132,77 @@
 			// `checkout.error` carries the normalized message, rendered below.
 		}
 	}
+
+	/** Satu metode: radio asli yang disembunyikan, sel persegi yang terlihat. */
+	const METODE =
+		'flex h-[26px] cursor-pointer items-center justify-center border border-border bg-card text-[13px] font-medium transition-colors hover:bg-muted focus-within:outline-2 focus-within:outline-solid focus-within:-outline-offset-2 focus-within:outline-foreground has-[:checked]:border-foreground has-[:checked]:bg-foreground has-[:checked]:font-semibold has-[:checked]:text-primary-foreground';
+	const FIELD =
+		'h-[26px] border-border bg-card px-1.5 py-0 text-[13px] shadow-none focus-visible:border-foreground aria-invalid:ring-0 md:text-[13px]';
+	/** Angka yang jadi jawaban layar: 20px/700, selalu tabular. */
+	const FIGURE = 'text-[20px] leading-[1.1] font-bold tabular-nums';
 </script>
 
-<form class="space-y-4 rounded-lg border p-4" aria-label="Pembayaran" onsubmit={submit} novalidate>
-	<h2 class="font-medium">Pembayaran</h2>
-
-	<p class="text-sm text-muted-foreground">
-		Total yang harus dibayar
-		<span class="font-medium text-foreground tabular-nums">{formatRupiah(total)}</span>
-	</p>
-
-	<fieldset class="space-y-2">
-		<legend class="text-sm font-medium">Metode pembayaran</legend>
-		<div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+<!--
+	Formnya sendiri tidak menggambar garis apa pun: ia deretan modul, dan tiap
+	modul membawa garis bawahnya sendiri, jadi dua modul bersebelahan berbagi satu
+	garis rambut alih-alih menggambar dua (DESIGN.md, Shared-Hairline).
+-->
+<form aria-label="Pembayaran" onsubmit={submit} novalidate>
+	<div class="border-b border-border px-2 py-1.5">
+		<p class="text-xs font-semibold">Metode pembayaran</p>
+		<div class="mt-1 grid grid-cols-2 gap-1">
 			{#each METODE_URUT as pilihan (pilihan)}
 				<!--
 					A native radio, so arrow keys move between the methods and the group
 					is announced as one choice. The input is only hidden from sight: the
 					label is what shows the method and what carries the focus ring.
 				-->
-				<label
-					class="flex cursor-pointer items-center justify-center rounded-md border px-3 py-2 text-sm font-medium transition-colors focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 hover:bg-accent has-[:checked]:border-primary has-[:checked]:bg-primary/10"
-				>
+				<label class={METODE}>
 					<input type="radio" name="method" value={pilihan} bind:group={method} class="sr-only" />
 					{METODE_LABEL[pilihan]}
 				</label>
 			{/each}
 		</div>
-	</fieldset>
+	</div>
 
 	{#if tunai}
-		<div class="grid gap-4 sm:grid-cols-2">
-			<div class="space-y-2">
-				<Label for="kasir-bayar">Jumlah bayar</Label>
+		<div class="border-b border-border px-2 py-1.5">
+			<div class="flex flex-col gap-[3px]">
+				<Label for="kasir-bayar" class="text-xs font-semibold">Jumlah bayar</Label>
 				<Input
 					id="kasir-bayar"
 					name="amount"
 					inputmode="numeric"
 					autocomplete="off"
+					class={FIELD}
 					bind:value={amount}
 					aria-invalid={amountError ? true : undefined}
 				/>
-				{#if amountError}
-					<p class="text-sm text-destructive">{amountError}</p>
-				{/if}
 			</div>
+			{#if amountError}
+				<p class="mt-1 text-xs font-semibold">{amountError}</p>
+			{/if}
+		</div>
 
-			<div class="space-y-2">
-				<span class="text-sm font-medium">Kembalian</span>
-				<p
-					class="text-2xl font-semibold tabular-nums"
-					role="status"
-					aria-label={`Kembalian ${change === null ? 'belum bisa dihitung' : formatRupiah(change)}`}
-				>
-					{change === null ? '—' : formatRupiah(change)}
-				</p>
-			</div>
+		<div class="border-b border-border px-2 py-1.5">
+			<p class="text-xs font-semibold">Kembalian</p>
+			<p
+				class={FIGURE}
+				role="status"
+				aria-label={`Kembalian ${change === null ? 'belum bisa dihitung' : formatRupiah(change)}`}
+			>
+				{change === null ? '—' : formatRupiah(change)}
+			</p>
 		</div>
 	{:else}
 		<!--
 			Nothing to type and nothing to hand back: the recorded method pays the
 			total, and the API records exactly that.
 		-->
-		<div class="space-y-2">
-			<span class="text-sm font-medium">Dibayar</span>
+		<div class="border-b border-border px-2 py-1.5">
+			<p class="text-xs font-semibold">Dibayar</p>
 			<p
-				class="text-2xl font-semibold tabular-nums"
+				class={FIGURE}
 				role="status"
 				aria-label={`Dibayar dengan ${METODE_LABEL[method]} ${formatRupiah(total)}`}
 			>
@@ -203,15 +211,25 @@
 		</div>
 	{/if}
 
-	{#if blocked}
-		<p class="text-sm text-muted-foreground">{blocked}</p>
-	{/if}
+	<div class="border-b border-border px-2 py-1.5">
+		{#if blocked}
+			<p class="mb-1.5 text-xs font-semibold">{blocked}</p>
+		{/if}
 
-	{#if checkout.error}
-		<p class="text-sm text-destructive" role="alert">{checkout.error.message}</p>
-	{/if}
+		{#if checkout.error}
+			<p class="mb-1.5 text-xs font-semibold" role="alert">{checkout.error.message}</p>
+		{/if}
 
-	<Button type="submit" disabled={pending || Boolean(blocked)}>
-		{pending ? 'Menyimpan…' : 'Bayar & Simpan Penjualan'}
-	</Button>
+		<!--
+			Aksi utama: satu-satunya bidang bertinta penuh di papan ini. Saat mati ia
+			kehilangan tintanya (bukan dipudarkan), jadi putih bergaris putus-putus.
+		-->
+		<Button
+			type="submit"
+			class="h-10 w-full text-[15px] font-semibold hover:bg-primary disabled:border-dashed disabled:border-border disabled:bg-card disabled:text-foreground disabled:opacity-100"
+			disabled={pending || Boolean(blocked)}
+		>
+			{pending ? 'Menyimpan…' : 'Bayar & Simpan Penjualan'}
+		</Button>
+	</div>
 </form>
