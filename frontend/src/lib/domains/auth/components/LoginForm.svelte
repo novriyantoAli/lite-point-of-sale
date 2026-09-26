@@ -41,7 +41,9 @@
   Kepala modul: latar isian, ditutup garis tinta — satu-satunya penanda kepala
   di dunia ini, tanpa bayangan.
 -->
-<div class="flex items-center justify-between gap-2 border-b border-foreground bg-muted px-2 py-1.5">
+<div
+	class="flex items-center justify-between gap-2 border-b border-foreground bg-muted px-2 py-1.5"
+>
 	<h2 class="text-[13px] font-bold">Masuk</h2>
 	<span class="text-xs">username &amp; password Pengguna</span>
 </div>
@@ -53,7 +55,7 @@
 			id="username"
 			name="username"
 			autocomplete="username"
-			class="h-[26px] px-1.5 text-[13px] md:text-[13px] shadow-none"
+			class="h-[26px] px-1.5 text-[13px] shadow-none md:text-[13px]"
 			bind:value={username}
 			aria-invalid={fieldErrors.username ? true : undefined}
 		/>
@@ -69,7 +71,7 @@
 			name="password"
 			type="password"
 			autocomplete="current-password"
-			class="h-[26px] px-1.5 text-[13px] md:text-[13px] shadow-none"
+			class="h-[26px] px-1.5 text-[13px] shadow-none md:text-[13px]"
 			bind:value={password}
 			aria-invalid={fieldErrors.password ? true : undefined}
 		/>
@@ -88,7 +90,7 @@
 	-->
 	<Button
 		type="submit"
-		class="h-10 w-full text-[15px] font-semibold hover:bg-primary disabled:border-border disabled:border-dashed disabled:bg-card disabled:text-foreground disabled:opacity-100"
+		class="h-10 w-full text-[15px] font-semibold hover:bg-primary disabled:border-dashed disabled:border-border disabled:bg-card disabled:text-foreground disabled:opacity-100"
 		disabled={login.isPending}
 	>
 		{login.isPending ? 'Memeriksa…' : 'Masuk'}

@@ -78,9 +78,7 @@
 	{:else if backups.error}
 		<div class="space-y-3">
 			<p class="text-sm text-destructive">{backups.error.message}</p>
-			<Button variant="outline" size="sm" onclick={() => void backups.refetch()}>
-				Coba lagi
-			</Button>
+			<Button variant="outline" size="sm" onclick={() => void backups.refetch()}>Coba lagi</Button>
 		</div>
 	{:else if backups.data?.length === 0}
 		<p class="text-sm text-muted-foreground">

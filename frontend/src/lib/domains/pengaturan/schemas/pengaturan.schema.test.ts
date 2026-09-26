@@ -115,9 +115,7 @@ describe('StoreNameEnvelopeSchema', () => {
 	});
 
 	it('reads an unnamed store as the empty string', () => {
-		expect(
-			StoreNameEnvelopeSchema.parse({ data: { store_name: '' } }).data.store_name
-		).toBe('');
+		expect(StoreNameEnvelopeSchema.parse({ data: { store_name: '' } }).data.store_name).toBe('');
 	});
 
 	it('rejects an answer that carries no name', () => {
