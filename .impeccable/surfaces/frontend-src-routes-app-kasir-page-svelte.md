@@ -73,10 +73,13 @@ kolom bersebelahan membacanya (skill §6.4).
   `"Tambah <nama> ke keranjang"` dan yang menyatakan keadaannya adalah kata "Stok habis" +
   garis coret di dalamnya. Aksi adalah nama tombolnya; keadaan adalah teks yang terlihat.
 - **Wajah struk menggantikan kasir, bukan menemani mosaiknya.** Prototipe menaruh struk di
-  kolom keranjang sementara mosaik tetap hidup — dan itu lubang yang sudah ada di skrip
-  prototipenya sendiri: petak yang ditekan setelah Penjualan tersimpan menambah keranjang yang
-  tidak terlihat. Aksi tersembunyi itu yang DESIGN.md tolak, jadi layar struk berdiri sendiri
-  dengan papan dua kolom: catatan Penjualan di kiri, cetak + "Penjualan Baru" di kanan.
+  kolom keranjang sementara mosaik tetap hidup, dan skrip prototipenya sendiri menunjukkan
+  akibatnya: penangan klik mosaik memanggil `render()`, dan `render()` menulis ulang
+  `baris.innerHTML` dengan baris keranjang. Jadi satu petak yang tersentuh setelah Penjualan
+  tersimpan akan **menghapus panel struk** — termasuk hasil cetaknya dan tombol "Penjualan
+  Baru" — dan menggantikannya dengan keranjang baru. Struknya sudah tersimpan di Go, tapi yang
+  dibaca Kasir hilang dari layar tanpa peringatan. Jadi layar struk berdiri sendiri dengan
+  papan dua kolom: catatan Penjualan di kiri, cetak + "Penjualan Baru" di kanan.
 - **Pesan galat dan peringatan memakai tinta, bukan merah.** `.note--warn` prototipe menggambar
   garis merah di atas pesan; DESIGN.md (Shapes, Zero-Grey, Three-Percent) hanya mengizinkan
   merah pada tab, harga, dan tanda field yang tidak valid. Jadi yang membawa merah di sini
