@@ -57,8 +57,14 @@ jobs:
       - name: Check
         run: pnpm check
 
+      # Dua langkah, bukan satu `pnpm lint`: kalau formatter dan linter berbagi satu
+      # langkah dengan `&&`, format yang merah membuat vonis linter tidak pernah
+      # terlihat — dan CI hanya melaporkan satu cacat dari dua yang mungkin ada.
+      - name: Format
+        run: pnpm lint:format
+
       - name: Lint
-        run: pnpm lint
+        run: pnpm lint:eslint
 
       - name: Test
         run: pnpm test
