@@ -14,10 +14,11 @@ applies_when:
 symptoms:
   - "Tombol mati tetap pudar walau DESIGN.md melarang opasitas sebagai penanda keadaan"
   - "`shadow-none` tidak menghapus bayangan milik `variant=\"outline\"`"
+  - "Cincin fokus terukur `2px none`: lebarnya ada, gayanya tidak"
   - "Hasil pengukuran Playwright tidak berubah setelah kode diubah"
 root_cause: framework_constraint
 resolution_type: workflow_improvement
-tags: [frontend, design-system, shadcn-svelte, tailwind-v4, tailwind-merge, accessibility, verification, playwright]
+tags: [frontend, design-system, shadcn-svelte, tailwind-v4, tailwind-merge, accessibility, verification, playwright, focus-ring, css-layers]
 ---
 
 # Port layar ke dunia mosaik — varian shadcn yang bertabrakan dengan DESIGN.md
@@ -49,11 +50,17 @@ kelas yang dikenali sebagai grup yang sama.
    base juga memasang `disabled:pointer-events-none`, tombol yang ingin tetap memperlihatkan
    `cursor: not-allowed` perlu `disabled:pointer-events-auto`.
 
-3. **`shadow-none` tidak mengalahkan `shadow-xs`.** Pada tombol `variant="outline"`,
-   `shadow-none` terukur tetap menyisakan `0 1px 2px rgba(0,0,0,0.05)`. Yang bekerja: pilih
-   varian tanpa bayangan (`variant="ghost"`) lalu bangun tampilannya dari `class`. Aturan
-   umumnya — kalau sebuah varian membawa hiasan yang dilarang dunia ini, jangan bertarung
-   dengan kelas; pilih varian yang bersih.
+3. **Kalau sebuah varian membawa hiasan yang dilarang dunia ini, pilih varian yang bersih —
+   jangan bertarung lewat kelas.** Tombol `variant="outline"` membawa `shadow-xs`, dan
+   `shadow-none` **tidak** mengalahkannya. Yang bekerja: `variant="ghost"` lalu bangun
+   tampilannya dari `class`. Sebaliknya, `shadow-none` memang obat yang benar untuk `Input`
+   (terukur: seluruh lapisan `box-shadow` menjadi nol), jadi jangan generalisasi "`shadow-none`
+   tidak bekerja" — yang gagal adalah menimpanya pada varian yang sama-sama mendeklarasikan
+   bayangan.
+
+   Koreksi, 2026-09-26: catatan sebelumnya di sini menyalahkan `shadow-none` secara umum. Yang
+   diukur ulang adalah `shadow-[none]` (nilai arbitrer), dan itulah yang kalah; `shadow-none`
+   biasa menang.
 
 4. **Keadaan tab aktif dipasang lewat `aria-current`, bukan kelas kondisional.** `class:`
    tidak bisa mencocokkan apa pun dari `aria-current`; yang bisa adalah varian Tailwind
@@ -72,6 +79,27 @@ kelas yang dikenali sebagai grup yang sama.
    dari DOM aplikasi **yang berjalan** pada 1440×900 (bukan prototipe `file://` seperti
    `.impeccable/tools/audit-kasir.mjs`), lalu rasternya disimpan ke
    `.impeccable/preview/shots/` seperti `rail-sveltekit.png`.
+
+7. **Aturan tingkat dunia tidak boleh ditulis di dalam `@layer`.** Tailwind menaruh
+   `utilities` sesudah `base`, dan urutan layer mengalahkan spesifisitas: apa pun yang
+   ditulis di `@layer base` — termasuk `input:focus-visible` (0,1,1) — kalah dari `.outline-none`
+   milik primitif shadcn (0,1,0). Inilah kenapa cincin fokus dunia ini sempat terukur
+   `2px none`: lebarnya dipasang, gayanya tidak. Cincin fokus yang benar (garis tinta 2px ke
+   dalam) ditulis **di luar layer mana pun** di `app.css`, sekali untuk seluruh aplikasi.
+
+8. **Mematikan glow bawaan tanpa `!important`: jadikan `--ring` transparan.** Primitif shadcn
+   membawa `focus-visible:ring-3`, dan cincin itu digambar dari `--tw-ring-*`. Menyetel
+   `--ring: transparent` membuat seluruh `ring-*` bawaan tidak menggambar apa pun, sementara
+   aturan fokus di poin 7 yang menggambar cincinnya. Konsekuensinya `focus-visible:border-ring`
+   juga menjadi transparan, jadi tombol berbingkai perlu `focus-visible:border-foreground`
+   sendiri supaya bingkainya tidak hilang saat difokus.
+
+9. **Suite e2e mengunci bentuk DOM, bukan hanya perilaku.** Tes `/penjualan` mencari
+   `record.locator('p').filter({ hasText: 'Bayar · Tunai' })`; label dan angkanya harus berada
+   di `<p>` **yang sama**, dan `getByRole('status')` di keranjang harus memuat kata "Total"
+   beserta angkanya. Port yang memecah pasangan itu menjadi dua elemen akan merah walau
+   perilakunya utuh — jadi bacalah tes yang menyentuh layar sebelum menggambar ulang
+   markahnya, dan biarkan kalimatnya apa adanya.
 
 ## Evidence — rel navigasi, 2026-09-26
 
