@@ -1,9 +1,5 @@
 import { apiClient } from '$lib/api/client';
-import {
-	BackupEnvelopeSchema,
-	BackupListSchema,
-	type Backup
-} from '../schemas/backup.schema';
+import { BackupEnvelopeSchema, BackupListSchema, type Backup } from '../schemas/backup.schema';
 
 /**
  * Interface next to implementation: `queries/` and tests depend on this shape,

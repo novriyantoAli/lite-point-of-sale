@@ -65,7 +65,11 @@ export default defineConfig({
 	testDir: './tests/e2e',
 	// The store this run uses and the printer file it prints to; global-teardown.ts
 	// reads both from here — one source of truth for paths two files need.
-	metadata: { e2eDbPath: E2E_DB_PATH, e2ePrinterPath: E2E_PRINTER_PATH, e2eBackupDir: E2E_BACKUP_DIR },
+	metadata: {
+		e2eDbPath: E2E_DB_PATH,
+		e2ePrinterPath: E2E_PRINTER_PATH,
+		e2eBackupDir: E2E_BACKUP_DIR
+	},
 	globalSetup: './tests/e2e/global-setup.ts',
 	globalTeardown: './tests/e2e/global-teardown.ts',
 	forbidOnly: !!process.env.CI,
