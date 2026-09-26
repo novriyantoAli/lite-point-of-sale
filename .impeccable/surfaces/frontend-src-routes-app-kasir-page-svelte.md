@@ -90,6 +90,13 @@ kolom bersebelahan membacanya (skill §6.4).
 - **"Kosongkan" pindah ke pita total**, bukan di kepala kolom: kepalanya tinggal nama modul +
   ringkasan, dan aksi keranjang berdiri di pita keranjangnya sendiri. Form Pembayaran tidak
   lagi mengulang "Total yang harus dibayar" — pitanya tepat di atasnya, di kolom yang sama.
+- **Hover petak mengink dua garis yang petaknya miliki** (kanan + bawah), bukan keempat sisi.
+  Skema garis di sini "tiap garis digambar satu kali": garis kiri/atas sebuah petak adalah garis
+  milik tetangganya — atau, di baris pertama, garis tinta kepala Katalog. Prototipe memberi tiap
+  petak keempat sisinya lewat `margin: -1px`, dan itu membuat batas atas petak baris pertama
+  menggambar di atas garis tinta kepala. Disetujui pemilik, 2026-09-26: garis kepala utuh lebih
+  penting daripada hover empat sisi. Aturan ini berlaku untuk semua layar berikutnya yang
+  memakai mosaik berpetak.
 - **Cincin fokus dan field tidak valid dipasang sekali untuk seluruh aplikasi** di `app.css`,
   di luar layer Tailwind (di dalam layer, `utilities` selalu menang — lihat
   `docs/solutions/developer-experience/port-layar-ke-dunia-mosaik.md`).
