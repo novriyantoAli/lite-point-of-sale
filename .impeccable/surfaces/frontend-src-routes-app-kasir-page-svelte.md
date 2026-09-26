@@ -24,9 +24,18 @@ Empat yang dikonfirmasi pemilik, semuanya mengikat: kecepatan di depan pembeli t
 - **Tombol `−` dan `+` tetap teks operator**, mengikuti aplikasi yang ada, bukan ikon yang digambar. Keputusan pemilik.
 - **Keadaan memuat belum diuji di sini**: prototipe tidak punya jaringan. Keadaan memuat aplikasi harus diport dan diverifikasi saat dunia ini masuk ke `frontend/src`.
 
-## Unresolved
+## Keputusan yang menutup pertanyaan ronde ini
 
-Apakah dunia ini dipakai untuk seluruh aplikasi atau hanya layar Kasir. Belum diputuskan, dan tidak perlu diputuskan di ronde ini.
+**Dijawab pemilik, 2026-09-26: dunia ini dipakai untuk SELURUH aplikasi, bukan hanya layar Kasir.**
+Konsekuensinya berurutan: rel navigasi dan nama toko dikerjakan lebih dulu, karena kedelapan
+layar lain duduk di dalam kerangka itu (`frontend/src/routes/(app)/+layout.svelte`), lalu tiap
+layar diport satu per satu. Keputusan ini menutup pertanyaan "Unresolved" ronde sebelumnya;
+tidak ada yang tersisa di sana.
+
+Catatan yang belum ditutup: **cacah pada tab** (`Produk 24`, `Stok 4`) ada di prototipe sebagai
+angka contoh. Angka itu butuh permintaan ke API dari kerangka, yang berarti setiap layar
+membayar dua permintaan demi kerangka — belum diputuskan, jadi tab untuk sekarang membawa
+katanya saja, tanpa cacah.
 
 ## Direction contract
 

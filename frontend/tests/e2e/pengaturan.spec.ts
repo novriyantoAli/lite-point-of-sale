@@ -49,6 +49,11 @@ test('the Admin sets the Struk template and it persists', async ({ page }) => {
 
 	await expect(page.getByRole('status')).toContainText('Pengaturan disimpan.');
 
+	// The first non-empty line of the header block *is* the store's name, and the
+	// rail leads with it on every screen (PRODUCT.md, ADR-0019) — so the store
+	// renaming itself here has to show up in the chrome, not only in the form.
+	await expect(page.getByRole('banner').getByText('Toko Kopi Purnama')).toBeVisible();
+
 	// The values are the stored ones: a reload reads them back.
 	await page.reload();
 	await expect(page.getByLabel('Header Struk')).toHaveValue('Toko Kopi Purnama\nJl. Melati 1');
