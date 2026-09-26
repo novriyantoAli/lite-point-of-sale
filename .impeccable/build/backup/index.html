@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="id">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Backup — Japanese High-Density Grid</title>
+		<link rel="stylesheet" href="../sistem/style.css" />
+	</head>
+	<body>
+		<div class="bar">
+			<p>
+				<b>Prototipe arah</b> — dunia <b>Japanese High-Density Grid</b>, layar Backup. Isi di
+				sini <b>contoh</b>, bukan data toko.
+			</p>
+			<p><a href="../kasir/index.html">layar Kasir</a></p>
+		</div>
+
+		<nav class="rail" aria-label="Navigasi utama">
+			<div class="rail__top">
+				<span class="rail__brand">Lite Point of Sale</span>
+				<span class="rail__who">
+					<span class="tnum">admin</span>
+					<span class="tag tag--quiet">Admin</span>
+					<button class="btn" type="button">Keluar</button>
+				</span>
+			</div>
+			<div class="rail__row">
+				<a class="tab" href="../beranda/index.html">Beranda</a>
+				<a class="tab" href="../kasir/index.html">Kasir</a>
+				<a class="tab" href="../penjualan/index.html">Penjualan</a>
+			</div>
+			<div class="rail__row">
+				<a class="tab" href="../produk/index.html">Produk <span class="tab__n">24</span></a>
+				<a class="tab" href="../stok/index.html">Stok <span class="tab__n">4</span></a>
+				<a class="tab" href="../laporan/index.html">Laporan</a>
+				<a class="tab" href="../pengguna/index.html">Pengguna</a>
+				<a class="tab" href="../pengaturan/index.html">Pengaturan</a>
+				<a class="tab" href="../backup/index.html" aria-current="page">Backup</a>
+			</div>
+		</nav>
+
+		<main class="board board--full">
+			<div class="strip">
+				<h1 class="strip__title">Backup</h1>
+				<p class="strip__desc">
+					Salinan database toko. Backup harian berjalan otomatis; tombol di bawah mengambil
+					salinan manual saat ini juga.
+				</p>
+				<span class="strip__act">
+					<button class="btn btn--solid" type="button">Backup sekarang</button>
+				</span>
+			</div>
+
+			<section class="col" aria-labelledby="daftar-judul">
+				<div class="mod mod--head">
+					<h2 class="mod__title" id="daftar-judul">Salinan tersimpan</h2>
+					<span class="mod__note tnum">3 file · terbaru di atas</span>
+				</div>
+				<div class="stack">
+					<div class="lirow">
+						<div class="lirow__main">
+							<p class="lirow__name tnum">pos-20260925-141205-123456789.db</p>
+							<p class="lirow__meta">25 September 2026 14:12 · 184 KB · manual</p>
+						</div>
+					</div>
+					<div class="lirow">
+						<div class="lirow__main">
+							<p class="lirow__name tnum">pos-20260925-000000-000000000.db</p>
+							<p class="lirow__meta">25 September 2026 00:00 · 180 KB · harian</p>
+						</div>
+					</div>
+					<div class="lirow">
+						<div class="lirow__main">
+							<p class="lirow__name tnum">pos-20260924-000000-000000000.db</p>
+							<p class="lirow__meta">24 September 2026 00:00 · 176 KB · harian</p>
+						</div>
+					</div>
+				</div>
+			</section>
+		</main>
+	</body>
+</html>

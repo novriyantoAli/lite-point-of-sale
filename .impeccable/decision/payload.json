@@ -1,0 +1,251 @@
+{
+  "title": "Pilih dunia visual — layar Kasir",
+  "question": "Satu arah dibangun penuh. Ambil yang lain, atau lempar ulang dadunya.",
+  "steer": true,
+  "canon": true,
+  "buildPath": {
+    "value": "code",
+    "toggle": false
+  },
+  "reroll": {
+    "registers": [
+      "safer",
+      "bolder"
+    ]
+  },
+  "options": [
+    {
+      "id": "assigned",
+      "label": "The Shelf Label",
+      "kicker": "THE ROLL",
+      "lineage": "label harga & price gun di tepi rak toko",
+      "thesis": "Setiap layar adalah kertas label: satu tinta di atas kertas, tercetak dalam kolom.",
+      "palette": [
+        "#ffffff",
+        "#111111",
+        "#c9c9c4",
+        "#c8102e"
+      ],
+      "materials": [
+        "kertas label termal",
+        "cetak satu tinta",
+        "lembar backing berlubang",
+        "rel tepi rak"
+      ],
+      "viewport": "Rel rak membawa navigasi; di bawahnya kasir adalah lembar label — Produk sebagai kotak label, keranjang sebagai strip berlubang, Total dan Kembalian sebagai kolom tercetak terbesar.",
+      "risk": "Satu tinta di atas putih adalah palet yang sempit; tanpa disiplin kolom, ia jatuh jadi tabel biasa.",
+      "raised": [
+        {
+          "from": "challenger-nixie",
+          "raise": "The Tube Bank — Total, Kembalian, dan Stok punya posisi dan satu ukuran yang tetap, jadi mata tidak pernah mencari angka."
+        },
+        {
+          "from": "challenger-arcade",
+          "raise": "The Palette Law — satu tinta dan satu merah stempel; tidak ada tint, jadi tidak ada keadaan yang bisa bersembunyi di balik warna yang lebih lembut."
+        },
+        {
+          "from": "challenger-cyclorama",
+          "raise": "The Named Cue — setiap keadaan membawa katanya dan pola dithernya, jadi warna tidak pernah jadi satu-satunya tanda."
+        },
+        {
+          "from": "challenger-busytown",
+          "raise": "The Printed Label — setiap kontrol dan setiap angka menyebut namanya sendiri dengan kata; tidak ada yang hanya berupa ikon."
+        },
+        {
+          "from": "challenger-boxwall",
+          "raise": "The End-Label Grid — setiap baris Produk dan setiap baris keranjang mengulang kolom yang sama dalam urutan yang sama, jadi mata cukup belajar satu bentuk."
+        },
+        {
+          "from": "challenger-warm-app",
+          "raise": "The Pressable Ink — tinta penuh hanya menandai yang bisa ditekan atau sudah tersimpan; kontrol yang mati kembali jadi kertas."
+        }
+      ]
+    },
+    {
+      "id": "model-pick",
+      "label": "The Faktur",
+      "kicker": "IMPECCABLE’S PICK",
+      "lineage": "faktur / nota rangkap karbon dari supplier",
+      "thesis": "Penjualan adalah dokumen berangkap, dan kolomnya adalah antarmuka.",
+      "palette": [
+        "#fbfaf7",
+        "#1a1a1a",
+        "#4b3a8f",
+        "#c8102e"
+      ],
+      "materials": [
+        "kertas tipis tanpa karbon",
+        "jejak karbon ungu",
+        "kolom bergaris",
+        "stempel karet"
+      ],
+      "viewport": "Kasir adalah satu formulir bergaris: Kode, Nama, Jumlah, Harga, Subtotal sebagai kolom tetap, dengan Struk sebagai rangkap pembeli dan total berjalan di kaki halaman.",
+      "risk": "Benda paling akrab di toko, jadi ini juga arah tempat hampir semua aplikasi kasir mendarat."
+    },
+    {
+      "id": "challenger-nixie",
+      "label": "Nixie Laboratory Counter",
+      "verdict": "competitive",
+      "lineage": "frequency counter & multimeter tabung nixie",
+      "thesis": "Angka adalah antarmukanya: setiap besaran punya bank tabungnya sendiri.",
+      "palette": [
+        "#0d0d0f",
+        "#ff7a18",
+        "#6b6f76",
+        "#e8e6e1"
+      ],
+      "materials": [
+        "tabung kaca",
+        "digit logam bertumpuk",
+        "casing baja hitam",
+        "mesh anoda"
+      ],
+      "viewport": "Total, Kembalian, dan Stok sebagai bank tabung dengan posisi digit tetap; label terukir di panel bawah tiap bank.",
+      "case": "Menang di pengenalan: ini alat uji, dunia pemilik toko elektronik. Kalah di kejelasan: permukaan gelap bercahaya dan animasi digit memperlambat daftar Produk yang padat.",
+      "risk": "Cahaya dan gerak membuat setiap angka jadi tontonan, padahal yang dibutuhkan kecepatan membaca.",
+      "hero": "https://impeccable.style/worlds/cards/signals-instruments-nixie-laboratory-counter-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/signals-instruments-nixie-laboratory-counter.webp"
+    },
+    {
+      "id": "challenger-boxwall",
+      "label": "The Box Wall",
+      "verdict": "competitive",
+      "lineage": "dinding dus bertumpuk dengan label ujung tercetak",
+      "thesis": "Toko ini adalah dinding dus berlabel; menjual berarti menarik satu dus keluar.",
+      "palette": [
+        "#ffffff",
+        "#1a1a1a",
+        "#b4763c",
+        "#2f5d8a"
+      ],
+      "materials": [
+        "label ujung karton",
+        "tinta siluet satu garis",
+        "kraft untuk stok tanpa merek",
+        "rak bertingkat"
+      ],
+      "viewport": "Stok sebagai dinding rak: setiap Produk adalah ujung dus dengan grid label yang sama, dan dus terpilih bergeser separuh keluar untuk jadi keranjang.",
+      "case": "Menang di pengenalan: toko ini memang dinding dus, dan label ujungnya memang empat kolom yang sama tiap kali. Kalah tipis di kecepatan, karena dinding yang ditelusuri lebih lambat daripada daftar yang disaring.",
+      "risk": "Menelusuri dinding lebih lambat daripada menyaring daftar, dan itu bertabrakan dengan batasan bahwa kasir tidak boleh jadi lebih lambat.",
+      "hero": "https://impeccable.style/worlds/cards/textiles-weave-drape-fashion-sneaker-box-stacks-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/textiles-weave-drape-fashion-sneaker-box-stacks.webp"
+    },
+    {
+      "id": "challenger-arcade",
+      "label": "CRT Arcade Pixel Glow",
+      "verdict": "declined",
+      "lineage": "layar kabinet arcade piksel",
+      "thesis": "Grid 240 baris sebagai panggung, dengan palet yang diatur seperti hukum.",
+      "palette": [
+        "#0a0a0a",
+        "#ffd447",
+        "#3ec1d3",
+        "#e8452c"
+      ],
+      "materials": [
+        "piksel 8×8",
+        "scanline",
+        "phosphor bloom",
+        "palet sprite 16 warna"
+      ],
+      "viewport": "Kaps 8×8 dipaku di tepi atas untuk angka, isi layar tersusun dalam petak utuh yang tidak boleh keluar grid.",
+      "case": "Yang disimpan: The Palette Law — satu warna berarti tepat satu hal, dan tidak ada yang lain boleh memakainya. Ditolak karena tata bahasa permainan bertabrakan langsung dengan batasan Anda sendiri: wibawa alat kerja, tanpa kesan mainan.",
+      "risk": "Tipografi piksel dan scanline menurunkan keterbacaan, tepat di tempat yang paling butuh jelas.",
+      "hero": "https://impeccable.style/worlds/cards/medium-native-crt-arcade-pixel-glow-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/medium-native-crt-arcade-pixel-glow.webp"
+    },
+    {
+      "id": "challenger-cyclorama",
+      "label": "Cyclorama Dawn",
+      "verdict": "declined",
+      "lineage": "pencahayaan panggung, cyclorama dari malam ke siang",
+      "thesis": "Atmosfer disusun sebagai pita horizon, dari gelap ke terang.",
+      "palette": [
+        "#05070c",
+        "#1f4ea8",
+        "#e0798f",
+        "#ffffff"
+      ],
+      "materials": [
+        "pita horizon kobalt",
+        "kabut rose",
+        "wash putih siang",
+        "cue stensil"
+      ],
+      "viewport": "Isi layar disusun sebagai pita mendatar dari gelap ke terang, dengan nama cue berhuruf stensil dan angka tabular.",
+      "case": "Yang disimpan: The Named Cue — keadaan diskret yang selalu bernama dan berpola, sehingga warna tidak pernah jadi satu-satunya tanda. Ditolak karena dunia panggung bukan dunia toko, dan pita atmosfer tidak membawa arti apa pun untuk transaksi.",
+      "risk": "Cantik di layar laporan, tapi tidak punya arti di depan pembeli yang menunggu.",
+      "hero": "https://impeccable.style/worlds/cards/stagecraft-theater-lighting-cyclorama-dawn-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/stagecraft-theater-lighting-cyclorama-dawn.webp"
+    },
+    {
+      "id": "challenger-busytown",
+      "label": "Busytown Cross-Section",
+      "verdict": "declined",
+      "lineage": "buku potongan melintang bergambar gouache",
+      "thesis": "Satu adegan menerus di mana setiap benda memakai label kecil tercetak.",
+      "palette": [
+        "#fbf7ef",
+        "#b4452f",
+        "#f0b52c",
+        "#5c8a3c"
+      ],
+      "materials": [
+        "gouache rata",
+        "garis coklat tipis",
+        "label romawi kecil",
+        "penunjuk rambut"
+      ],
+      "viewport": "Satu adegan menerus yang digeser tepi ke tepi; setiap benda punya label kecil dengan garis penunjuk tipis ke bendanya.",
+      "case": "Yang disimpan: The Printed Label — setiap benda, termasuk setiap kontrol, menyebut namanya sendiri dengan kata. Ditolak karena dunia buku anak bukan dunia alat kerja, dan adegan menerus yang digeser terlalu lambat untuk meja kasir.",
+      "risk": "Satu adegan menerus tidak bisa memuat katalog Produk yang padat tanpa berhenti jadi adegan.",
+      "hero": "https://impeccable.style/worlds/cards/graphic-worlds-publishing-busytown-cross-section-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/graphic-worlds-publishing-busytown-cross-section.webp"
+    },
+    {
+      "id": "challenger-warm-app",
+      "label": "Warm Consumer App Surface",
+      "verdict": "declined",
+      "lineage": "permukaan aplikasi konsumen modern",
+      "thesis": "Kartu bersudut lembut di atas dasar hangat, dengan satu warna aksi.",
+      "palette": [
+        "#faf6f0",
+        "#ffffff",
+        "#e2603c",
+        "#2a2622"
+      ],
+      "materials": [
+        "kartu sudut besar",
+        "bayangan lembut",
+        "aksen hanya untuk aksi",
+        "bar bawah setinggi jempol"
+      ],
+      "viewport": "Kartu bertumpuk dalam satu kolom yang menggulir, dengan bar bawah tetap yang selalu terjangkau jempol.",
+      "case": "Yang disimpan: The Pressable Ink — warna aksi hanya muncul di tempat yang benar-benar bisa ditekan, dan kontrol yang mati kehilangan warnanya sepenuhnya. Ditolak karena ini tata bahasa ponsel yang dipegang tangan, sedangkan kasir ini laptop di meja dengan keyboard, dan karena dasar hangat berkartu lembut adalah penampilan yang dikirim hampir semua model untuk kategori apa pun.",
+      "risk": "Terlihat ramah tapi bukan dunia toko ini, dan bar bawah jempol salah perangkat.",
+      "hero": "https://impeccable.style/worlds/cards/digital-design-canon-warm-consumer-app-surface-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/digital-design-canon-warm-consumer-app-surface.webp"
+    }
+  ],
+  "canonCard": {
+    "label": "The Category Standard",
+    "lineage": "keluarga kasir SaaS: majoo, Moka, Pawoon, Olsera, Shopify POS",
+    "thesis": "Yang dikirim setiap aplikasi kasir: sidebar indigo, kartu KPI, tabel berbayang lembut.",
+    "palette": [
+      "#f8fafc",
+      "#ffffff",
+      "#4f46e5",
+      "#0f172a",
+      "#e2e8f0"
+    ],
+    "materials": [
+      "kartu berbayang lembut",
+      "radius 12px",
+      "aksen indigo",
+      "sidebar ikon + label",
+      "thumbnail produk besar"
+    ],
+    "viewport": "Sidebar di kiri, empat kartu KPI di atas, tabel data bersudut bulat di bawahnya.",
+    "risk": "Tidak bisa dibedakan dari pesaing, dan itu memang tujuannya."
+  }
+}

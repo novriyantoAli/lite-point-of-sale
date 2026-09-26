@@ -2,13 +2,6 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { Button } from '$lib/components/ui/button';
-	import {
-		Card,
-		CardContent,
-		CardDescription,
-		CardHeader,
-		CardTitle
-	} from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { collectFieldErrors } from '$lib/utils';
@@ -44,49 +37,62 @@
 	}
 </script>
 
-<Card class="w-full max-w-sm">
-	<CardHeader>
-		<CardTitle>Masuk</CardTitle>
-		<CardDescription>Gunakan username dan password Pengguna.</CardDescription>
-	</CardHeader>
-	<CardContent>
-		<form class="space-y-4" onsubmit={submit} novalidate>
-			<div class="space-y-2">
-				<Label for="username">Username</Label>
-				<Input
-					id="username"
-					name="username"
-					autocomplete="username"
-					bind:value={username}
-					aria-invalid={fieldErrors.username ? true : undefined}
-				/>
-				{#if fieldErrors.username}
-					<p class="text-sm text-destructive">{fieldErrors.username}</p>
-				{/if}
-			</div>
+<!--
+  Kepala modul: latar isian, ditutup garis tinta — satu-satunya penanda kepala
+  di dunia ini, tanpa bayangan.
+-->
+<div
+	class="flex items-center justify-between gap-2 border-b border-foreground bg-muted px-2 py-1.5"
+>
+	<h2 class="text-[13px] font-bold">Masuk</h2>
+	<span class="text-xs">username &amp; password Pengguna</span>
+</div>
 
-			<div class="space-y-2">
-				<Label for="password">Password</Label>
-				<Input
-					id="password"
-					name="password"
-					type="password"
-					autocomplete="current-password"
-					bind:value={password}
-					aria-invalid={fieldErrors.password ? true : undefined}
-				/>
-				{#if fieldErrors.password}
-					<p class="text-sm text-destructive">{fieldErrors.password}</p>
-				{/if}
-			</div>
+<form class="space-y-2 px-2 py-2" onsubmit={submit} novalidate>
+	<div class="space-y-1">
+		<Label for="username" class="text-xs font-semibold">Username</Label>
+		<Input
+			id="username"
+			name="username"
+			autocomplete="username"
+			class="h-[26px] px-1.5 text-[13px] shadow-none md:text-[13px]"
+			bind:value={username}
+			aria-invalid={fieldErrors.username ? true : undefined}
+		/>
+		{#if fieldErrors.username}
+			<p class="text-xs font-semibold text-destructive">{fieldErrors.username}</p>
+		{/if}
+	</div>
 
-			{#if login.error}
-				<p class="text-sm text-destructive" role="alert">{login.error.message}</p>
-			{/if}
+	<div class="space-y-1">
+		<Label for="password" class="text-xs font-semibold">Password</Label>
+		<Input
+			id="password"
+			name="password"
+			type="password"
+			autocomplete="current-password"
+			class="h-[26px] px-1.5 text-[13px] shadow-none md:text-[13px]"
+			bind:value={password}
+			aria-invalid={fieldErrors.password ? true : undefined}
+		/>
+		{#if fieldErrors.password}
+			<p class="text-xs font-semibold text-destructive">{fieldErrors.password}</p>
+		{/if}
+	</div>
 
-			<Button type="submit" class="w-full" disabled={login.isPending}>
-				{login.isPending ? 'Memeriksa…' : 'Masuk'}
-			</Button>
-		</form>
-	</CardContent>
-</Card>
+	{#if login.error}
+		<p class="text-xs font-semibold text-destructive" role="alert">{login.error.message}</p>
+	{/if}
+
+	<!--
+	  Aksi utama: satu-satunya bidang bertinta penuh. Saat mati ia kehilangan
+	  tintanya (bukan dipudarkan), jadi putih bergaris putus-putus.
+	-->
+	<Button
+		type="submit"
+		class="h-10 w-full text-[15px] font-semibold hover:bg-primary disabled:border-dashed disabled:border-border disabled:bg-card disabled:text-foreground disabled:opacity-100"
+		disabled={login.isPending}
+	>
+		{login.isPending ? 'Memeriksa…' : 'Masuk'}
+	</Button>
+</form>

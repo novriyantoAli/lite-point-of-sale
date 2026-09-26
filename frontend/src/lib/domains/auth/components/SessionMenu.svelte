@@ -29,10 +29,27 @@
 	}
 </script>
 
+<!--
+  Siapa yang sedang memakai terminal, di dalam sel rel navigasi yang disediakan
+  layout. Namanya memakai tinta hitam seperti seluruh teks lain di dunia ini —
+  abu-abu hanya boleh jadi garis dan isian (DESIGN.md, Zero-Grey Rule).
+-->
 <div class="flex items-center gap-2">
-	<span class="text-sm text-muted-foreground">{user.username}</span>
+	<span class="text-[13px]">{user.username}</span>
 	<RoleBadge role={user.role} />
-	<Button variant="outline" size="sm" disabled={logout.isPending} onclick={() => void signOut()}>
+
+	<!--
+	  Tombol petak berbingkai rambut. Saat menunggu ia tidak dipudarkan:
+	  opasitas 0,5 milik dunia lama dan terukur di bawah AA, jadi tintanya yang
+	  dipertahankan dan `cursor: not-allowed` yang menandai keadaannya.
+	-->
+	<Button
+		variant="ghost"
+		size="sm"
+		class="h-[26px] border-border bg-card px-2 text-[13px] font-semibold hover:border-foreground focus-visible:border-foreground disabled:pointer-events-auto disabled:opacity-100"
+		disabled={logout.isPending}
+		onclick={() => void signOut()}
+	>
 		Keluar
 	</Button>
 </div>

@@ -1,0 +1,989 @@
+<!doctype html>
+<html lang="id">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Pratinjau — Lite Point of Sale · layar Kasir</title>
+		<link rel="stylesheet" href="style.css" />
+	</head>
+	<body>
+		<!-- ==================================================================
+		     Kerangka pratinjau. Yang direview adalah isi di bawahnya.
+		     ================================================================== -->
+		<div class="preview-bar">
+			<div class="shell">
+				<p>
+					<strong>Pratinjau statis</strong>: sistem yang direkam di DESIGN.md, layar Kasir.
+					Data Produk &amp; Penjualan di sini <strong>contoh</strong>, bukan data toko.
+				</p>
+				<nav aria-label="Bagian pratinjau">
+					<a href="#kasir">Kasir</a>
+					<a href="#checkout">Setelah checkout</a>
+					<a href="#keadaan">Keadaan lain</a>
+					<a href="#sistem">Token</a>
+					<a href="#komponen">Komponen</a>
+				</nav>
+			</div>
+		</div>
+
+		<!-- ==================================================================
+		     Kerangka aplikasi: (app)/+layout.svelte
+		     ================================================================== -->
+		<header class="app-header">
+			<div class="shell">
+				<div class="row row--gap-6">
+					<span class="brand">Lite Point of Sale</span>
+					<nav class="nav" aria-label="Navigasi utama">
+						<a href="#kasir">Beranda</a>
+						<a href="#kasir" aria-current="page">Kasir</a>
+						<a href="#kasir">Penjualan</a>
+						<a href="#kasir">Produk</a>
+						<a href="#kasir">Stok</a>
+						<a href="#kasir">Laporan</a>
+						<a href="#kasir">Pengguna</a>
+						<a href="#kasir">Pengaturan</a>
+						<a href="#kasir">Backup</a>
+					</nav>
+				</div>
+				<div class="row row--gap-3">
+					<span class="quiet">admin</span>
+					<span class="badge">Admin</span>
+					<button class="btn btn--outline btn--sm" type="button">Keluar</button>
+				</div>
+			</div>
+		</header>
+
+		<main class="shell" style="padding-top: 24px; padding-bottom: 72px">
+			<!-- ==============================================================
+			     LAYAR KASIR — dari domains/penjualan/components/Kasir.svelte
+			     ============================================================== -->
+			<div id="kasir" class="stack-8">
+				<div class="stack-1">
+					<h1 class="page-title">Kasir</h1>
+					<p class="quiet">
+						Temukan Produk, susun keranjang, lalu bayar. Stok berkurang sendiri saat Penjualan
+						tersimpan.
+					</p>
+				</div>
+
+				<!-- PencarianProduk.svelte -->
+				<section class="stack-4" aria-labelledby="kasir-cari-judul">
+					<h2 id="kasir-cari-judul" class="label-text">Cari Produk</h2>
+
+					<form
+						class="grid-2 panel"
+						role="search"
+						aria-label="Cari Produk"
+						onsubmit="event.preventDefault()"
+					>
+						<div class="field">
+							<label class="label" for="kasir-kode">Kode</label>
+							<input id="kasir-kode" class="input" name="code" autocomplete="off" />
+							<p class="quiet">
+								Scan barcode atau ketik Kode — daftar di bawah menyaring ke Produk yang cocok.
+							</p>
+						</div>
+						<div class="field">
+							<label class="label" for="kasir-nama">Nama</label>
+							<input id="kasir-nama" class="input" name="name" autocomplete="off" />
+							<p class="quiet">Produk tanpa Kode tetap bisa dijual — cari lewat namanya.</p>
+						</div>
+					</form>
+
+					<ul class="stack-2" id="hasil-produk" aria-label="Hasil pencarian Produk">
+						<li class="row row--between panel" style="gap: 12px">
+							<div class="stack-1">
+								<p class="label-text">
+									Indomie Goreng <span class="quiet">· 8998866200014</span>
+								</p>
+								<p class="quiet">Rp 3.500 · Stok 48</p>
+							</div>
+							<button class="btn btn--sm" type="button" data-tambah="indomie">Tambah</button>
+						</li>
+						<li class="row row--between panel" style="gap: 12px">
+							<div class="stack-1">
+								<p class="label-text">
+									Aqua 600 ml <span class="quiet">· 8886008101011</span>
+								</p>
+								<p class="quiet">Rp 4.000 · Stok 24</p>
+							</div>
+							<button class="btn btn--sm" type="button" data-tambah="aqua">Tambah</button>
+						</li>
+						<li class="row row--between panel" style="gap: 12px">
+							<div class="stack-1">
+								<!-- Produk tanpa Kode: baris ini yang membuktikan lookup lewat nama -->
+								<p class="label-text">Teh Botol Sosro 350 ml</p>
+								<p class="quiet">Rp 5.000 · Stok 12</p>
+							</div>
+							<button class="btn btn--sm" type="button" data-tambah="teh">Tambah</button>
+						</li>
+						<li class="row row--between panel" style="gap: 12px">
+							<div class="stack-1">
+								<p class="label-text">
+									Roti Tawar Sari Roti <span class="quiet">· 8991002101234</span>
+								</p>
+								<p class="quiet">Rp 18.000 · Stok habis</p>
+							</div>
+							<button class="btn btn--sm" type="button" disabled aria-label="Tambah Roti Tawar Sari Roti ke keranjang">
+								Tambah
+							</button>
+						</li>
+					</ul>
+				</section>
+
+				<!-- Keranjang.svelte -->
+				<section class="stack-4" aria-labelledby="kasir-keranjang-judul">
+					<div class="row row--between row--end row--gap-4">
+						<div class="stack-1">
+							<h2 id="kasir-keranjang-judul" class="label-text">Keranjang</h2>
+							<p class="quiet" id="keranjang-ringkas">5 unit dalam 2 Item.</p>
+						</div>
+						<button class="btn btn--outline btn--sm" type="button" id="kosongkan">Kosongkan</button>
+					</div>
+
+					<p class="quiet hidden" id="keranjang-kosong">
+						Keranjang kosong. Cari Produk di atas, lalu tekan Tambah.
+					</p>
+
+					<ul class="stack-2" id="keranjang-baris">
+						<li class="stack-2 panel" data-baris="indomie" data-harga="3500" data-stok="48" data-nama="Indomie Goreng" data-kode="8998866200014">
+							<div class="row row--between" style="gap: 12px; align-items: flex-start">
+								<div class="stack-1">
+									<p class="label-text">Indomie Goreng <span class="quiet">· 8998866200014</span></p>
+									<p class="quiet">Rp 3.500 · Stok 48</p>
+								</div>
+								<div class="row row--gap-3">
+									<button class="btn btn--outline btn--sm btn--icon" type="button" data-minus aria-label="Kurangi jumlah Indomie Goreng">−</button>
+									<input class="input input--qty" type="number" min="1" step="1" inputmode="numeric" value="2" aria-label="Jumlah Indomie Goreng" />
+									<button class="btn btn--outline btn--sm btn--icon" type="button" data-plus aria-label="Tambah jumlah Indomie Goreng">+</button>
+								</div>
+								<div class="row row--gap-3">
+									<span class="tabular-nums" data-subtotal>Rp 7.000</span>
+									<button class="btn btn--outline btn--sm" type="button" data-hapus aria-label="Hapus Indomie Goreng dari keranjang">Hapus</button>
+								</div>
+							</div>
+						</li>
+						<li class="stack-2 panel" data-baris="aqua" data-harga="4000" data-stok="24" data-nama="Aqua 600 ml" data-kode="8886008101011">
+							<div class="row row--between" style="gap: 12px; align-items: flex-start">
+								<div class="stack-1">
+									<p class="label-text">Aqua 600 ml <span class="quiet">· 8886008101011</span></p>
+									<p class="quiet">Rp 4.000 · Stok 24</p>
+								</div>
+								<div class="row row--gap-3">
+									<button class="btn btn--outline btn--sm btn--icon" type="button" data-minus aria-label="Kurangi jumlah Aqua 600 ml">−</button>
+									<input class="input input--qty" type="number" min="1" step="1" inputmode="numeric" value="3" aria-label="Jumlah Aqua 600 ml" />
+									<button class="btn btn--outline btn--sm btn--icon" type="button" data-plus aria-label="Tambah jumlah Aqua 600 ml">+</button>
+								</div>
+								<div class="row row--gap-3">
+									<span class="tabular-nums" data-subtotal>Rp 12.000</span>
+									<button class="btn btn--outline btn--sm" type="button" data-hapus aria-label="Hapus Aqua 600 ml dari keranjang">Hapus</button>
+								</div>
+							</div>
+						</li>
+					</ul>
+
+					<p class="text-right figure--running" role="status" id="keranjang-total" aria-label="Total keranjang Rp 19.000">
+						Total <span class="tabular-nums">Rp 19.000</span>
+					</p>
+				</section>
+
+				<!-- Pembayaran.svelte -->
+				<form class="stack-4 panel" aria-label="Pembayaran" id="pembayaran" onsubmit="event.preventDefault()">
+					<h2 class="label-text">Pembayaran</h2>
+
+					<p class="quiet">
+						Total yang harus dibayar
+						<span class="label-text tabular-nums" style="color: var(--foreground)" id="total-bayar">Rp 19.000</span>
+					</p>
+
+					<fieldset class="stack-2">
+						<legend class="label-text" style="margin-bottom: 8px">Metode pembayaran</legend>
+						<div class="methods">
+							<label class="method"><input type="radio" name="method" value="cash" checked /><span>Tunai</span></label>
+							<label class="method"><input type="radio" name="method" value="qris" /><span>QRIS</span></label>
+							<label class="method"><input type="radio" name="method" value="debit" /><span>Debit</span></label>
+							<label class="method"><input type="radio" name="method" value="transfer" /><span>Transfer</span></label>
+						</div>
+					</fieldset>
+
+					<div class="grid-2" id="baris-tunai">
+						<div class="field">
+							<label class="label" for="kasir-bayar">Jumlah bayar</label>
+							<input id="kasir-bayar" class="input" name="amount" inputmode="numeric" autocomplete="off" value="50000" />
+							<p class="danger hidden" id="bayar-error"></p>
+						</div>
+						<div class="field">
+							<span class="label">Kembalian</span>
+							<p class="figure" role="status" id="kembalian" aria-label="Kembalian Rp 31.000">Rp 31.000</p>
+						</div>
+					</div>
+
+					<div class="stack-2 hidden" id="baris-non-tunai">
+						<span class="label">Dibayar</span>
+						<p class="figure" role="status" id="dibayar">QRIS · Rp 19.000</p>
+					</div>
+
+					<p class="quiet hidden" id="terblokir"></p>
+
+					<button class="btn" type="submit" id="tombol-bayar">Bayar &amp; Simpan Penjualan</button>
+				</form>
+			</div>
+
+			<!-- ==============================================================
+			     SETELAH CHECKOUT — StrukPenjualan.svelte + RincianPenjualan.svelte
+			     + CetakStruk.svelte, dalam keadaan cetak GAGAL (ADR-0017).
+			     Panel ini muncul di layar yang sama setelah Penjualan tersimpan.
+			     ============================================================== -->
+			<section id="checkout" class="stack-4 panel" aria-labelledby="kasir-struk-judul">
+				<p class="quiet" style="font-size: 0.75rem">
+					Keadaan setelah checkout: panel ini menggantikan pencarian, keranjang, dan pembayaran
+					di layar yang sama. Tekan <strong>Bayar &amp; Simpan Penjualan</strong> di atas untuk
+					melihatnya terisi dengan keranjang Anda.
+				</p>
+				<h2 id="kasir-struk-judul" class="label-text">Penjualan tercatat</h2>
+
+				<div class="stack-4">
+					<p class="quiet" role="status">
+						Nomor Struk
+						<span class="label-text tabular-nums" style="color: var(--foreground)" id="struk-nomor">7</span>
+						· <span id="struk-waktu">2026-09-25 19:42:10</span> · Kasir admin
+					</p>
+
+					<ul class="stack-1" id="struk-items">
+						<li class="row row--between row--gap-3">
+							<span>Indomie Goreng <span class="quiet">· 2 × Rp 3.500</span></span>
+							<span class="tabular-nums">Rp 7.000</span>
+						</li>
+						<li class="row row--between row--gap-3">
+							<span>Aqua 600 ml <span class="quiet">· 3 × Rp 4.000</span></span>
+							<span class="tabular-nums">Rp 12.000</span>
+						</li>
+					</ul>
+
+					<div class="stack-1" style="padding-top: 12px; border-top: 1px solid var(--border)">
+						<p class="row row--between row--gap-3 label-text">
+							<span>Total</span><span class="tabular-nums" id="struk-total">Rp 19.000</span>
+						</p>
+						<p class="row row--between row--gap-3">
+							<span id="struk-bayar-label">Bayar · Tunai</span
+							><span class="tabular-nums" id="struk-bayar">Rp 50.000</span>
+						</p>
+						<p class="row row--between row--gap-3 label-text" id="struk-kembalian-baris">
+							<span>Kembalian</span><span class="tabular-nums" id="struk-kembalian">Rp 31.000</span>
+						</p>
+					</div>
+				</div>
+
+				<div class="stack-2">
+					<button class="btn btn--outline" type="button">Cetak ulang Struk</button>
+					<p class="danger" role="alert">Printer belum diatur.</p>
+				</div>
+
+				<div>
+					<button class="btn" type="button" id="penjualan-baru">Penjualan Baru</button>
+				</div>
+			</section>
+
+			<!-- ==============================================================
+			     KEADAAN LAIN — yang DESIGN.md klaim ada, ditunjukkan sekali supaya
+			     bisa diperiksa tanpa harus memicu tiap keadaan di aplikasi.
+			     ============================================================== -->
+			<section id="keadaan" class="stack-6">
+				<div class="stack-1">
+					<h2 class="sheet-heading">Keadaan lain</h2>
+					<p class="quiet">
+						Setiap keadaan di bawah ini datang dari komponen yang sama dengan layar di atas,
+						bukan contoh yang dibuat terpisah.
+					</p>
+				</div>
+
+				<div class="stack-3">
+					<h3 class="block-title">Memuat</h3>
+					<p class="quiet">
+						Dua cara: satu kalimat di dalam alur, dan tiga baris berdenyut saat mencari Penjualan
+						lewat Nomor Struk.
+					</p>
+					<p class="quiet">Memuat Produk…</p>
+					<div class="stack-3" role="status" style="max-width: 320px">
+						<span class="sr-only">Mencari Penjualan…</span>
+						<div class="pulse" style="width: 66%"></div>
+						<div class="pulse" style="width: 50%"></div>
+						<div class="pulse" style="width: 75%"></div>
+					</div>
+				</div>
+
+				<div class="stack-3">
+					<h3 class="block-title">Kosong</h3>
+					<p class="quiet">
+						Keranjang kosong, hasil saringan yang tidak ketemu, dan katalog yang memang belum
+						ada. Tiga kalimat yang berbeda karena tiga hal yang berbeda.
+					</p>
+					<p class="quiet">Keranjang kosong. Cari Produk di atas, lalu tekan Tambah.</p>
+					<p class="quiet">Tidak ada Produk Aktif yang cocok. Periksa Kode atau namanya.</p>
+					<p class="quiet">
+						Belum ada Produk yang bisa dijual. Admin perlu menambahkannya lebih dulu.
+					</p>
+				</div>
+
+				<div class="stack-3">
+					<h3 class="block-title">Galat</h3>
+					<p class="quiet">
+						Pesan datang dari API lewat satu normalisasi galat; yang gagal selalu punya tombol
+						coba lagi di sebelahnya.
+					</p>
+					<div class="stack-3">
+						<p class="danger" role="alert">Tidak dapat menghubungi layanan.</p>
+						<div>
+							<button class="btn btn--outline btn--sm" type="button">Coba lagi</button>
+						</div>
+					</div>
+					<div class="field" style="max-width: 320px">
+						<label class="label" for="contoh-invalid">Jumlah bayar</label>
+						<input id="contoh-invalid" class="input" value="15000" aria-invalid="true" />
+						<p class="danger">Jumlah bayar kurang dari total.</p>
+					</div>
+				</div>
+
+				<div class="stack-3">
+					<h3 class="block-title">Melebihi Stok</h3>
+					<p class="quiet">
+						Satu-satunya tempat field di dalam keranjang ditandai tidak valid, dan checkout
+						ditahan sampai jumlahnya dikurangi.
+					</p>
+					<li class="stack-2 panel" style="list-style: none">
+						<div class="row row--between" style="gap: 12px; align-items: flex-start">
+							<div class="stack-1">
+								<p class="label-text">Teh Botol Sosro 350 ml</p>
+								<p class="quiet">Rp 5.000 · Stok 12</p>
+							</div>
+							<div class="row row--gap-3">
+								<button class="btn btn--outline btn--sm btn--icon" type="button">−</button>
+								<input class="input input--qty" value="15" aria-invalid="true" aria-label="Jumlah Teh Botol Sosro 350 ml" />
+								<button class="btn btn--outline btn--sm btn--icon" type="button">+</button>
+							</div>
+							<div class="row row--gap-3">
+								<span class="tabular-nums">Rp 75.000</span>
+								<button class="btn btn--outline btn--sm" type="button">Hapus</button>
+							</div>
+						</div>
+						<p class="danger">Melebihi Stok: tersisa 12. Kurangi jumlahnya sebelum checkout.</p>
+					</li>
+					<p class="quiet">Ada Item yang melebihi Stok. Kurangi jumlahnya lebih dulu.</p>
+				</div>
+
+				<div class="stack-3">
+					<h3 class="block-title">Tabel: daftar Produk</h3>
+					<p class="quiet">
+						Angka rata kanan dan <span class="tabular-nums">tabular-nums</span>; sel kosong
+						ditulis <code>—</code>, bukan dibiarkan bolong.
+					</p>
+					<div class="table-wrap">
+						<table class="table">
+							<caption class="sr-only">Contoh daftar Produk</caption>
+							<thead>
+								<tr>
+									<th scope="col">Nama</th>
+									<th scope="col">Kode</th>
+									<th scope="col">Kategori</th>
+									<th scope="col" class="text-right">Harga</th>
+									<th scope="col" class="text-right">Stok</th>
+									<th scope="col">Status</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td class="label-text">Indomie Goreng</td>
+									<td class="quiet">8998866200014</td>
+									<td class="quiet">Makanan</td>
+									<td class="text-right tabular-nums">Rp 3.500</td>
+									<td class="text-right tabular-nums">48</td>
+									<td><span class="badge">Aktif</span></td>
+								</tr>
+								<tr>
+									<td class="label-text">Teh Botol Sosro 350 ml</td>
+									<td class="quiet">—</td>
+									<td class="quiet">Minuman</td>
+									<td class="text-right tabular-nums">Rp 5.000</td>
+									<td class="text-right tabular-nums">12</td>
+									<td><span class="badge badge--quiet">Nonaktif</span></td>
+								</tr>
+								<tr>
+									<td class="label-text">Roti Tawar Sari Roti</td>
+									<td class="quiet">8991002101234</td>
+									<td class="quiet">—</td>
+									<td class="text-right tabular-nums">Rp 18.000</td>
+									<td class="text-right tabular-nums">0</td>
+									<td><span class="badge">Aktif</span></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+
+				<div class="stack-3">
+					<h3 class="block-title">Kartu: status layanan</h3>
+					<p class="quiet">
+						Satu dari dua tempat saja di aplikasi yang memakai kartu. Perhatikan: latarnya
+						sama persis dengan halaman, yang memisahkan hanya ring 1px dan bayangan terkecil.
+					</p>
+					<div class="card" style="max-width: 448px">
+						<div class="stack-1">
+							<p class="block-title">Status layanan</p>
+							<p class="quiet">Diperiksa dari API Go lewat BFF SvelteKit.</p>
+						</div>
+						<div class="row row--gap-3">
+							<span class="badge">OK</span>
+							<span class="quiet">Basis data: ok</span>
+						</div>
+					</div>
+					<div class="card" style="max-width: 448px">
+						<div class="stack-1">
+							<p class="block-title">Status layanan</p>
+							<p class="quiet">Keadaan gagal memakai Signal Red, satu-satunya warna di sistem.</p>
+						</div>
+						<div class="row row--gap-3">
+							<span class="badge badge--destructive">DEGRADED</span>
+							<span class="quiet">Basis data: error</span>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<!-- ==============================================================
+			     TOKEN — dikutip dari DESIGN.md, ditampilkan dengan nilai yang
+			     benar-benar dipakai frontend/src/app.css
+			     ============================================================== -->
+			<section id="sistem" class="stack-6">
+				<div class="stack-1">
+					<h2 class="sheet-heading">Token</h2>
+					<p class="quiet">
+						Sembilan nilai, delapan di antaranya berkroma nol. Tidak ada warna brand, tidak ada
+						aksen dekoratif. Warna di sini bekerja sebagai nilai terang–gelap, bukan identitas.
+					</p>
+				</div>
+
+				<div class="swatches">
+					<div class="swatch">
+						<div class="swatch__chip" style="background: oklch(0.205 0 0)"></div>
+						<div class="swatch__meta">
+							<strong>Solid Ink</strong><code>oklch(0.205 0 0)</code
+							><span class="quiet">Isi aksi yang membuat / menyimpan</span>
+						</div>
+					</div>
+					<div class="swatch">
+						<div class="swatch__chip" style="background: oklch(0.985 0 0)"></div>
+						<div class="swatch__meta">
+							<strong>Ink Inverse</strong><code>oklch(0.985 0 0)</code
+							><span class="quiet">Teks di atas Solid Ink</span>
+						</div>
+					</div>
+					<div class="swatch">
+						<div class="swatch__chip" style="background: oklch(0.577 0.245 27.325)"></div>
+						<div class="swatch__meta">
+							<strong>Signal Red</strong><code>oklch(0.577 0.245 27.325)</code
+							><span class="quiet">Satu-satunya hue: penolakan &amp; hapus permanen</span>
+						</div>
+					</div>
+					<div class="swatch">
+						<div class="swatch__chip" style="background: oklch(1 0 0); border-bottom: 1px solid var(--border)"></div>
+						<div class="swatch__meta">
+							<strong>Paper White</strong><code>oklch(1 0 0)</code
+							><span class="quiet">Halaman, kartu, popover: sama persis</span>
+						</div>
+					</div>
+					<div class="swatch">
+						<div class="swatch__chip" style="background: oklch(0.145 0 0)"></div>
+						<div class="swatch__meta">
+							<strong>Ink Black</strong><code>oklch(0.145 0 0)</code
+							><span class="quiet">Teks default</span>
+						</div>
+					</div>
+					<div class="swatch">
+						<div class="swatch__chip" style="background: oklch(0.97 0 0)"></div>
+						<div class="swatch__meta">
+							<strong>Flat Wash</strong><code>oklch(0.97 0 0)</code
+							><span class="quiet">Hover outline, badge status, kepala tabel</span>
+						</div>
+					</div>
+					<div class="swatch">
+						<div class="swatch__chip" style="background: oklch(0.922 0 0)"></div>
+						<div class="swatch__meta">
+							<strong>Hairline Grey</strong><code>oklch(0.922 0 0)</code
+							><span class="quiet">Setiap border 1px dan stroke input</span>
+						</div>
+					</div>
+					<div class="swatch">
+						<div class="swatch__chip" style="background: oklch(0.708 0 0)"></div>
+						<div class="swatch__meta">
+							<strong>Focus Grey</strong><code>oklch(0.708 0 0)</code
+							><span class="quiet">Cincin fokus 3px</span>
+						</div>
+					</div>
+					<div class="swatch">
+						<div class="swatch__chip" style="background: oklch(0.556 0 0)"></div>
+						<div class="swatch__meta">
+							<strong>Quiet Ink</strong><code>oklch(0.556 0 0)</code
+							><span class="quiet">Suara kedua · 77× pemakaian</span>
+						</div>
+					</div>
+				</div>
+
+				<div class="note">
+					<p>
+						<strong>Token yang ada tapi tidak bisa dicapai.</strong> <code>.dark</code> memuat 31
+						token lengkap, tetapi tidak ada toggle, tidak ada <code>prefers-color-scheme</code>,
+						dan tidak ada satu pun <code>class="dark"</code> di kode. <code>--chart-1…5</code> dan
+						<code>--sidebar-*</code> (8 token) juga nol pemakaian di komponen.
+					</p>
+					<div class="gallery" style="margin-top: 12px">
+						<span class="badge badge--quiet">oklch(0.145 0 0) · .dark background</span>
+						<span class="badge badge--quiet">chart-1 oklch(0.87 0 0)</span>
+						<span class="badge badge--quiet">chart-2 oklch(0.556 0 0)</span>
+						<span class="badge badge--quiet">chart-3 oklch(0.439 0 0)</span>
+						<span class="badge badge--quiet">chart-4 oklch(0.371 0 0)</span>
+						<span class="badge badge--quiet">chart-5 oklch(0.269 0 0)</span>
+					</div>
+				</div>
+
+				<div class="stack-3">
+					<h3 class="block-title">Tipografi: tiga ukuran yang benar-benar bekerja</h3>
+					<div class="specs">
+						<div>
+							<span class="page-title">Judul halaman</span>
+							<small>Headline · 600 · 1,5rem / 2rem · judul halaman + angka utama (14×)</small>
+						</div>
+						<div>
+							<span class="section-title">Judul bagian</span>
+							<small>Section · 600 · 1,125rem / 1,75rem · “Omzet harian”, total keranjang (3×)</small>
+						</div>
+						<div>
+							<span class="block-title">Judul kartu</span>
+							<small>Title · 500 · 1rem / 1,5rem · CardTitle saja</small>
+						</div>
+						<div>
+							<span>Badan teks, hampir semua hal di aplikasi ini</span>
+							<small>Body · 400 · 0,875rem / 1,25rem (112×)</small>
+						</div>
+						<div>
+							<span class="label-text">Label formulir dan teks tombol</span>
+							<small>Label · 500 · 0,875rem</small>
+						</div>
+						<div>
+							<span class="badge">Badge</span>
+							<small>Micro · 500 · 0,75rem / 1rem</small>
+						</div>
+						<div>
+							<span class="quiet">Teks sekunder tidak mengecil; ia menjadi Quiet Ink.</span>
+							<small>The Quiet-Not-Small Rule</small>
+						</div>
+					</div>
+				</div>
+
+				<div class="stack-3">
+					<h3 class="block-title">Angka uang: dua tingkat, dan bedanya disengaja</h3>
+					<div class="grid-2">
+						<div class="panel">
+							<p class="quiet">Total keranjang, saat transaksi berjalan</p>
+							<p class="figure--running text-right">Rp 19.000</p>
+							<small class="quiet">1,125rem / 600 · satu langkah di bawah angka checkout</small>
+						</div>
+						<div class="panel">
+							<p class="quiet">Kembalian, saat uang berpindah tangan</p>
+							<p class="figure">Rp 31.000</p>
+							<small class="quiet">1,5rem / 600 · ukuran yang sama dengan judul halaman</small>
+						</div>
+					</div>
+				</div>
+
+				<div class="stack-3">
+					<h3 class="block-title">Radius, bayangan, ritme</h3>
+					<div class="specs">
+						<div>
+							<span>Kontrol · <code>rounded-md</code></span>
+							<small>8px · tombol, input, pilihan metode</small>
+						</div>
+						<div>
+							<span>Panel · <code>rounded-lg</code></span>
+							<small>10px · blok berisi, pembungkus tabel</small>
+						</div>
+						<div>
+							<span>Kartu · <code>rounded-xl</code></span>
+							<small>14px · radius terbesar pada permukaan</small>
+						</div>
+						<div>
+							<span>Badge · <code>rounded-4xl</code></span>
+							<small>26px pada tinggi 20px → pill penuh</small>
+						</div>
+						<div>
+							<span>Satu-satunya bayangan · <code>shadow-xs</code></span>
+							<small>0 1px 2px 0 rgb(0 0 0 / 0.05) · tidak ada shadow-sm ke atas</small>
+						</div>
+						<div>
+							<span>Garis</span>
+							<small>Selalu 1px. Tidak ada 2px, tidak ada border ganda.</small>
+						</div>
+						<div>
+							<span>Ritme</span>
+							<small>4 · 8 · 12 · 16 · 24 · 32px</small>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<!-- ==============================================================
+			     KOMPONEN
+			     ============================================================== -->
+			<section id="komponen" class="stack-6">
+				<div class="stack-1">
+					<h2 class="sheet-heading">Komponen</h2>
+					<p class="quiet">
+						Semuanya adalah primitif yang benar-benar dipakai layar di atas, bukan contoh yang
+						dibuat untuk halaman ini.
+					</p>
+				</div>
+
+				<div class="stack-3">
+					<h3 class="block-title">Tombol</h3>
+					<p class="quiet">
+						Isi pekat = aksi yang membuat atau menyimpan. Semua yang lain outline. Tidak ada satu
+						pun tombol berikon di kode domain: setiap tombol membawa katanya.
+					</p>
+					<div class="gallery">
+						<button class="btn" type="button">Tambah Produk</button>
+						<button class="btn btn--outline" type="button">Ubah</button>
+						<button class="btn btn--outline btn--sm" type="button">Nonaktifkan</button>
+						<button class="btn btn--destructive btn--sm" type="button">Ya, hapus</button>
+						<button class="btn" type="button" disabled>Menyimpan…</button>
+						<button class="btn btn--outline btn--sm btn--icon" type="button" aria-label="Kurangi jumlah">−</button>
+						<button class="btn btn--outline btn--sm btn--icon" type="button" aria-label="Tambah jumlah">+</button>
+					</div>
+				</div>
+
+				<div class="stack-3">
+					<h3 class="block-title">Badge</h3>
+					<p class="quiet">
+						Status selalu membawa katanya; tidak ada keadaan yang disampaikan lewat warna saja.
+						Nonaktif sengaja <em>tidak</em> merah: itu keadaan tenang, bukan kesalahan.
+					</p>
+					<div class="gallery">
+						<span class="badge">Aktif</span>
+						<span class="badge badge--quiet">Nonaktif</span>
+						<span class="badge badge--destructive">DEGRADED</span>
+						<span class="badge">Admin</span>
+						<span class="badge">Kasir</span>
+					</div>
+				</div>
+
+				<div class="stack-3">
+					<h3 class="block-title">Field</h3>
+					<p class="quiet">
+						Label selalu di atas field dengan jarak 8px; tidak ada placeholder yang merangkap
+						label. Cincin fokus 3px, bukan glow.
+					</p>
+					<div class="grid-2">
+						<div class="field">
+							<label class="label" for="contoh-teks">Nama</label>
+							<input id="contoh-teks" class="input" placeholder="Nama Produk" />
+							<p class="quiet">Keadaan biasa.</p>
+						</div>
+						<div class="field">
+							<label class="label" for="contoh-fokus">Kode</label>
+							<input id="contoh-fokus" class="input" value="8998866200014" />
+							<p class="quiet">Klik/Tab untuk melihat cincin fokusnya.</p>
+						</div>
+						<div class="field">
+							<label class="label" for="contoh-galat">Harga</label>
+							<input id="contoh-galat" class="input" value="18.000" aria-invalid="true" />
+							<p class="danger">
+								Harga harus bilangan bulat. “18.000” ditolak, bukan dibaca sebagai 18.
+							</p>
+						</div>
+						<div class="field">
+							<label class="label" for="contoh-mati">Stok</label>
+							<input id="contoh-mati" class="input" value="48" disabled />
+							<p class="quiet">Nonaktif.</p>
+						</div>
+					</div>
+				</div>
+
+				<div class="stack-3">
+					<h3 class="block-title">Navigasi</h3>
+					<p class="quiet">
+						Satu header, border-b 1px, tanpa sticky dan tanpa blur. Aktif = Ink + 500; lainnya
+						Quiet Ink. Tanpa ikon, tanpa pill, tanpa underline.
+					</p>
+					<nav class="nav">
+						<a href="#komponen" aria-current="page">Kasir</a>
+						<a href="#komponen">Penjualan</a>
+						<a href="#komponen">Produk</a>
+						<a href="#komponen">Stok</a>
+					</nav>
+				</div>
+			</section>
+		</main>
+		<script>
+			/*
+			 * Perilaku pratinjau. Meniru aturan yang sudah ada di aplikasi, termasuk
+			 * yang paling mudah salah kalau ditiru setengah-setengah:
+			 *
+			 *  - Jumlah bayar hanya menerima digit. "50.000" ditolak, bukan dibaca
+			 *    sebagai 50 — persis seperti parseIntegerLiteral di lib/utils.ts.
+			 *  - Galat jumlah bayar baru muncul saat tombolnya ditekan, tidak saat
+			 *    mengetik; sementara mengetik, Kembalian hanya berhenti di "—".
+			 *  - Tombol bayar mati selama keranjang kosong atau ada Item melebihi Stok.
+			 */
+			(() => {
+				const rupiah = new Intl.NumberFormat('id-ID');
+				const rp = (n) => 'Rp ' + rupiah.format(n);
+
+				const PRODUK = {
+					indomie: { nama: 'Indomie Goreng', kode: '8998866200014', harga: 3500, stok: 48 },
+					aqua: { nama: 'Aqua 600 ml', kode: '8886008101011', harga: 4000, stok: 24 },
+					teh: { nama: 'Teh Botol Sosro 350 ml', kode: '', harga: 5000, stok: 12 }
+				};
+				const METODE = { cash: 'Tunai', qris: 'QRIS', debit: 'Debit', transfer: 'Transfer' };
+
+				const items = [
+					{ id: 'indomie', qty: 2 },
+					{ id: 'aqua', qty: 3 }
+				];
+				let metode = 'cash';
+				let nomorStruk = 7;
+
+				const $ = (s) => document.querySelector(s);
+				const daftar = $('#keranjang-baris');
+				const fieldBayar = $('#kasir-bayar');
+
+				const total = () => items.reduce((n, it) => n + PRODUK[it.id].harga * it.qty, 0);
+				const units = () => items.reduce((n, it) => n + it.qty, 0);
+				const melebihiStok = () => items.some((it) => it.qty > PRODUK[it.id].stok);
+				const blocked = () =>
+					items.length === 0
+						? 'Keranjang masih kosong.'
+						: melebihiStok()
+							? 'Ada Item yang melebihi Stok. Kurangi jumlahnya lebih dulu.'
+							: '';
+
+				/** Angka yang boleh dibaca: bilangan bulat, seperti schema-nya. */
+				function nominal() {
+					const raw = fieldBayar.value.trim();
+					if (!/^[+-]?\d+$/.test(raw)) return { ok: false, message: 'Jumlah bayar harus bilangan bulat.' };
+					const value = Number(raw);
+					if (value < 0) return { ok: false, message: 'Jumlah bayar tidak boleh negatif.' };
+					if (value < total()) return { ok: false, message: 'Jumlah bayar kurang dari total.' };
+					return { ok: true, value };
+				}
+
+				function barisHtml(it) {
+					const p = PRODUK[it.id];
+					return `<li class="stack-2 panel" data-id="${it.id}">
+						<div class="row row--between" style="gap: 12px; align-items: flex-start">
+							<div class="stack-1">
+								<p class="label-text">${p.nama}${p.kode ? ` <span class="quiet">· ${p.kode}</span>` : ''}</p>
+								<p class="quiet">${rp(p.harga)} · Stok ${p.stok}</p>
+							</div>
+							<div class="row row--gap-3">
+								<button class="btn btn--outline btn--sm btn--icon" type="button" data-act="minus" aria-label="Kurangi jumlah ${p.nama}">−</button>
+								<input class="input input--qty" type="number" min="1" step="1" inputmode="numeric" value="${it.qty}" aria-label="Jumlah ${p.nama}" data-act="qty" />
+								<button class="btn btn--outline btn--sm btn--icon" type="button" data-act="plus" aria-label="Tambah jumlah ${p.nama}">+</button>
+							</div>
+							<div class="row row--gap-3">
+								<span class="tabular-nums" data-subtotal></span>
+								<button class="btn btn--outline btn--sm" type="button" data-act="hapus" aria-label="Hapus ${p.nama} dari keranjang">Hapus</button>
+							</div>
+						</div>
+						<p class="danger hidden" data-lebih>Melebihi Stok: tersisa ${p.stok}. Kurangi jumlahnya sebelum checkout.</p>
+					</li>`;
+				}
+
+				function render() {
+					daftar.innerHTML = items.map(barisHtml).join('');
+					sync();
+				}
+
+				function sync() {
+					items.forEach((it) => {
+						const p = PRODUK[it.id];
+						const li = daftar.querySelector(`[data-id="${it.id}"]`);
+						if (!li) return;
+						const field = li.querySelector('[data-act="qty"]');
+						if (document.activeElement !== field) field.value = it.qty;
+						const invalid = it.qty > p.stok;
+						if (invalid) field.setAttribute('aria-invalid', 'true');
+						else field.removeAttribute('aria-invalid');
+						li.querySelector('[data-subtotal]').textContent = rp(p.harga * it.qty);
+						li.querySelector('[data-lebih]').classList.toggle('hidden', !invalid);
+						li.querySelector('[data-act="minus"]').disabled = it.qty <= 1;
+					});
+
+					const kosong = items.length === 0;
+					$('#keranjang-kosong').classList.toggle('hidden', !kosong);
+					$('#keranjang-ringkas').textContent = kosong
+						? 'Belum ada Item.'
+						: `${units()} unit dalam ${items.length} Item.`;
+					$('#kosongkan').disabled = kosong;
+
+					const t = total();
+					const totalKeranjang = $('#keranjang-total');
+					totalKeranjang.classList.toggle('hidden', kosong);
+					totalKeranjang.setAttribute('aria-label', `Total keranjang ${rp(t)}`);
+					totalKeranjang.innerHTML = `Total <span class="tabular-nums">${rp(t)}</span>`;
+
+					syncBayar();
+				}
+
+				function syncBayar() {
+					const t = total();
+					$('#total-bayar').textContent = rp(t);
+
+					const tunai = metode === 'cash';
+					$('#baris-tunai').classList.toggle('hidden', !tunai);
+					$('#baris-non-tunai').classList.toggle('hidden', tunai);
+
+					if (tunai) {
+						const hasil = nominal();
+						// Sementara mengetik tidak ada pesan: angkanya hanya berhenti di "—"
+						// sampai tombolnya ditekan (Pembayaran.svelte, `change`).
+						const bisa = hasil.ok && hasil.value >= t;
+						const kembali = bisa ? hasil.value - t : null;
+						const kb = $('#kembalian');
+						kb.textContent = kembali === null ? '—' : rp(kembali);
+						kb.setAttribute(
+							'aria-label',
+							`Kembalian ${kembali === null ? 'belum bisa dihitung' : rp(kembali)}`
+						);
+					} else {
+						$('#dibayar').textContent = `${METODE[metode]} · ${rp(t)}`;
+					}
+
+					const pesan = blocked();
+					const bl = $('#terblokir');
+					bl.textContent = pesan;
+					bl.classList.toggle('hidden', pesan === '');
+					$('#tombol-bayar').disabled = pesan !== '';
+				}
+
+				/** Isi panel "Penjualan tercatat" dengan keranjang yang barusan dibayar. */
+				function renderStruk(bayar) {
+					const t = total();
+					const tunai = metode === 'cash';
+					const now = new Date();
+					const pad = (n) => String(n).padStart(2, '0');
+					const stamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+					$('#struk-nomor').textContent = nomorStruk;
+					$('#struk-waktu').textContent = stamp;
+					$('#struk-items').innerHTML = items
+						.map((it) => {
+							const p = PRODUK[it.id];
+							return `<li class="row row--between row--gap-3"><span>${p.nama} <span class="quiet">· ${it.qty} × ${rp(p.harga)}</span></span><span class="tabular-nums">${rp(p.harga * it.qty)}</span></li>`;
+						})
+						.join('');
+					$('#struk-total').textContent = rp(t);
+					$('#struk-bayar-label').textContent = `Bayar · ${METODE[metode]}`;
+					$('#struk-bayar').textContent = rp(bayar);
+					$('#struk-kembalian-baris').classList.toggle('hidden', !tunai);
+					$('#struk-kembalian').textContent = rp(tunai ? bayar - t : 0);
+				}
+
+				// --- keranjang ------------------------------------------------------
+				daftar.addEventListener('click', (event) => {
+					const tombol = event.target.closest('button[data-act]');
+					if (!tombol) return;
+					const li = tombol.closest('[data-id]');
+					const item = items.find((it) => it.id === li.dataset.id);
+					if (!item) return;
+
+					if (tombol.dataset.act === 'plus') item.qty += 1;
+					if (tombol.dataset.act === 'minus') item.qty = Math.max(1, item.qty - 1);
+					if (tombol.dataset.act === 'hapus') items.splice(items.indexOf(item), 1);
+
+					if (tombol.dataset.act === 'hapus') render();
+					else sync();
+				});
+
+				daftar.addEventListener('input', (event) => {
+					const field = event.target.closest('[data-act="qty"]');
+					if (!field) return;
+					const item = items.find((it) => it.id === field.closest('[data-id]').dataset.id);
+					if (!item) return;
+					// Sama seperti Keranjang.svelte: bilangan bulat ≥ 1 disimpan; field
+					// yang dikosongkan dibiarkan kosong, tidak diketik ulang.
+					const typed = field.valueAsNumber;
+					if (Number.isInteger(typed) && typed >= 1) item.qty = typed;
+					sync();
+				});
+
+				$('#kosongkan').addEventListener('click', () => {
+					items.length = 0;
+					render();
+				});
+
+				document.querySelectorAll('[data-tambah]').forEach((tombol) => {
+					tombol.addEventListener('click', () => {
+						const id = tombol.dataset.tambah;
+						const ada = items.find((it) => it.id === id);
+						if (ada) ada.qty += 1;
+						else items.push({ id, qty: 1 });
+						render();
+						$('#keranjang-baris').scrollIntoView({ block: 'center', behavior: 'smooth' });
+					});
+				});
+
+				// --- pembayaran -----------------------------------------------------
+				document.querySelectorAll('input[name="method"]').forEach((radio) => {
+					radio.addEventListener('change', () => {
+						metode = radio.value;
+						const err = $('#bayar-error');
+						err.classList.add('hidden');
+						fieldBayar.removeAttribute('aria-invalid');
+						syncBayar();
+					});
+				});
+
+				fieldBayar.addEventListener('input', syncBayar);
+
+				$('#pembayaran').addEventListener('submit', () => {
+					if (blocked()) return;
+
+					const err = $('#bayar-error');
+					if (metode === 'cash') {
+						const hasil = nominal();
+						if (!hasil.ok) {
+							err.textContent = hasil.message;
+							err.classList.remove('hidden');
+							fieldBayar.setAttribute('aria-invalid', 'true');
+							return;
+						}
+						nomorStruk += 1;
+						renderStruk(hasil.value);
+					} else {
+						nomorStruk += 1;
+						renderStruk(total());
+					}
+
+					err.classList.add('hidden');
+					fieldBayar.removeAttribute('aria-invalid');
+
+					// Kasir.svelte mengosongkan keranjang hanya setelah Penjualan tersimpan:
+					// checkout yang ditolak meninggalkan pekerjaan Kasir apa adanya.
+					items.length = 0;
+					fieldBayar.value = '';
+					render();
+
+					$('#checkout').scrollIntoView({ block: 'start', behavior: 'smooth' });
+				});
+
+				$('#penjualan-baru').addEventListener('click', () => {
+					items.length = 0;
+					fieldBayar.value = '';
+					render();
+					$('#kasir-kode').focus();
+					$('#kasir').scrollIntoView({ block: 'start', behavior: 'smooth' });
+				});
+
+				render();
+			})();
+		</script>
+	</body>
+</html>

@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="id">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Stok — Japanese High-Density Grid</title>
+		<link rel="stylesheet" href="../sistem/style.css" />
+	</head>
+	<body>
+		<div class="bar">
+			<p>
+				<b>Prototipe arah</b> — dunia <b>Japanese High-Density Grid</b>, layar Stok. Angka di sini
+				<b>contoh</b>, bukan data toko.
+			</p>
+			<p><a href="../kasir/index.html">layar Kasir</a></p>
+		</div>
+
+		<nav class="rail" aria-label="Navigasi utama">
+			<div class="rail__top">
+				<span class="rail__brand">Lite Point of Sale</span>
+				<span class="rail__who">
+					<span class="tnum">admin</span>
+					<span class="tag tag--quiet">Admin</span>
+					<button class="btn" type="button">Keluar</button>
+				</span>
+			</div>
+			<div class="rail__row">
+				<a class="tab" href="../beranda/index.html">Beranda</a>
+				<a class="tab" href="../kasir/index.html">Kasir</a>
+				<a class="tab" href="../penjualan/index.html">Penjualan</a>
+			</div>
+			<div class="rail__row">
+				<a class="tab" href="../produk/index.html">Produk <span class="tab__n">24</span></a>
+				<a class="tab" href="../stok/index.html" aria-current="page">Stok <span class="tab__n">4</span></a>
+				<a class="tab" href="../laporan/index.html">Laporan</a>
+				<a class="tab" href="../pengguna/index.html">Pengguna</a>
+				<a class="tab" href="../pengaturan/index.html">Pengaturan</a>
+				<a class="tab" href="../backup/index.html">Backup</a>
+			</div>
+		</nav>
+
+		<main class="board board--full">
+			<div class="strip">
+				<h1 class="strip__title">Stok</h1>
+				<p class="strip__desc">
+					Catat barang masuk dan lihat Produk mana yang perlu ditambah. Stok berkurang sendiri
+					saat Produk terjual.
+				</p>
+			</div>
+
+			<section class="col" aria-labelledby="menipis-judul">
+				<div class="mod mod--head">
+					<h2 class="mod__title" id="menipis-judul">Stok menipis</h2>
+					<span class="mod__note tnum">ambang 5 · paling sedikit di atas</span>
+				</div>
+				<div class="mod">
+					<p class="note">
+						Produk Aktif dengan Stok di bawah <b class="tnum">5</b>. Stok 0 disebut
+						<b>Habis</b> dan tetap di daftar yang sama.
+					</p>
+				</div>
+				<div class="stack">
+					<div class="lirow">
+						<div class="lirow__main">
+							<p class="lirow__name">Multimeter Digital <span class="lirow__meta" style="display: inline">· MMD01</span></p>
+							<p class="lirow__meta">
+								<span class="tag tag--quiet">menipis</span> Sisa <span class="tnum">2</span>
+							</p>
+						</div>
+						<div class="lirow__acts">
+							<button class="btn" type="button">Tambah Stok</button>
+						</div>
+					</div>
+					<div class="lirow">
+						<div class="lirow__main">
+							<p class="lirow__name">Kabel Roll 50 m <span style="font-size: var(--fs-micro)">· ROL50</span></p>
+							<p class="lirow__meta">
+								<span class="tag tag--quiet">menipis</span> Sisa <span class="tnum">3</span>
+							</p>
+						</div>
+						<div class="lirow__acts">
+							<button class="btn" type="button">Tambah Stok</button>
+						</div>
+					</div>
+					<div class="lirow">
+						<div class="lirow__main">
+							<p class="lirow__name">Trafo 5A <span style="font-size: var(--fs-micro)">· TRF5A</span></p>
+							<p class="lirow__meta">
+								<span class="tag tag--quiet">menipis</span> Sisa <span class="tnum">4</span>
+							</p>
+						</div>
+						<div class="lirow__acts">
+							<button class="btn" type="button">Tambah Stok</button>
+						</div>
+					</div>
+					<div class="lirow">
+						<div class="lirow__main">
+							<p class="lirow__name strike">Steker Tanam Legrand <span style="font-size: var(--fs-micro)">· LEGST</span></p>
+							<p class="lirow__meta">
+								<span class="tag tag--quiet">habis</span> Stok habis
+							</p>
+						</div>
+						<div class="lirow__acts">
+							<button class="btn" type="button">Tambah Stok</button>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="col" aria-labelledby="semua-judul" style="margin-top: 8px">
+				<div class="mod mod--head">
+					<h2 class="mod__title" id="semua-judul">Stok per Produk</h2>
+					<span class="mod__note tnum">24 Produk · tanpa saringan</span>
+				</div>
+				<div class="mod mod--flush">
+					<table class="tbl">
+						<thead>
+							<tr>
+								<th scope="col">Nama</th>
+								<th scope="col">Kode</th>
+								<th scope="col" class="tbl__num">Stok</th>
+								<th scope="col">Aksi</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr><td class="tbl__name">Kabel NYM 3x2.5 mm</td><td class="tbl__sub tnum">NYM325</td><td class="tbl__num">120</td><td class="tbl__acts"><button class="btn" type="button">Tambah Stok</button></td></tr>
+							<tr><td class="tbl__name">Saklar Panasonic 1 Gang</td><td class="tbl__sub tnum">WEG5001</td><td class="tbl__num">34</td><td class="tbl__acts"><button class="btn" type="button">Tambah Stok</button></td></tr>
+							<tr><td class="tbl__name">MCB Schneider 10A</td><td class="tbl__sub tnum">SCH10A</td><td class="tbl__num">12</td><td class="tbl__acts"><button class="btn" type="button">Tambah Stok</button></td></tr>
+							<tr><td class="tbl__name">Lampu LED Philips 12W</td><td class="tbl__sub tnum">PHL12W</td><td class="tbl__num">48</td><td class="tbl__acts"><button class="btn" type="button">Tambah Stok</button></td></tr>
+							<tr><td class="tbl__name">Stop Kontak Broco 2 Lubang</td><td class="tbl__sub tnum">BRC2L</td><td class="tbl__num">60</td><td class="tbl__acts"><button class="btn" type="button">Tambah Stok</button></td></tr>
+							<tr><td class="tbl__name">Kabel NYA 1x1.5 mm</td><td class="tbl__sub">tanpa Kode</td><td class="tbl__num">300</td><td class="tbl__acts"><button class="btn" type="button">Tambah Stok</button></td></tr>
+							<tr><td class="tbl__name strike">Steker Tanam Legrand</td><td class="tbl__sub tnum">LEGST</td><td class="tbl__num">Stok habis</td><td class="tbl__acts"><button class="btn" type="button">Tambah Stok</button></td></tr>
+							<tr><td class="tbl__name">Gland Kabel 3/4 inci</td><td class="tbl__sub">tanpa Kode</td><td class="tbl__num">90</td><td class="tbl__acts"><button class="btn" type="button">Tambah Stok</button></td></tr>
+							<tr><td class="tbl__name">Sekring 2A</td><td class="tbl__sub tnum">SKR2A</td><td class="tbl__num">150</td><td class="tbl__acts"><button class="btn" type="button">Tambah Stok</button></td></tr>
+							<tr><td class="tbl__name">Tespen</td><td class="tbl__sub tnum">TSP01</td><td class="tbl__num">25</td><td class="tbl__acts"><button class="btn" type="button">Tambah Stok</button></td></tr>
+							<tr><td class="tbl__name">Isolasi Nitto 3M</td><td class="tbl__sub tnum">NIT3M</td><td class="tbl__num">40</td><td class="tbl__acts"><button class="btn" type="button">Tambah Stok</button></td></tr>
+							<tr><td class="tbl__name">Terminal Skun 1.5 mm</td><td class="tbl__sub tnum">SKN15</td><td class="tbl__num">500</td><td class="tbl__acts"><button class="btn" type="button">Tambah Stok</button></td></tr>
+							<tr><td class="tbl__name">Pipa Konduit 20 mm</td><td class="tbl__sub tnum">KND20</td><td class="tbl__num">75</td><td class="tbl__acts"><button class="btn" type="button">Tambah Stok</button></td></tr>
+							<tr><td class="tbl__name">Baut Fisher 8 mm</td><td class="tbl__sub tnum">FSH8</td><td class="tbl__num">200</td><td class="tbl__acts"><button class="btn" type="button">Tambah Stok</button></td></tr>
+							<tr><td class="tbl__name">Trafo 5A</td><td class="tbl__sub tnum">TRF5A</td><td class="tbl__num">4 · menipis</td><td class="tbl__acts"><button class="btn" type="button">Tambah Stok</button></td></tr>
+							<tr><td class="tbl__name">Box Panel 20x30</td><td class="tbl__sub tnum">BOX2030</td><td class="tbl__num">6</td><td class="tbl__acts"><button class="btn" type="button">Tambah Stok</button></td></tr>
+							<tr><td class="tbl__name">Klem Kabel 10 mm</td><td class="tbl__sub tnum">KLM10</td><td class="tbl__num">180</td><td class="tbl__acts"><button class="btn" type="button">Tambah Stok</button></td></tr>
+							<tr><td class="tbl__name">Timer Lampu</td><td class="tbl__sub tnum">TMR01</td><td class="tbl__num">9</td><td class="tbl__acts"><button class="btn" type="button">Tambah Stok</button></td></tr>
+							<tr><td class="tbl__name">Kabel Roll 50 m</td><td class="tbl__sub tnum">ROL50</td><td class="tbl__num">3 · menipis</td><td class="tbl__acts"><button class="btn" type="button">Tambah Stok</button></td></tr>
+							<tr><td class="tbl__name">Fitting Lampu</td><td class="tbl__sub tnum">FTG01</td><td class="tbl__num">44</td><td class="tbl__acts"><button class="btn" type="button">Tambah Stok</button></td></tr>
+							<tr><td class="tbl__name strike">Gergaji Besi</td><td class="tbl__sub tnum">GRG02</td><td class="tbl__num">Stok habis</td><td class="tbl__acts"><button class="btn" type="button">Tambah Stok</button></td></tr>
+							<tr><td class="tbl__name">Meteran 5 m</td><td class="tbl__sub tnum">MTR5</td><td class="tbl__num">15</td><td class="tbl__acts"><button class="btn" type="button">Tambah Stok</button></td></tr>
+							<tr><td class="tbl__name">Tang Kombinasi</td><td class="tbl__sub tnum">TNG01</td><td class="tbl__num">8</td><td class="tbl__acts"><button class="btn" type="button">Tambah Stok</button></td></tr>
+							<tr><td class="tbl__name">Multimeter Digital</td><td class="tbl__sub tnum">MMD01</td><td class="tbl__num">2 · menipis</td><td class="tbl__acts"><button class="btn" type="button">Tambah Stok</button></td></tr>
+						</tbody>
+					</table>
+				</div>
+			</section>
+		</main>
+	</body>
+</html>
