@@ -172,8 +172,12 @@
 		INPUT,
 		'w-full data-[size=default]:h-[26px] [&_svg:not([class*=size-])]:size-3'
 	);
-	/** Field yang tidak valid: pesannya 12px/600 merah utilitas di bawah field. */
-	const ERROR = 'text-xs font-semibold text-destructive';
+	/**
+	 * Field yang tidak valid: pesannya 12px/600 di bawah field. Warnanya tinta, bukan
+	 * merah utilitas — merah hanya milik garis dan outline field-nya (DESIGN.md,
+	 * Fields & Inputs).
+	 */
+	const ERROR = 'text-xs font-semibold';
 	/**
 	 * `.btn` 26px/13px — petak berbingkai rambut, dan keadaan mati kehilangan
 	 * kursor alih-alih tintanya (DESIGN.md, Commit Button).
@@ -326,10 +330,7 @@
 			</div>
 
 			{#if error}
-				<p
-					class="border-t border-border px-2 py-1.5 text-xs font-semibold text-destructive"
-					role="alert"
-				>
+				<p class="border-t border-border px-2 py-1.5 text-xs font-semibold" role="alert">
 					{error.message}
 				</p>
 			{/if}

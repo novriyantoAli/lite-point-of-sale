@@ -234,7 +234,7 @@
 
 	<div class="border-b border-border px-2 py-1.5">
 		{#if blocked}
-			<p class="mb-1.5 text-xs font-semibold">{blocked}</p>
+			<p class="mb-1.5 text-xs font-semibold" role="alert">{blocked}</p>
 		{/if}
 
 		{#if checkout.error}

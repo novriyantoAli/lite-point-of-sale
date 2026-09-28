@@ -106,6 +106,10 @@ function pembayaran() {
 	return within(screen.getByRole('form', { name: 'Pembayaran' }));
 }
 
+function katalog() {
+	return within(screen.getByRole('region', { name: 'Katalog' }));
+}
+
 function struk() {
 	return within(screen.getByRole('region', { name: 'Penjualan tercatat' }));
 }
@@ -166,9 +170,9 @@ describe('Kasir', () => {
 
 		renderKasir();
 
-		expect(
-			await screen.findByText('Anda tidak berhak melakukan tindakan ini.')
-		).toBeInTheDocument();
+		expect(await katalog().findByRole('alert')).toHaveTextContent(
+			'Anda tidak berhak melakukan tindakan ini.'
+		);
 
 		await user.click(screen.getByRole('button', { name: 'Coba lagi' }));
 
@@ -266,9 +270,9 @@ describe('Kasir', () => {
 		await user.click(keranjang().getByRole('button', { name: 'Tambah jumlah Teh Botol' }));
 
 		expect(keranjang().getByText(/Melebihi Stok: tersisa 2/)).toBeInTheDocument();
-		expect(
-			pembayaran().getByText('Ada Item yang melebihi Stok. Kurangi jumlahnya lebih dulu.')
-		).toBeInTheDocument();
+		expect(pembayaran().getByRole('alert')).toHaveTextContent(
+			'Ada Item yang melebihi Stok. Kurangi jumlahnya lebih dulu.'
+		);
 		expect(pembayaran().getByRole('button', { name: 'Bayar & Simpan Penjualan' })).toBeDisabled();
 	});
 

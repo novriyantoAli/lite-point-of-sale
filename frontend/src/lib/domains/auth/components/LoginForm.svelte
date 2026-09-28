@@ -60,7 +60,7 @@
 			aria-invalid={fieldErrors.username ? true : undefined}
 		/>
 		{#if fieldErrors.username}
-			<p class="text-xs font-semibold text-destructive">{fieldErrors.username}</p>
+			<p class="text-xs font-semibold">{fieldErrors.username}</p>
 		{/if}
 	</div>
 
@@ -76,12 +76,12 @@
 			aria-invalid={fieldErrors.password ? true : undefined}
 		/>
 		{#if fieldErrors.password}
-			<p class="text-xs font-semibold text-destructive">{fieldErrors.password}</p>
+			<p class="text-xs font-semibold">{fieldErrors.password}</p>
 		{/if}
 	</div>
 
 	{#if login.error}
-		<p class="text-xs font-semibold text-destructive" role="alert">{login.error.message}</p>
+		<p class="text-xs font-semibold" role="alert">{login.error.message}</p>
 	{/if}
 
 	<!--

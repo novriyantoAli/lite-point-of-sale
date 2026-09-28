@@ -350,7 +350,9 @@ aslinya berarti satu permintaan ke API dari kerangka di setiap layar, dan itu be
 Tinggi 26px, radius 0, latar Tile White, garis rambut 1px, teks 13px. Label selalu di atas
 field dengan jarak 3px, dan selalu 12px/600. Fokus memakai garis tinta plus outline 2px ke
 dalam, bukan glow. Field yang tidak valid memakai garis dan outline merah utilitas, dengan
-pesannya sebagai baris 12px/600 di bawah field.
+pesannya sebagai baris 12px/600 di bawah field. Warna baris pesan galat — di bawah field maupun
+di tingkat formulir — selalu tinta, bukan merah utilitas: yang memakai merah hanya garis dan
+outline field yang tidak valid, karena merah milik tab dan harga (Secondary, Three-Percent Rule).
 
 ### Methods
 

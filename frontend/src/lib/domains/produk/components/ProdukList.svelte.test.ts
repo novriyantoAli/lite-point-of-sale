@@ -226,6 +226,9 @@ describe('ProdukList', () => {
 		await user.click(screen.getByRole('button', { name: 'Tambah' }));
 
 		expect(await screen.findByText('Harga harus bilangan bulat.')).toBeInTheDocument();
+		// The field error is ink, not utility red; the invalid field keeps the red
+		// border/outline (DESIGN.md, Fields & Inputs).
+		expect(screen.getByText('Harga harus bilangan bulat.')).not.toHaveClass('text-destructive');
 		expect(create).not.toHaveBeenCalled();
 	});
 
@@ -243,6 +246,7 @@ describe('ProdukList', () => {
 		await user.click(screen.getByRole('button', { name: 'Tambah' }));
 
 		expect(await screen.findByRole('alert')).toHaveTextContent('Kode sudah dipakai Produk lain.');
+		expect(screen.getByRole('alert')).not.toHaveClass('text-destructive');
 	});
 
 	it('opens the row of a Produk pre-filled and saves the change', async () => {

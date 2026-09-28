@@ -90,7 +90,7 @@
 		<p class="sr-only" role="status">Memuat Produk…</p>
 	{:else if list.error}
 		<div class="border-b border-border px-2 py-1.5">
-			<p class="text-xs font-semibold">{list.error.message}</p>
+			<p class="text-xs font-semibold" role="alert">{list.error.message}</p>
 			<Button
 				variant="ghost"
 				size="sm"
