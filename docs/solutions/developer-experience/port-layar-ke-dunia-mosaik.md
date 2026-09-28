@@ -1,7 +1,7 @@
 ---
 title: "Port layar ke dunia mosaik — varian shadcn yang bertabrakan dengan DESIGN.md"
 date: 2026-09-26
-last_updated: 2026-09-26
+last_updated: 2026-09-28
 category: developer-experience
 module: frontend-design
 problem_type: developer_experience
@@ -199,6 +199,43 @@ skrip Playwright sekali pakai yang menyalin `getComputedStyle` (pola §6). Raste
 | 1440×900 | dokumen 900px, tanpa geser mendatar | One-Screen |
 | 390×844 | tanpa geser mendatar; tabel menggeser di dalam kotaknya | layar sempit menumpuk, bukan menyusut |
 
+## Evidence — layar Pengguna, 2026-09-28
+
+Diukur dari DOM aplikasi yang berjalan pada 1440×900 (`build/` yang baru dibangun), dengan
+skrip Playwright sekali pakai yang menyalin `getComputedStyle` (pola §6). Rasternya:
+`.impeccable/preview/shots/pengguna-sveltekit.png` dan `pengguna-mobile-sveltekit.png`.
+
+| Yang diukur | Hasil | DESIGN.md |
+| --- | --- | --- |
+| Kontras seluruh teks | 4/4 pasangan unik lolos AA (terendah 5,78:1 — teks putih di tab rel yang aktif) | Zero-Grey |
+| `border-radius` selain 0 | tidak ada, di 83 elemen | Square-Corner |
+| `box-shadow` yang terlihat | nol: 80 elemen `none`, 3 cincin transparan berukuran nol | No-Shadow |
+| Merah pada permukaan | 0,18% (hanya tab rel yang aktif) | Three-Percent (≤ 3%) |
+| Monospace | 0 elemen | tanpa monospace |
+| Strip judul | 24px/700, `-0.36px` (=-0.015em), latar petak, garis bawah `rgb(0,0,0)` | Title + strip judul |
+| Kepala modul (2 modul) | latar `rgb(245,245,245)`, garis bawah `rgb(0,0,0)`, judul 13px/700 | Wash Grey + garis tinta |
+| Tag Peran (`RoleBadge`, 5 buah) | tinggi 15px, 12px/600, isian `rgb(245,245,245)`, `opacity: 1` | quiet tag; satu bentuk untuk Peran |
+| Tag `Nonaktif` | tinggi 15px, 12px/600, `opacity: 1`, `line-through` | quiet tag; State-Is-Not-Faded |
+| Commit Button hidup | tinggi 26px, latar `rgb(0,0,0)`, teks putih | `.btn--solid`; Commit Button |
+| Commit Button mati | latar `rgb(255,255,255)`, `border-style: dashed`, teks tinta, `opacity: 1` | "kehilangan tintanya", bukan memudar |
+| Field | tinggi 26px (terukur 26), radius 0, `box-shadow` transparan berukuran nol, label 12px/600 tepat 3px di atasnya | Fields & Inputs |
+| Picker Peran | trigger menulis `Kasir`, bukan nilai mentah `kasir` | #33: registry label terisi saat item mount |
+| Garis rambut daftar | satu garis per batas: 3×`1px` di baris + `1px` penutup daftar; pindai piksel satu kolom menemukan 1 garis tinta (kepala) + 3 garis rambut berjarak 39px, tanpa garis ganda | Shared-Hairline |
+| `tabular-nums` | cacah modul `4 akun` — satu-satunya angka di layar ini | "setiap angka uang, jumlah, dan Stok" |
+| 1440×900 | dokumen 900px, tanpa geser mendatar (1440 = 1440) | One-Screen |
+| 390×844 | tanpa geser mendatar; kisi form tiga kolom menumpuk jadi satu kolom (356px), kedua modul 374px | layar sempit menumpuk, bukan menyusut |
+
+Keadaan memuat, gagal, dan kosong ketiganya berdiri di modul Daftar; dua di antaranya sudah
+lama dijaga tes komponen (`shows the normalized error and a retry`, `says so when the list
+comes back empty`) dan tetap utuh setelah port.
+
+Satu temuan lama yang ikut diperbaiki di sini: picker Peran menampilkan nilai mentah `kasir`
+selama dropdown-nya belum pernah dibuka, karena `Select.Value` membaca registry label yang
+baru terisi saat item mount — persis jebakan yang #33 sudah hindari di layar Produk. Trigger-nya
+kini menulis katanya (`PERAN_LABEL`, diekspor dari `RoleBadge` supaya kedua kata Peran hanya
+ada di satu tempat), dan kueri `getByText('Kasir')` di satu tes komponen di-scope ke modul
+Daftar karena trigger itu kini menemukan kata yang sama.
+
 ## Kesalahan yang hampir dilakukan
 
 `pnpm exec playwright test <spec>` **tidak** membangun ulang SvelteKit — ia menyajikan
@@ -207,11 +244,43 @@ dan memberi angka yang tampak sah padahal bukan milik kodenya. Jalankan `pnpm bu
 atau pakai `pnpm test:e2e` yang memang `pnpm build && playwright test`. Ini kelas cacat yang
 sama dengan `definition-of-done-verification.md`: sinyal hijau yang bukan bukti.
 
+`getComputedStyle` **juga** tidak boleh dibaca sesaat setelah keadaan diubah kalau elemennya
+membawa `transition-*`: yang terbaca nilai antara, bukan nilai yang dilihat Admin. Tombol
+`Button` membawa `transition-all`, jadi `commit.disabled = true` lalu langsung membaca
+`backgroundColor` mengembalikan tinta lamanya — dan itu terbaca persis seperti "varian
+`disabled:`-nya tidak bekerja", lengkap dengan selector yang cocok di CSSOM. Dua obat, dan
+keduanya dipakai di sini: matikan `style.transition` pada elemen yang sedang diukur, dan beri
+jeda sebelum mengukur kontras di halaman yang baru dinavigasi (tab rel bertransisi warnanya
+150ms, dan pembacaan di tengah jalan mengukur merah yang belum selesai). Persis kelas cacat
+yang sama dengan cincin fokus di `app.css`: transisi 150ms milik primitif yang menyamarkan
+keadaan akhirnya.
+
 ## Yang belum diputuskan
 
 Cacah pada tab (`Produk 24`, `Stok 4`) ada di prototipe sebagai angka contoh. Angka asli
 butuh permintaan ke API dari kerangka, yang berarti setiap layar membayar dua permintaan demi
 kerangka. Untuk sekarang tab membawa katanya saja.
+
+Dua hal yang tiap port berikutnya akan temui lagi, dan yang belum punya satu jawaban:
+
+- **Titik menumpuknya kisi field punya dua angka.** Prototipe layar Produk menumpuk kisi
+  empat kolomnya di 1080px (`min-[1081px]:grid-cols-4`, ikut titik papan), sedangkan prototipe
+  layar Pengguna menumpuk kisi tiga kolomnya di 900px (`min-[901px]:grid-cols-3`, dari
+  `@media (max-width: 900px)` milik `style.css`). Keduanya setia pada prototipenya
+  masing-masing — tapi "kapan kisi field menumpuk" adalah satu keputusan dunia yang sekarang
+  dijawab dua angka, dan yang membacanya harus tahu itu disengaja, bukan kelalaian.
+- **Kelas quiet tag disalin per komponen.** `TAG`/`TAG_NONAKTIF` sekarang hidup di
+  `ProdukList`, `StokList`, dan `PenggunaList` (§1 menoleransi pengulangan di tengah port).
+  Setelah layar terakhir mendarat, satu `lib/components/shared/` yang memuat strip judul,
+  kepala modul, tag, dan Commit Button akan menghapus tiga salinan sekaligus — dan itu
+  perubahan yang harus ditunggu sampai tidak ada port yang sedang berjalan.
+- **Commit Button punya dua ukuran, dan DESIGN.md baru menuliskan satu.** DESIGN.md
+  menggambarnya 40px selebar kolom keranjang (`ProdukForm`), sedangkan di Stok dan Pengguna
+  aksi utama berdiri di dalam baris dan memakai 26px milik prototipe `.btn--solid`
+  (`TambahStokForm`, `PenggunaList`). Yang diwarisi di kedua tempat itu tintanya, bukan
+  lebarnya — tapi "Commit Button" sekarang menunjuk dua ukuran sekaligus, dan layar sisa
+  sebaiknya tidak menebak: yang mana yang berlaku ditulis di DESIGN.md, bukan disimpulkan
+  ulang dari prototipe tiap layar.
 
 ## Tabular-nums — angka Inter Variable proporsional, 2026-09-28
 

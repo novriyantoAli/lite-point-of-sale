@@ -3,19 +3,11 @@
 
 	// `data` is the merged result of this page's loads and the (app) layout's:
 	// the Pengguna comes from the layout, which got it from hooks.server.ts.
+	// The screen owns its own heading and both of its modules; the route is only
+	// the adapter that puts the domain component on a URL.
 	let { data } = $props();
 </script>
 
-<div class="space-y-6">
-	<div class="space-y-1">
-		<h1 class="text-2xl font-semibold">Pengguna</h1>
-		<p class="text-sm text-muted-foreground">
-			Kasir dan Admin yang boleh memakai kasir ini. Akun yang Nonaktif tetap tersimpan riwayatnya,
-			tetapi tidak bisa login lagi.
-		</p>
-	</div>
-
-	{#if data.user}
-		<PenggunaList currentUserId={data.user.id} />
-	{/if}
-</div>
+{#if data.user}
+	<PenggunaList currentUserId={data.user.id} />
+{/if}

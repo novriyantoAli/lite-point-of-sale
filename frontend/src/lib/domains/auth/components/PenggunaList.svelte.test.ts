@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/svelte';
+import { render, screen, within } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import QueryClientHarness from '$lib/testing/QueryClientHarness.svelte';
@@ -34,9 +34,13 @@ describe('PenggunaList', () => {
 
 		renderList();
 
-		expect(await screen.findByText('kasir1')).toBeInTheDocument();
-		expect(screen.getByText('Admin')).toBeInTheDocument();
-		expect(screen.getByText('Kasir')).toBeInTheDocument();
+		// The assertions are scoped to the list module, not weakened by it: the Peran
+		// picker in the form above shows the same two words (`Kasir`, `Admin`), so an
+		// unscoped `getByText('Kasir')` would find the trigger as well as the tag.
+		const daftar = await screen.findByRole('region', { name: 'Daftar Pengguna' });
+		expect(within(daftar).getByText('kasir1')).toBeInTheDocument();
+		expect(within(daftar).getByText('Admin')).toBeInTheDocument();
+		expect(within(daftar).getByText('Kasir')).toBeInTheDocument();
 	});
 
 	it('offers no way to deactivate the Admin using the page', async () => {
@@ -118,6 +122,24 @@ describe('PenggunaList', () => {
 			role: 'kasir'
 		});
 		expect(await screen.findByRole('status')).toHaveTextContent('Pengguna kasir1 ditambahkan.');
+	});
+
+	it('clears the password once the Pengguna exists, so it is never sent back to the screen', async () => {
+		listPengguna.mockResolvedValue([admin]);
+		createPengguna.mockResolvedValue(kasir);
+		const user = userEvent.setup();
+
+		renderList();
+
+		const password = screen.getByLabelText('Password');
+		await user.type(screen.getByLabelText('Username'), 'kasir1');
+		await user.type(password, 'rahasia123');
+		await user.click(screen.getByRole('button', { name: 'Tambah' }));
+
+		expect(await screen.findByRole('status')).toHaveTextContent('Pengguna kasir1 ditambahkan.');
+		// The screen shows username, Peran, and whether the account is Aktif — and
+		// nothing it shows ever holds the password that was typed here.
+		expect(password).toHaveValue('');
 	});
 
 	it('refuses a password below the minimum without asking the API', async () => {
