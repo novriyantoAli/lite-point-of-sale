@@ -236,6 +236,40 @@ kini menulis katanya (`PERAN_LABEL`, diekspor dari `RoleBadge` supaya kedua kata
 ada di satu tempat), dan kueri `getByText('Kasir')` di satu tes komponen di-scope ke modul
 Daftar karena trigger itu kini menemukan kata yang sama.
 
+## Evidence — layar Penjualan, 2026-09-28
+
+Diukur dari DOM aplikasi yang berjalan pada 1440×900 (`build/` yang baru dibangun), dengan
+skrip Playwright sekali pakai yang menyalin `getComputedStyle` (pola §6). Rasternya:
+`.impeccable/preview/shots/penjualan-sveltekit.png` dan `penjualan-mobile-sveltekit.png`.
+
+| Yang diukur | Hasil | DESIGN.md |
+| --- | --- | --- |
+| Kontras seluruh teks | 4/4 pasangan unik lolos AA (terendah 5,78:1 — teks putih di atas merah: tab rel aktif dan tag `tersegel`) | Zero-Grey |
+| `border-radius` selain 0 | tidak ada | Square-Corner |
+| `box-shadow` yang terlihat | nol | No-Shadow |
+| Merah pada permukaan | 0,26% (tab rel aktif + tag `tersegel`) | Three-Percent (≤ 3%) |
+| Monospace | 0 elemen | tanpa monospace, termasuk angka |
+| Strip judul | 24px/700, `-0.015em`, garis bawah `rgb(0,0,0)` | Title + strip judul |
+| Kepala modul (2 modul) | latar `rgb(245,245,245)`, garis bawah `rgb(0,0,0)`, judul 13px/700 | Wash Grey + garis tinta |
+| Tag `tersegel` | tinggi 15px, 12px/600, latar `rgb(204,13,13)`, teks putih, `opacity: 1` — dengan katanya, bukan warna sendirian | Tags; State-Is-Not-Faded |
+| Field Nomor Struk | tinggi 26px, radius 0, `box-shadow` nol, label 12px/600 tepat 3px di atasnya | Fields & Inputs |
+| Tombol Cari | tinggi 26px, latar `rgb(0,0,0)`, teks putih | `.btn--solid`; Commit Button |
+| Aksi Cetak ulang Struk | selalu terlihat sebagai kata; tidak ada aksi di balik hover | Named-Not-Hidden |
+| `tabular-nums` | Nomor Struk, tiap nominal, dan field Nomor Struk — 5 simpul berdigit semuanya tabular | "setiap angka uang, jumlah, dan Stok", tanpa kecuali |
+| Rincian Penjualan | memakai `RincianPenjualan.svelte` yang sudah diporting saat layar Kasir, bukan markah baru yang mirip | satu bentuk, dua layar |
+| 1440×900 | dokumen 900px, tanpa geser mendatar (1440 = 1440) | One-Screen |
+| 390×844 | tanpa geser mendatar; form pencarian dan modul tersimpan menumpuk | layar sempit menumpuk, bukan menyusut |
+
+Keadaan memuat, gagal, dan kosong ketiganya berdiri: memuat sebagai kata (bukan layar kosong),
+gagal sebagai pesan Go yang terbaca plus tombol "Coba lagi", dan kosong sebagai kalimat
+"Ketik Nomor Struk lalu tekan Cari…". Nomor Struk yang menamai tak satu Penjualan pun
+menuliskan pesan Go-nya ("Penjualan tidak ditemukan.") — bukan layar kosong — dan sudah lama
+dijaga tes e2e (`a Nomor Struk that names nothing is a readable message`).
+
+Markah yang dikunci e2e tetap utuh: `Bayar · Tunai` dan angkanya berada di `<p>` yang sama,
+dan rincian yang dibuka memakai komponen yang sama dengan struk Kasir — bukan salinan kedua
+(solution doc §9).
+
 ## Kesalahan yang hampir dilakukan
 
 `pnpm exec playwright test <spec>` **tidak** membangun ulang SvelteKit — ia menyajikan
