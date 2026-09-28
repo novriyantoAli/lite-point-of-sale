@@ -138,6 +138,17 @@
 		'flex h-[26px] cursor-pointer items-center justify-center border border-border bg-card text-[13px] font-medium transition-colors hover:bg-muted focus-within:outline-2 focus-within:outline-solid focus-within:-outline-offset-2 focus-within:outline-foreground has-[:checked]:border-foreground has-[:checked]:bg-foreground has-[:checked]:font-semibold has-[:checked]:text-primary-foreground';
 	const FIELD =
 		'h-[26px] border-border bg-card px-1.5 py-0 text-[13px] shadow-none focus-visible:border-foreground aria-invalid:ring-0 md:text-[13px]';
+	/**
+	 * Field yang isinya angka uang. Angkanya tabular, seperti setiap angka lain di
+	 * dunia ini (DESIGN.md, Typography: "tanpa kecuali"), dan prototipe menulis
+	 * `class="input tnum"` tepat di field ini.
+	 *
+	 * Ia bukan hiasan di sini: Inter Variable memakai angka proporsional — sepuluh
+	 * digit bisa berubah lebar 30px (50px untuk "1111111111", 80px untuk
+	 * "0000000000") — dan tanpa `tabular-nums` nominal yang sedang diketik menggeser
+	 * dirinya sendiri di dalam fieldnya.
+	 */
+	const FIELD_ANGKA = `${FIELD} tabular-nums`;
 	/** Angka yang jadi jawaban layar: 20px/700, selalu tabular. */
 	const FIGURE = 'text-[20px] leading-[1.1] font-bold tabular-nums';
 </script>
@@ -174,7 +185,7 @@
 					name="amount"
 					inputmode="numeric"
 					autocomplete="off"
-					class={FIELD}
+					class={FIELD_ANGKA}
 					bind:value={amount}
 					aria-invalid={amountError ? true : undefined}
 				/>

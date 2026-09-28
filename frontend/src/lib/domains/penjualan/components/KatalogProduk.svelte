@@ -60,7 +60,14 @@
 		class="flex items-center justify-between gap-2 border-b border-foreground bg-muted px-2 py-1.5"
 	>
 		<h2 id="kasir-katalog-judul" class="text-[13px] font-bold tracking-[0.01em]">Katalog</h2>
-		<span class="text-xs">
+		<!--
+			Cacah ini berubah setiap kali Kasir mengetik di kolom pencarian, dan
+			Inter Variable memakai angka proporsional: sepuluh digit bisa berubah lebar
+			30px (50px untuk "1111111111", 80px untuk
+			"0000000000"). Tanpa `tabular-nums`, catatan ini bergoyang di sebelah
+			judulnya sambil orang mengetik (DESIGN.md, Typography: "tanpa kecuali").
+		-->
+		<span class="text-xs tabular-nums">
 			{#if belumDiketahui}—{:else}{found.length}{/if} Produk Aktif · tekan satu petak untuk menambah
 		</span>
 	</div>

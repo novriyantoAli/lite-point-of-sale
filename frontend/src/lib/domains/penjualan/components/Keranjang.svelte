@@ -62,7 +62,13 @@
 		class="flex items-center justify-between gap-2 border-b border-foreground bg-muted px-2 py-1.5"
 	>
 		<h2 id="kasir-keranjang-judul" class="text-[13px] font-bold tracking-[0.01em]">Keranjang</h2>
-		<span class="text-xs">
+		<!--
+			Ringkasan keranjang: dua angka yang berubah setiap kali satu unit ditambah
+			atau dikurangi. Prototipe menulis catatan ini `mod__note tnum`, dan Inter
+			Variable memakai angka proporsional — "7 unit" yang menjadi "8 unit" akan
+			menggeser kalimatnya tanpa `tabular-nums`.
+		-->
+		<span class="text-xs tabular-nums">
 			{keranjangState.units === 0
 				? 'Belum ada Item.'
 				: `${keranjangState.units} unit dalam ${keranjangState.items.length} Item.`}
