@@ -175,6 +175,7 @@
 					inputmode="numeric"
 					autocomplete="off"
 					class={FIELD}
+					data-caret="utility"
 					bind:value={amount}
 					aria-invalid={amountError ? true : undefined}
 				/>

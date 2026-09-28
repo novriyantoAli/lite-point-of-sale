@@ -161,6 +161,72 @@ summary:focus-visible,
 }
 
 /*
+ * Cincin fokus tidak ikut bertransisi.
+ *
+ * Primitif shadcn membawa `transition-all`, jadi `outline-width` dan
+ * `outline-offset` milik cincin di atas ikut dianimasikan: pada saat fokus
+ * mendarat, cincinnya terukur `3px solid currentColor offset 0px`, dan baru
+ * menjadi `2px solid tinta offset -2px` sekitar 150ms kemudian. Di atas bidang
+ * bertinta, `currentColor` itu berarti cincinnya sempat putih. Prototipe hanya
+ * mentransisikan latar dan garis (`transition: background, border-color`), jadi
+ * cincinnya mendarat seketika — dan itu memang yang diminta DESIGN.md: "Hover
+ * hanya mengubah latar dan garis".
+ *
+ * Yang dikecualikan hanya properti cincinnya; `transition-duration` dari primitif
+ * dibiarkan, jadi latar dan garisnya tetap halus.
+ */
+:focus-visible {
+	transition-property: background-color, border-color, color;
+}
+
+/*
+ * Teks terpilih, caret, dan scrollbar (DESIGN.md, Browser surfaces: "Teks terpilih
+ * memakai tinta penuh dengan teks putih. Caret memakai tinta... Scrollbar memakai
+ * `scrollbar-width: thin` dengan garis rambut di atas dasar"). Ketiganya bawaan
+ * peramban kalau dibiarkan, dan bawaan itu bukan milik dunia mana pun — prototipe
+ * menulisnya di `sistem/style.css`, dan port ini sempat kehilangan seluruhnya.
+ * Tidak satu pun bisa dilihat tes: ia bukan teks, bukan tata letak, bukan nama.
+ */
+::selection {
+	background-color: var(--foreground);
+	color: var(--card);
+}
+
+html {
+	caret-color: var(--foreground);
+	scrollbar-width: thin;
+	scrollbar-color: var(--border) var(--background);
+}
+
+/*
+ * Satu-satunya tempat merah utilitas menyentuh sesuatu yang sedang diketik: field
+ * jumlah bayar di Kasir. Dipasang lewat atribut, bukan id, supaya lembar dunia ini
+ * tidak perlu tahu id milik domain mana pun.
+ */
+[data-caret='utility'] {
+	caret-color: var(--destructive);
+}
+
+/*
+ * Gerak yang dikurangi (prototipe, `sistem/style.css`). Port ini sempat
+ * kehilangan aturannya, jadi orang yang meminta sedikit gerak tetap mendapat
+ * dialog yang membesar dan baris yang berkedip warna.
+ *
+ * `animation-duration` ikut dinolkan, bukan hanya transisi: animasi masuknya
+ * dialog dan dropdown datang dari `tw-animate-css`, dan keduanya gerak juga.
+ */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	::before,
+	::after {
+		transition-duration: 0ms !important;
+		animation-duration: 0ms !important;
+		animation-iteration-count: 1 !important;
+		scroll-behavior: auto !important;
+	}
+}
+
+/*
  * Field yang tidak valid memakai garis dan outline merah utilitas (DESIGN.md,
  * Fields & Inputs). Merah penuh, bukan tint 20% — tint itulah yang membuat sistem
  * sebelumnya kehilangan kontrasnya.
