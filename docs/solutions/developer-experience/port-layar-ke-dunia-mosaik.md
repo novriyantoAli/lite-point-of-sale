@@ -1,7 +1,7 @@
 ---
 title: "Port layar ke dunia mosaik — varian shadcn yang bertabrakan dengan DESIGN.md"
 date: 2026-09-26
-last_updated: 2026-09-28
+last_updated: 2026-09-29
 category: developer-experience
 module: frontend-design
 problem_type: developer_experience
@@ -270,6 +270,11 @@ Markah yang dikunci e2e tetap utuh: `Bayar · Tunai` dan angkanya berada di `<p>
 dan rincian yang dibuka memakai komponen yang sama dengan struk Kasir — bukan salinan kedua
 (solution doc §9).
 
+Satu keputusan dunia ikut diselesaikan di sini: **Commit Button** kini menunjuk dua ukuran
+yang ditulis di `DESIGN.md` §Commit Button — kolom 40px/15px/600 dan baris 26px/13px/600,
+dengan tinta, radius, dan keadaan mati yang sama — supaya layar berikutnya tidak menebaknya
+sendiri dari prototipe masing-masing.
+
 ## Kesalahan yang hampir dilakukan
 
 `pnpm exec playwright test <spec>` **tidak** membangun ulang SvelteKit — ia menyajikan
@@ -308,13 +313,6 @@ Dua hal yang tiap port berikutnya akan temui lagi, dan yang belum punya satu jaw
   Setelah layar terakhir mendarat, satu `lib/components/shared/` yang memuat strip judul,
   kepala modul, tag, dan Commit Button akan menghapus tiga salinan sekaligus — dan itu
   perubahan yang harus ditunggu sampai tidak ada port yang sedang berjalan.
-- **Commit Button punya dua ukuran, dan DESIGN.md baru menuliskan satu.** DESIGN.md
-  menggambarnya 40px selebar kolom keranjang (`ProdukForm`), sedangkan di Stok dan Pengguna
-  aksi utama berdiri di dalam baris dan memakai 26px milik prototipe `.btn--solid`
-  (`TambahStokForm`, `PenggunaList`). Yang diwarisi di kedua tempat itu tintanya, bukan
-  lebarnya — tapi "Commit Button" sekarang menunjuk dua ukuran sekaligus, dan layar sisa
-  sebaiknya tidak menebak: yang mana yang berlaku ditulis di DESIGN.md, bukan disimpulkan
-  ulang dari prototipe tiap layar.
 
 ## Tabular-nums — angka Inter Variable proporsional, 2026-09-28
 

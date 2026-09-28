@@ -114,6 +114,16 @@ components:
     backgroundColor: '{colors.tile}'
     textColor: '{colors.ink}'
     height: '40px'
+  button-commit-inline:
+    backgroundColor: '{colors.ink}'
+    textColor: '{colors.tile}'
+    typography: '{typography.body}'
+    rounded: '{rounded.none}'
+    height: '26px'
+  button-commit-inline-disabled:
+    backgroundColor: '{colors.tile}'
+    textColor: '{colors.ink}'
+    height: '26px'
   figure:
     textColor: '{colors.ink}'
     typography: '{typography.figure}'
@@ -362,9 +372,20 @@ bukan tint dan bukan centang. Cincin fokusnya muncul di sel, bukan di input yang
 
 ### Commit Button
 
-Satu-satunya bidang bertinta penuh di layar: 40px, radius 0, latar Ink Black, teks putih
-15px/600, lebar penuh kolom keranjang. Saat mati ia **kehilangan tintanya** dan berubah jadi
-putih bergaris putus-putus, bukan jadi pudar.
+Satu-satunya bidang bertinta penuh di layar: radius 0, latar Ink Black, teks putih, dan saat
+mati ia **kehilangan tintanya** lalu berubah jadi putih bergaris putus-putus, bukan jadi
+pudar. Yang berubah di antara dua tempat ia berdiri hanyalah ukurannya:
+
+- **Commit Button kolom** — 40px, lebar penuh kolomnya, huruf 15px/600. Ia mengisi kolom yang
+  memang miliknya: **Bayar & Simpan Penjualan** di kolom keranjang (`Pembayaran`), dan tombol
+  simpan yang menutup kaki Dialog formulir (`ProdukForm`).
+- **Commit Button baris** — 26px, selebar katanya, huruf 13px/600. Ia berdiri di dalam baris
+  yang sama dengan field-nya, mengikuti tinggi `.btn` dunia ini: **Tambah Stok**
+  (`TambahStokForm`), **Tambah** (`PenggunaList`), dan **Cari** (`PencarianPenjualan`).
+
+Yang diwarisi di kedua tempat itu tintanya, radiusnya, dan keadaan matinya — bukan lebarnya.
+Itu sebabnya kedua ukuran ditulis di sini: layar berikutnya tidak menebaknya sendiri dari
+prototipe masing-masing.
 
 ### Figures
 
