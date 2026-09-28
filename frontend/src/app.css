@@ -161,6 +161,21 @@ summary:focus-visible,
 }
 
 /*
+ * Tabir dialog bukan tint, dan tidak mengaburkan apa pun (DESIGN.md, The No-Tint
+ * Rule: "tidak ada nilai warna yang dipakai sebagai tint 10% atau 20%"). Primitif
+ * shadcn membawa `bg-black/10` plus `backdrop-blur-xs`, dan `Dialog.Content`
+ * merender overlay-nya sendiri tanpa prop kelas — jadi satu-satunya jalan adalah
+ * aturan tingkat dunia, di luar `@layer` seperti aturan fokus di atas
+ * (solution doc §7). Yang memisahkan dialog dari papan tetap ada, dan itu memang
+ * cara dunia ini memisahkan permukaan: selisih #fafafa ke #ffffff dan satu garis
+ * rambut 1px (DESIGN.md, Elevation & Depth).
+ */
+[data-slot='dialog-overlay'] {
+	background-color: transparent;
+	backdrop-filter: none;
+}
+
+/*
  * Cincin fokus tidak ikut bertransisi.
  *
  * Primitif shadcn membawa `transition-all`, jadi `outline-width` dan
@@ -226,6 +241,28 @@ html {
 	}
 }
 
+/*
+ * Cincin fokus di atas bidang bertinta penuh (DESIGN.md, Browser surfaces).
+ *
+ * Cincin dunia ini tinta, dan tinta di atas tinta terukur 1,00:1 — tak terlihat —
+ * pada tombol aksi utama, yang justru salah satu pengendali pertama yang dituju Tab.
+ * Palet ini hanya punya dua warna yang punya kontras di atas tinta: petak
+ * (#ffffff, 21:1) dan merah utilitas (#cc0d0d, 5,88:1).
+ *
+ * Merah ditolak bukan karena seleranya, tapi karena ia memindahkan cacatnya alih-alih
+ * menghapusnya: di atas tab rel yang aktif — bidang merah juga — cincin merah terukur
+ * 1,00:1, dan DESIGN.md sudah membatasi merah pada harga dan tab. Petak lolos di kedua
+ * permukaan (21:1 di atas tinta, 4,85:1 di atas merah) dan membaca sebagai kebalikan
+ * cincin dunia ini: tombol yang hidup kehilangan tintanya di tepinya, seperti tombol
+ * yang mati kehilangan seluruhnya.
+ *
+ * `bg-primary` adalah nama dunia ini untuk bidang bertinta penuh — `--primary`
+ * memetakan ke tinta di `:root`, dan varian `default` milik `Button`, satu-satunya
+ * bidang bertinta penuh yang sistem ini kenal, membawanya. Karena itu aturannya
+ * berdiri di sini sekali, bukan ditempel di setiap tombol; bidang bertinta yang
+ * dilukis dengan kelas lain harus menanggung cincinnya sendiri (lihat sel metode
+ * Pembayaran).
+ */
 /*
  * Cincin fokus di atas bidang bertinta penuh (DESIGN.md, Browser surfaces).
  *

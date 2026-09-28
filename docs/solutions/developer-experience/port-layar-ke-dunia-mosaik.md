@@ -101,6 +101,35 @@ kelas yang dikenali sebagai grup yang sama.
    perilakunya utuh — jadi bacalah tes yang menyentuh layar sebelum menggambar ulang
    markahnya, dan biarkan kalimatnya apa adanya.
 
+10. **Tombol berbingkai tanpa `variant` berakhir putih di atas putih.** `Button` tanpa prop
+    `variant` memakai varian `default`, yang membawa `text-primary-foreground` (putih) —
+    dan kelas `bg-card` di prop `class` menang atas `bg-primary`-nya, jadi latarnya putih
+    sementara tintanya tetap putih. Terukur 1,00:1 pada layar Produk (`#ffffff on #ffffff`,
+    "Ubah"), dan itu **tak terlihat oleh tes**: `getByRole` tetap menemukan tombolnya, dan
+    `toBeVisible()` tetap hijau. Satu-satunya yang menangkapnya adalah pengukuran kontras DOM
+    yang berjalan (§6). Karena itu setiap tombol berbingkai memakai `variant="ghost"` lebih
+    dulu, baru dibangun dari `class`.
+
+11. **Dialog shadcn: tiga hal yang tidak bisa diselesaikan lewat prop.** Port pertama yang
+    memakai `Dialog` menemukan tiga batas yang akan ditemui setiap formulir berikutnya.
+    - **Tabirnya tidak punya prop kelas.** `Dialog.Content` merender `<Dialog.Overlay />`-nya
+      sendiri, jadi `bg-black/10` + `backdrop-blur-xs` bawaan tidak bisa diganti dari komponen
+      domain. Satu-satunya jalan adalah aturan tingkat dunia di `app.css`, di luar `@layer`
+      seperti poin 7 — `[data-slot='dialog-overlay'] { background-color: transparent;
+      backdrop-filter: none }` — karena tint 10% dan blur bukan kosakata dunia ini. Yang
+      memisahkan dialog dari papan tetap ada: selisih `#fafafa` ke `#ffffff` dan garis rambut 1px.
+      Bingkai dialog sendiri juga dipindah dari `ring-1` ke `border` sungguhan, supaya
+      `box-shadow` benar-benar nol dan bukan garis rambut yang menyamar jadi bayangan.
+    - **bits-ui mengunci `document.body` dan mengembalikannya lewat timer, bukan saat unmount.**
+      Scroll-lock-nya menulis `pointer-events: none` ke `body` dan baru membersihkannya
+      ~24 ms setelah dialog dibongkar. Di jsdom, tes berikutnya mulai di dalam jendela itu dan
+      `user-event` menolak setiap klik dengan "Unable to perform pointer interaction". Obatnya
+      satu baris di `tests/vitest-setup-client.ts`: `afterEach(() => document.body.removeAttribute('style'))`.
+    - **Focus-trap-nya mendarat satu tick setelah klik yang membukanya.** Keystroke yang
+      dikirim di antaranya dibaca dialog, bukan field — tombol pertama terisi, yang kedua tidak.
+      Hanya tes yang bisa secepat itu, jadi obatnya ada di tes: `openForm()` menunggu
+      `document.activeElement` berada di dalam `[data-slot="dialog-content"]` sebelum mengetik.
+
 ## Evidence — rel navigasi, 2026-09-26
 
 | Yang diukur | Hasil | DESIGN.md |
@@ -113,6 +142,39 @@ kelas yang dikenali sebagai grup yang sama.
 | Tag Peran | tinggi 15px, 12px/600, isian `rgb(245,245,245)` | quiet tag |
 | Tombol Keluar | tinggi 26px, 13px/600, `box-shadow: none`, `opacity: 1` | tombol petak, keadaan mati tidak dipudarkan |
 | Papan | `padding: 8px`, lebar 1440, tanpa gulir mendatar | papan selebar viewport, padding luar 8px |
+
+## Evidence — layar Produk, 2026-09-28
+
+Diukur dari DOM aplikasi yang berjalan pada 1440×900 (`build/` yang baru dibangun, lihat
+catatan di bawah). Rasternya: `.impeccable/preview/shots/produk-sveltekit.png`,
+`produk-mobile-sveltekit.png`, dan `produk-form-sveltekit.png`.
+
+| Yang diukur | Hasil | DESIGN.md |
+| --- | --- | --- |
+| Kontras seluruh teks | 13/13 pasangan unik lolos AA | Zero-Grey (tinta hitam, abu-abu hanya garis/isian) |
+| `border-radius` selain 0 | tidak ada — termasuk dialog | Square-Corner |
+| Bayangan yang terlihat | tidak ada (135/139 elemen `box-shadow: none`; sisanya cincin transparan berukuran nol) | No-Shadow |
+| Merah pada permukaan | 0,2% | Three-Percent (≤ 3%) |
+| Monospace | 0 elemen | tanpa monospace, termasuk angka |
+| Strip judul | 24px/700, `-0.015em`, garis bawah `rgb(0,0,0)` | Title + strip judul |
+| Kepala modul (2 modul) | latar `rgb(245,245,245)`, garis bawah `rgb(0,0,0)` | Wash Grey + garis tinta |
+| Garis rambut antar baris tabel | tepat satu `rgb(232,232,232)` per batas baris; baris terakhir tanpa garis (sampel piksel) | Shared-Hairline |
+| Field saringan | tinggi 26px, radius 0, `box-shadow` transparan berukuran nol | Fields & Inputs |
+| Label field | 12px/600, jarak 3px di atas field | Fields & Inputs |
+| Tag Nonaktif | tinggi 15px, `opacity: 1`, garis coret | quiet tag; State-Is-Not-Faded |
+| Tombol strip (Tambah Produk) | tinggi 26px, 13px/600, latar `rgb(0,0,0)`, teks putih | `.btn--solid` |
+| Tombol baris tabel (Ubah/Nonaktifkan/Aktifkan) | tinggi 22px, 12px/600, tinta di atas petak | `.tbl__acts .btn` |
+| Tombol kepala modul & kepala dialog | tinggi 26px, 13px/600 | `.btn` |
+| Kolom Kode tanpa Kode | `tanpa Kode` (kata, bukan sel kosong) | Do's |
+| Kolom Stok | `Stok habis` (0) · `120` · `2 · menipis` | kata di sebelah tandanya |
+| `tabular-nums` | kolom Harga, kolom Stok, dan cacah modul Katalog | "setiap angka uang, jumlah, dan Stok", tanpa kecuali |
+| Cacah modul Katalog | `5 Produk`, dari daftar yang sudah dimuat — bukan permintaan kedua | Tabs: cacah *tab* yang belum diputuskan |
+| 1440×900 | dokumen 900px, tanpa geser mendatar | One-Screen |
+| 390×844 | dokumen tanpa geser mendatar; tabel menggeser di dalam kotaknya (491/372); grid saringan satu kolom | layar sempit menumpuk, bukan menyusut |
+| Dialog: bingkai | `1px rgb(232,232,232)` sebagai `border` sungguhan, `box-shadow` transparan; radius 0; petak putih | garis 1px, radius 0, nol bayangan |
+| Dialog: tabir | latar transparan, `backdrop-filter: none` | No-Tint |
+| Dialog: Commit Button | tinggi 40px, latar `rgb(0,0,0)`, radius 0 | Commit Button |
+| Dialog: field & label | field 26px radius 0 · label 12px/600 | Fields & Inputs |
 
 ## Kesalahan yang hampir dilakukan
 
@@ -127,6 +189,43 @@ sama dengan `definition-of-done-verification.md`: sinyal hijau yang bukan bukti.
 Cacah pada tab (`Produk 24`, `Stok 4`) ada di prototipe sebagai angka contoh. Angka asli
 butuh permintaan ke API dari kerangka, yang berarti setiap layar membayar dua permintaan demi
 kerangka. Untuk sekarang tab membawa katanya saja.
+
+## Tabular-nums — angka Inter Variable proporsional, 2026-09-28
+
+Diukur pada Inter Variable 13px, sepuluh digit:
+
+| `font-variant-numeric` | `1111111111` | `0000000000` | `8888888888` |
+| --- | --- | --- | --- |
+| `normal` | 50px | 80px | 80px |
+| `tabular-nums` | 80px | 80px | 80px |
+
+Jadi kelas itu **menahan lebar**, bukan hiasan: angka yang berubah tanpa kelasnya menggeser
+tetangganya sampai 30px per sepuluh digit. Dua tempat paling terasa dampaknya — cacah yang
+berubah sambil orang mengetik di kolom saringan, dan nominal yang sedang diketik di dalam
+fieldnya sendiri. DESIGN.md menuntutnya "tanpa kecuali", dan prototipe menandai `tnum` bahkan
+di field nominal (`<input id="bayar" class="input tnum">`).
+
+**Cara memeriksa, dan hasilnya pada Masuk + Kasir + rel.** Telusuri setiap elemen yang simpul
+teksnya sendiri memuat digit, lalu baca `font-variant-numeric`-nya — membaca kelasnya satu per
+satu di layar akan melewatkan yang justru paling sering berubah. Audit pertama menemukan 16
+elemen berangka; 5 bukan `tabular-nums`, dan **3 di antaranya benar-benar angka**:
+
+| Elemen | Sebelum | Sesudah | Kenapa |
+| --- | --- | --- | --- |
+| Cacah Katalog (`{n} Produk Aktif · tekan satu petak…`) | `normal` | `tabular-nums` | berubah sambil saringan diketik; prototipe menandai cacah yang sama `tnum` |
+| Ringkasan Keranjang (`{n} unit dalam {m} Item.`) | `normal` | `tabular-nums` | berubah setiap unit; prototipe: `mod__note tnum` |
+| Field "Jumlah bayar" (`#kasir-bayar`) | `normal` | `tabular-nums` | nominal yang sedang diketik; prototipe: `class="input tnum"` |
+
+Sisanya nama Produk yang sekadar memuat digit (`… E2E`) — bukan angka menurut aturan ini.
+
+Sengaja **tidak** disentuh: kolom pencarian Kode dan Nama (prototipe tidak menandainya, dan
+Kode adalah barcode — bukan uang, jumlah, atau Stok), dan nama Pengguna di rel (prototipe
+menulis `class="tnum"` pada `admin`, string tanpa angka, jadi tanda itu tidak menggambar apa
+pun — bukan pernyataan tentang digit).
+
+Field angka memakai satu const terpisah dari pakaian field-nya — `FIELD_ANGKA = ${FIELD}
+tabular-nums` di `Pembayaran.svelte` — supaya yang dibaca dari kelasnya bukan "field",
+melainkan "field yang isinya angka". Kolom pencarian memakai `FIELD` biasa.
 
 ## Related
 
