@@ -150,7 +150,7 @@
 			Nomor Struk apa pun dicari, orang yang membukanya harus tahu apa yang
 			dikerjakan layar ini.
 		-->
-		<p class={cn(CATATAN, 'mt-2 border border-t-0 border-border bg-card px-2 py-1.5')}>
+		<p class={cn(CATATAN, 'mt-2 border border-border bg-card px-2 py-1.5')}>
 			Ketik Nomor Struk lalu tekan Cari untuk melihat Penjualannya.
 		</p>
 	{/if}

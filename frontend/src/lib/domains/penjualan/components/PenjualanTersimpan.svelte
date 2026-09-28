@@ -53,12 +53,12 @@
 </script>
 
 {#if detail.isPending}
-	<div class="mt-2 border border-t-0 border-border bg-card px-2 py-1.5" aria-busy="true">
+	<div class="mt-2 border border-border bg-card px-2 py-1.5" aria-busy="true">
 		<span class="sr-only" role="status">Mencari Penjualan…</span>
 		<p class="text-xs">Memuat Penjualan…</p>
 	</div>
 {:else if detail.error}
-	<div class="mt-2 border border-t-0 border-border bg-card px-2 py-1.5">
+	<div class="mt-2 border border-border bg-card px-2 py-1.5">
 		<p class={PESAN} role="alert">{detail.error.message}</p>
 		<Button variant="ghost" class={cn(AKSI_MODUL, 'mt-1.5')} onclick={() => void detail.refetch()}
 			>Coba lagi</Button
