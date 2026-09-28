@@ -176,6 +176,120 @@ summary:focus-visible,
 }
 
 /*
+ * Cincin fokus tidak ikut bertransisi.
+ *
+ * Primitif shadcn membawa `transition-all`, jadi `outline-width` dan
+ * `outline-offset` milik cincin di atas ikut dianimasikan: pada saat fokus
+ * mendarat, cincinnya terukur `3px solid currentColor offset 0px`, dan baru
+ * menjadi `2px solid tinta offset -2px` sekitar 150ms kemudian. Di atas bidang
+ * bertinta, `currentColor` itu berarti cincinnya sempat putih. Prototipe hanya
+ * mentransisikan latar dan garis (`transition: background, border-color`), jadi
+ * cincinnya mendarat seketika — dan itu memang yang diminta DESIGN.md: "Hover
+ * hanya mengubah latar dan garis".
+ *
+ * Yang dikecualikan hanya properti cincinnya; `transition-duration` dari primitif
+ * dibiarkan, jadi latar dan garisnya tetap halus.
+ */
+:focus-visible {
+	transition-property: background-color, border-color, color;
+}
+
+/*
+ * Teks terpilih, caret, dan scrollbar (DESIGN.md, Browser surfaces: "Teks terpilih
+ * memakai tinta penuh dengan teks putih. Caret memakai tinta... Scrollbar memakai
+ * `scrollbar-width: thin` dengan garis rambut di atas dasar"). Ketiganya bawaan
+ * peramban kalau dibiarkan, dan bawaan itu bukan milik dunia mana pun — prototipe
+ * menulisnya di `sistem/style.css`, dan port ini sempat kehilangan seluruhnya.
+ * Tidak satu pun bisa dilihat tes: ia bukan teks, bukan tata letak, bukan nama.
+ */
+::selection {
+	background-color: var(--foreground);
+	color: var(--card);
+}
+
+html {
+	caret-color: var(--foreground);
+	scrollbar-width: thin;
+	scrollbar-color: var(--border) var(--background);
+}
+
+/*
+ * Satu-satunya tempat merah utilitas menyentuh sesuatu yang sedang diketik: field
+ * jumlah bayar di Kasir. Dipasang lewat atribut, bukan id, supaya lembar dunia ini
+ * tidak perlu tahu id milik domain mana pun.
+ */
+[data-caret='utility'] {
+	caret-color: var(--destructive);
+}
+
+/*
+ * Gerak yang dikurangi (prototipe, `sistem/style.css`). Port ini sempat
+ * kehilangan aturannya, jadi orang yang meminta sedikit gerak tetap mendapat
+ * dialog yang membesar dan baris yang berkedip warna.
+ *
+ * `animation-duration` ikut dinolkan, bukan hanya transisi: animasi masuknya
+ * dialog dan dropdown datang dari `tw-animate-css`, dan keduanya gerak juga.
+ */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	::before,
+	::after {
+		transition-duration: 0ms !important;
+		animation-duration: 0ms !important;
+		animation-iteration-count: 1 !important;
+		scroll-behavior: auto !important;
+	}
+}
+
+/*
+ * Cincin fokus di atas bidang bertinta penuh (DESIGN.md, Browser surfaces).
+ *
+ * Cincin dunia ini tinta, dan tinta di atas tinta terukur 1,00:1 — tak terlihat —
+ * pada tombol aksi utama, yang justru salah satu pengendali pertama yang dituju Tab.
+ * Palet ini hanya punya dua warna yang punya kontras di atas tinta: petak
+ * (#ffffff, 21:1) dan merah utilitas (#cc0d0d, 5,88:1).
+ *
+ * Merah ditolak bukan karena seleranya, tapi karena ia memindahkan cacatnya alih-alih
+ * menghapusnya: di atas tab rel yang aktif — bidang merah juga — cincin merah terukur
+ * 1,00:1, dan DESIGN.md sudah membatasi merah pada harga dan tab. Petak lolos di kedua
+ * permukaan (21:1 di atas tinta, 4,85:1 di atas merah) dan membaca sebagai kebalikan
+ * cincin dunia ini: tombol yang hidup kehilangan tintanya di tepinya, seperti tombol
+ * yang mati kehilangan seluruhnya.
+ *
+ * `bg-primary` adalah nama dunia ini untuk bidang bertinta penuh — `--primary`
+ * memetakan ke tinta di `:root`, dan varian `default` milik `Button`, satu-satunya
+ * bidang bertinta penuh yang sistem ini kenal, membawanya. Karena itu aturannya
+ * berdiri di sini sekali, bukan ditempel di setiap tombol; bidang bertinta yang
+ * dilukis dengan kelas lain harus menanggung cincinnya sendiri (lihat sel metode
+ * Pembayaran).
+ */
+/*
+ * Cincin fokus di atas bidang bertinta penuh (DESIGN.md, Browser surfaces).
+ *
+ * Cincin dunia ini tinta, dan tinta di atas tinta terukur 1,00:1 — tak terlihat —
+ * pada tombol aksi utama, yang justru salah satu pengendali pertama yang dituju Tab.
+ * Palet ini hanya punya dua warna yang punya kontras di atas tinta: petak
+ * (#ffffff, 21:1) dan merah utilitas (#cc0d0d, 5,88:1).
+ *
+ * Merah ditolak bukan karena seleranya, tapi karena ia memindahkan cacatnya alih-alih
+ * menghapusnya: di atas tab rel yang aktif — bidang merah juga — cincin merah terukur
+ * 1,00:1, dan DESIGN.md sudah membatasi merah pada harga dan tab. Petak lolos di kedua
+ * permukaan (21:1 di atas tinta, 4,85:1 di atas merah) dan membaca sebagai kebalikan
+ * cincin dunia ini: tombol yang hidup kehilangan tintanya di tepinya, seperti tombol
+ * yang mati kehilangan seluruhnya.
+ *
+ * `bg-primary` adalah nama dunia ini untuk bidang bertinta penuh — `--primary`
+ * memetakan ke tinta di `:root`, dan varian `default` milik `Button`, satu-satunya
+ * bidang bertinta penuh yang sistem ini kenal, membawanya. Karena itu aturannya
+ * berdiri di sini sekali, bukan ditempel di setiap tombol; bidang bertinta yang
+ * dilukis dengan kelas lain harus menanggung cincinnya sendiri (lihat sel metode
+ * Pembayaran).
+ */
+:focus-visible.bg-primary {
+	outline-color: var(--primary-foreground);
+}
+
+/*
  * Field yang tidak valid memakai garis dan outline merah utilitas (DESIGN.md,
  * Fields & Inputs). Merah penuh, bukan tint 20% — tint itulah yang membuat sistem
  * sebelumnya kehilangan kontrasnya.

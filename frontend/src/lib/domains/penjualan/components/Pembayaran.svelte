@@ -134,8 +134,17 @@
 	}
 
 	/** Satu metode: radio asli yang disembunyikan, sel persegi yang terlihat. */
+	/**
+	 * Satu metode: radio asli yang disembunyikan, sel persegi yang terlihat.
+	 *
+	 * Saat terpilih selnya menjadi bidang bertinta penuh, jadi cincin fokusnya harus
+	 * berbalik menjadi petak — tinta di atas tinta terukur 1,00:1 (DESIGN.md, Browser
+	 * surfaces). Aturan dunia di `app.css` menangkap bidang bertinta lewat `bg-primary`,
+	 * dan sel ini tidak memakai kelas itu: tintanya datang dari `has-[:checked]`, jadi
+	 * cincinnya ditanggung di sini.
+	 */
 	const METODE =
-		'flex h-[26px] cursor-pointer items-center justify-center border border-border bg-card text-[13px] font-medium transition-colors hover:bg-muted focus-within:outline-2 focus-within:outline-solid focus-within:-outline-offset-2 focus-within:outline-foreground has-[:checked]:border-foreground has-[:checked]:bg-foreground has-[:checked]:font-semibold has-[:checked]:text-primary-foreground';
+		'flex h-[26px] cursor-pointer items-center justify-center border border-border bg-card text-[13px] font-medium transition-colors hover:bg-muted focus-within:outline-2 focus-within:outline-solid focus-within:-outline-offset-2 focus-within:outline-foreground has-[:checked]:focus-within:outline-primary-foreground has-[:checked]:border-foreground has-[:checked]:bg-foreground has-[:checked]:font-semibold has-[:checked]:text-primary-foreground';
 	const FIELD =
 		'h-[26px] border-border bg-card px-1.5 py-0 text-[13px] shadow-none focus-visible:border-foreground aria-invalid:ring-0 md:text-[13px]';
 	/**
@@ -186,6 +195,7 @@
 					inputmode="numeric"
 					autocomplete="off"
 					class={FIELD_ANGKA}
+					data-caret="utility"
 					bind:value={amount}
 					aria-invalid={amountError ? true : undefined}
 				/>

@@ -373,7 +373,11 @@ menyebut apa angka itu. Angka yang belum bisa dihitung ditulis `—`, bukan `0`.
 
 Teks terpilih memakai tinta penuh dengan teks putih. Caret memakai tinta, kecuali di field
 jumlah bayar yang memakai merah utilitas. Scrollbar memakai `scrollbar-width: thin` dengan
-garis rambut di atas dasar. Cincin fokus selalu outline 2px ke dalam, tidak pernah glow.
+garis rambut di atas dasar. Cincin fokus selalu outline 2px ke dalam, tidak pernah glow:
+warnanya tinta, kecuali di atas **bidang bertinta penuh** — tombol aksi utama, metode
+Pembayaran yang terpilih — yang memakai petak. Tinta di atas tinta terukur 1,00:1, dan merah
+utilitas menukar satu cacat dengan cacat lain (1,00:1 pula di atas tab rel yang aktif), jadi
+petak satu-satunya warna palet yang terlihat di kedua permukaan.
 
 ### Named Rules
 

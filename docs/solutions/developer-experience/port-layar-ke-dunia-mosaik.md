@@ -233,3 +233,76 @@ melainkan "field yang isinya angka". Kolom pencarian memakai `FIELD` biasa.
 - `docs/solutions/developer-experience/definition-of-done-verification.md` — kenapa kelima
   perintah §12 harus dijalankan, dan kenapa exit code lebih dipercaya daripada teksnya.
 - `docs/adr/0019-nama-toko-baris-pertama-header-endpoint-publik.md` — nama toko dan endpoint publiknya.
+
+## Permukaan peramban & gerak — 2026-09-28
+
+DESIGN.md punya bagiannya sendiri untuk ini ("Browser surfaces": teks terpilih, caret,
+scrollbar, cincin fokus) dan Do's menutupnya lagi: *"theme the browser surfaces — selection,
+caret, scrollbar, focus ring — from this palette"*. Prototipe menulis keempatnya di
+`sistem/style.css` dengan alasan yang sama: *"bawaan itu bukan milik dunia mana pun"*.
+
+Port ini sempat kehilangan hampir semuanya. Dari empat permukaan itu, **hanya cincin fokus**
+yang mendarat (di poin 7–8 di atas). Yang hilang, terukur sebelum perubahan:
+
+| Yang diukur di aplikasi yang berjalan | Sebelum | Sesudah |
+| --- | --- | --- |
+| `::selection` | latar `rgba(0,0,0,0)` — jatuh ke biru bawaan peramban | `var(--foreground)` di atas `var(--card)` |
+| `caret-color` html | `rgb(0,0,0)` — kebetulan benar, sebagai bawaan peramban | `var(--foreground)` |
+| `caret-color` `#kasir-bayar` | `rgb(0,0,0)` | `rgb(204,13,13)` (merah utilitas, lewat `data-caret="utility"`) |
+| `scrollbar-width` / `-color` | `auto` / `auto` | `thin` / garis rambut di atas dasar |
+| `prefers-reduced-motion: reduce` → `transition-duration` baris | `0.15s` (diabaikan) | `0s` |
+| idem → `animation-duration` dialog | `0.1s` (diabaikan) | `0s` |
+
+Prototipe hanya menolkan `transition-duration`; di sini `animation-duration` ikut, karena animasi
+masuknya dialog dan dropdown datang dari `tw-animate-css` dan keduanya juga gerak.
+
+**Kenapa tidak satu pun tes bisa melihatnya.** Keempatnya bukan teks, bukan tata letak, dan
+bukan nama: `getByRole`, `toBeVisible`, kontras teks, radius, bayangan, `tabular-nums` — semuanya
+diam. Yang menemukannya hanya membaca empat properti itu dari DOM yang berjalan, dan
+trapesiumnya adalah `grep` di `app.css`: **tidak satu pun dari keempat kata itu ada di sana.**
+
+### Cincin fokus yang masuk secara halus — dan cincin yang tak terlihat
+
+Cincinnya sendiri sudah ada, tetapi ia **beranimasi masuk**, dan itu akar yang sama: primitif
+shadcn membawa `transition-all`, sementara prototipe hanya mentransisikan latar dan garis. Jadi
+`outline-width` dan `outline-offset` milik cincin ikut bertransisi:
+
+| Kontrol | Saat fokus mendarat | Sesudah tenang |
+| --- | --- | --- |
+| Button shadcn (petak putih) | `3px solid rgb(0,0,0)` offset `0px` | `2px solid rgb(0,0,0)` offset `-2px` |
+| Button shadcn (bidang bertinta) | `3px solid rgb(255,255,255)` offset `0px` | `2px solid rgb(0,0,0)` offset `-2px` |
+| Input shadcn | `2px solid` — benar sejak awal | sama |
+| Select trigger bits-ui | `2px solid` — benar sejak awal | sama |
+
+Jadi pada tombol, ~150ms pertama cincinnya salah lebar, salah offset, dan salah warna — di atas
+bidang bertinta ia bahkan sempat putih. Obatnya satu aturan tingkat dunia, di luar `@layer`:
+`:focus-visible { transition-property: background-color, border-color, color }` — cincinnya
+mendarat seketika, sementara latar dan garisnya tetap halus.
+
+**Diputuskan: petak.** Setelah tenang, cincinnya `2px solid var(--foreground)` di atas bidang
+bertinta pada tombol aksi utama — strip Produk, Commit Button, field Masuk — terukur **1,00:1**,
+tak terlihat, dan itu salah satu pengendali pertama yang dituju Tab. Prototipe melakukan hal yang
+sama (`:focus-visible` global dengan `outline: 2px solid var(--ink)`, dan `.method:focus-within`
+pun memakai tinta padahal sel metode yang terpilih justru bidang bertinta), jadi port ini setia;
+yang cacat sistemnya, dan DESIGN.md hanya menyebut "outline 2px ke dalam" tanpa warna.
+
+Tiga kandidat diukur pada dua permukaan sekaligus, dan raster perbandingannya — diperbesar 3×
+supaya cincin 2px bisa dinilai mata — disimpan sebagai rekaman keputusan:
+
+| Kandidat | Di atas tinta `rgb(0,0,0)` | Di atas tab merah `rgb(204,13,13)` |
+| --- | --- | --- |
+| tinta (sebelum) | 1,00:1 ✗ | 4,33:1 ✓ |
+| **petak (dipilih)** | **21:1** ✓ | **4,85:1** ✓ |
+| merah utilitas | 5,88:1 ✓ | 1,00:1 ✗ |
+
+Merah ditolak bukan karena seleranya: ia **memindahkan** cacatnya ke tab rel yang aktif, dan
+DESIGN.md sudah membatasi merah pada harga dan tab. Petak satu-satunya warna palet yang lolos di
+kedua permukaan, dan ia membaca sebagai kebalikan cincin dunia ini — tombol yang hidup kehilangan
+tintanya di tepinya, seperti tombol yang mati kehilangan seluruhnya.
+
+Aturannya berdiri sekali di `app.css`, dan menemukan bidang bertintanya lewat `bg-primary`:
+`--primary` memetakan ke tinta, dan varian `default` milik `Button` — satu-satunya bidang bertinta
+penuh yang sistem ini kenal — membawa kelas itu. Jadi tidak ada satu pun tombol yang perlu
+ditambahi apa pun, dan port berikutnya tidak bisa lupa. Sel metode Pembayaran adalah pengecualian
+yang membuktikan aturannya: tintanya datang dari `has-[:checked]`, bukan dari `bg-primary`, jadi
+cincinnya ditanggung di komponennya.
