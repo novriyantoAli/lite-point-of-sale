@@ -47,9 +47,13 @@ test('a Produk may be added with no Kode and no Kategori at all', async ({ page 
 
 	await createProduk(page, { name: 'Tanpa Kode E2E', price: 3000, stock: 4 });
 
-	// The absent Kode and Kategori are written as an em dash, not left blank or
-	// shown as the string "null".
-	await expect(produkRow(page, 'Tanpa Kode E2E')).toContainText('—');
+	const row = produkRow(page, 'Tanpa Kode E2E');
+
+	// A blank Kode is written as the word for it, so an empty column never reads as
+	// data that went missing. A blank Kategori has no word of its own, so it takes
+	// the em dash. Neither is left blank, and neither reads as the string "null".
+	await expect(row.getByRole('cell', { name: 'tanpa Kode', exact: true })).toBeVisible();
+	await expect(row.getByRole('cell', { name: '—', exact: true })).toBeVisible();
 });
 
 test('a Kode that is already taken is refused with the API message', async ({ page }) => {
