@@ -158,6 +158,16 @@
 	const LABEL = 'text-xs leading-[1.2] font-semibold';
 	const INPUT =
 		'h-[26px] border-border bg-card px-1.5 py-0 text-[13px] shadow-none focus-visible:border-foreground aria-invalid:ring-0 md:text-[13px]';
+	/**
+	 * Field yang isinya angka: Harga dan Stok, bukan Nama, Kode, atau Kategori.
+	 *
+	 * Angkanya tabular, seperti setiap angka lain di dunia ini (DESIGN.md,
+	 * Typography: "tanpa kecuali"), dan itu bukan hiasan: pada Inter Variable 13px
+	 * sepuluh digit `1111111111` selebar 50px sementara `0000000000` selebar 80px,
+	 * jadi nominal yang sedang diketik menggeser dirinya sendiri di dalam fieldnya
+	 * tanpa kelas ini. Kasir memakai pembagian yang sama untuk field Jumlah bayar.
+	 */
+	const INPUT_ANGKA = `${INPUT} tabular-nums`;
 	const SELECT = cn(
 		INPUT,
 		'w-full data-[size=default]:h-[26px] [&_svg:not([class*=size-])]:size-3'
@@ -251,7 +261,7 @@
 						name="price"
 						inputmode="numeric"
 						autocomplete="off"
-						class={INPUT}
+						class={INPUT_ANGKA}
 						bind:value={price}
 						aria-invalid={fieldErrors.price ? true : undefined}
 					/>
@@ -268,7 +278,7 @@
 							name="stock"
 							inputmode="numeric"
 							autocomplete="off"
-							class={INPUT}
+							class={INPUT_ANGKA}
 							bind:value={stock}
 							aria-invalid={fieldErrors.stock ? true : undefined}
 						/>
