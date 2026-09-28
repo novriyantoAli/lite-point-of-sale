@@ -234,7 +234,11 @@
 		</Dialog.Description>
 
 		<form aria-label="Formulir Produk" onsubmit={submit} novalidate>
-			<div class="grid grid-cols-1 gap-x-3 gap-y-[10px] px-2 py-2 sm:grid-cols-2">
+			<!--
+				Kisi field menumpuk di 900px, sama seperti kisi field mana pun di dunia ini
+				(ADR-0020) — dialog pun sebuah kisi field, bukan permukaan yang diatur papan.
+			-->
+			<div class="grid grid-cols-1 gap-x-3 gap-y-[10px] px-2 py-2 min-[901px]:grid-cols-2">
 				<div class={FIELD}>
 					<Label for="produk-nama" class={LABEL}>Nama</Label>
 					<Input

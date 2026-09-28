@@ -205,8 +205,11 @@
 	const MODUL_KEPALA =
 		'flex items-center justify-between gap-2 border-b border-foreground bg-muted px-2 py-1.5';
 	const MODUL_JUDUL = 'text-[13px] font-bold tracking-[0.01em]';
-	/** Fields & Inputs: field 26px, label 12px/600 di atasnya dengan jarak 3px. */
-	const FORMGRID = 'grid grid-cols-1 gap-x-3 gap-y-[10px] min-[1081px]:grid-cols-4';
+	/**
+	 * Fields & Inputs: field 26px, label 12px/600 di atasnya dengan jarak 3px. Kisi field
+	 * menumpuk di 900px, bukan di titik papan 1080px (ADR-0020).
+	 */
+	const FORMGRID = 'grid grid-cols-1 gap-x-3 gap-y-[10px] min-[901px]:grid-cols-4';
 	const FIELD = 'flex flex-col gap-[3px]';
 	const FIELD_LABEL = 'text-xs leading-[1.2] font-semibold';
 	const FIELD_INPUT =

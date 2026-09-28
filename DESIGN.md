@@ -270,9 +270,12 @@ Sistem ini bukan kolom tengah yang mengambang. Papannya selebar viewport dengan 
   digambar dua kali.
 - **Ritme:** 6px vertikal dan 8px horizontal di dalam modul, 4–8px antar elemen di dalamnya,
   dan nol antar modul. Jarak adalah hal yang pertama dibuang di sini.
-- **Layar sempit:** di bawah 1080px papan menumpuk jadi satu kolom, dan di bawah 560px rel
-  membungkus serta mosaik turun ke minimum 132px per petak. Laptop di meja kasir adalah
-  perangkatnya (PRODUCT.md), jadi ini hanya supaya tidak rusak.
+- **Layar sempit (ADR-0020):** tiga titik, masing-masing diperintah oleh satu permukaan. Di
+  bawah **1080px** papan Kasir yang tiga kolom menumpuk jadi satu kolom. Di bawah **900px**
+  kisi field — 2, 3, atau 4 kolom — menumpuk jadi satu kolom; kisi field bukan papan, jadi ia
+  menumpuk lebih awal. Di bawah **560px** rel membungkus serta mosaik turun ke minimum 132px
+  per petak. Laptop di meja kasir adalah perangkatnya (PRODUCT.md), jadi ini hanya supaya
+  tidak rusak.
 
 ### Named Rules
 

@@ -337,14 +337,14 @@ Cacah pada tab (`Produk 24`, `Stok 4`) ada di prototipe sebagai angka contoh. An
 butuh permintaan ke API dari kerangka, yang berarti setiap layar membayar dua permintaan demi
 kerangka. Untuk sekarang tab membawa katanya saja.
 
-Dua hal yang tiap port berikutnya akan temui lagi, dan yang belum punya satu jawaban:
+**Titik menumpuk kisi field — diputuskan (ADR-0020).** Catatan lama di sini menyebut prototipe
+layar Produk menumpuk kisi empat kolomnya di 1080px; itu salah baca. Prototipe layar Produk
+memakai `.formgrid--4` dari `sistem/style.css`, dan satu-satunya media query-nya menumpuk
+`.formgrid`, `.formgrid--3`, dan `.formgrid--4` di **900px**. Yang benar: kisi field menumpuk
+di 900px, papan Kasir di 1080px. `ProdukList` dan `ProdukForm` sudah diselaraskan ke 900px.
 
-- **Titik menumpuknya kisi field punya dua angka.** Prototipe layar Produk menumpuk kisi
-  empat kolomnya di 1080px (`min-[1081px]:grid-cols-4`, ikut titik papan), sedangkan prototipe
-  layar Pengguna menumpuk kisi tiga kolomnya di 900px (`min-[901px]:grid-cols-3`, dari
-  `@media (max-width: 900px)` milik `style.css`). Keduanya setia pada prototipenya
-  masing-masing — tapi "kapan kisi field menumpuk" adalah satu keputusan dunia yang sekarang
-  dijawab dua angka, dan yang membacanya harus tahu itu disengaja, bukan kelalaian.
+Satu hal yang tiap port berikutnya akan temui lagi, dan yang belum punya satu jawaban:
+
 - **Kelas quiet tag disalin per komponen.** `TAG`/`TAG_NONAKTIF` sekarang hidup di
   `ProdukList`, `StokList`, dan `PenggunaList` (§1 menoleransi pengulangan di tengah port).
   Setelah layar terakhir mendarat, satu `lib/components/shared/` yang memuat strip judul,
