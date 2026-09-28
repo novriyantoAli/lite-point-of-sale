@@ -130,6 +130,17 @@ kelas yang dikenali sebagai grup yang sama.
       Hanya tes yang bisa secepat itu, jadi obatnya ada di tes: `openForm()` menunggu
       `document.activeElement` berada di dalam `[data-slot="dialog-content"]` sebelum mengetik.
 
+12. **Tes yang membuktikan ketiadaan lewat satu kata adalah proksi, bukan bukti.**
+    `tests/e2e/auth.spec.ts` memastikan Kasir yang mengetik `/pengguna` tidak melihat layar
+    Pengguna dengan `getByText('Pengguna', { exact: true }).toHaveCount(0)` — dan itu hijau
+    selama satu-satunya "Pengguna" di layar tujuan adalah tab rel. Port Beranda menambah modul
+    "Dari satu layar" yang menyebut setiap tab dengan namanya, jadi kata itu kini sah ada di
+    Beranda: penjaganya merah walau perilakunya utuh. Yang benar adalah menanyakan hal yang
+    memang ingin dibuktikan — apakah **layar**-nya yang tidak dimuat:
+    `getByRole('heading', { name: 'Pengguna', level: 1 }).toHaveCount(0)`, ditambah judul
+    Beranda yang terlihat. Ini §9 dalam bentuk lain: suite mengunci bentuk, dan proksi kata akan
+    patah begitu kata itu berpindah tempat; ganti proksinya, jangan hapus teks layarnya.
+
 ## Evidence — rel navigasi, 2026-09-26
 
 | Yang diukur | Hasil | DESIGN.md |
@@ -467,3 +478,46 @@ penuh yang sistem ini kenal — membawa kelas itu. Jadi tidak ada satu pun tombo
 ditambahi apa pun, dan port berikutnya tidak bisa lupa. Sel metode Pembayaran adalah pengecualian
 yang membuktikan aturannya: tintanya datang dari `has-[:checked]`, bukan dari `bg-primary`, jadi
 cincinnya ditanggung di komponennya.
+
+## Evidence — layar Beranda, 2026-09-29
+
+Diukur dari DOM aplikasi yang berjalan pada 1440×900 dan 390×844 (`build/` yang baru dibangun),
+dengan skrip Playwright sekali pakai yang menyalin `getComputedStyle` (pola §6). Rasternya:
+`.impeccable/preview/shots/beranda-sveltekit.png` dan `beranda-mobile-sveltekit.png`.
+
+| Yang diukur | Hasil | DESIGN.md |
+| --- | --- | --- |
+| Kontras seluruh teks | 3/3 pasangan warna nyata lolos AA (terendah 5,78:1 — teks putih di atas merah: tab rel aktif) | Zero-Grey |
+| `border-radius` selain 0 | tidak ada, di 45 elemen | Square-Corner |
+| `box-shadow` yang terlihat | nol: 45 elemen `box-shadow: none` | No-Shadow |
+| Merah pada permukaan | 0,18% (1440×900) · 0,70% (390×844) — hanya tab rel aktif | Three-Percent (≤ 3%) |
+| Monospace | 0 elemen | tanpa monospace, termasuk angka |
+| Strip judul | 24px/700, `-0.36px` (=-0.015em), latar petak, garis bawah `rgb(0,0,0)` | Title + strip judul |
+| Kepala modul (2 modul) | latar `rgb(245,245,245)`, garis bawah `rgb(0,0,0)`, judul 13px/700 | Wash Grey + garis tinta |
+| Tag `OK` | quiet tag: tinggi 15px, 12px/600, isian `rgb(245,245,245)`, garis rambut `rgb(232,232,232)`, `opacity: 1` — dengan katanya, bukan warna sendirian | Tags; State-Is-Not-Faded |
+| Keadaan tidak sehat | tag bergaris tinta (1px `rgb(0,0,0)`) dan kata `DEGRADED`, plus kalimatnya — bukan merah utilitas | Secondary; Three-Percent; Do's "write every state's word" |
+| Jarak antar modul | 8px antara Status layanan dan Dari satu layar (`y=246` → `y=254`), seperti prototipe | Shared-Hairline |
+| `tabular-nums` | 0 simpul berdigit di layar ini — tidak ada angka yang bisa meleset | "setiap angka uang, jumlah, dan Stok" |
+| 1440×900 | dokumen 900px, tanpa geser mendatar (1440 = 1440) | One-Screen |
+| 390×844 | tanpa geser mendatar (390 = 390); kedua modul 374px | layar sempit menumpuk, bukan menyusut |
+
+Keadaan memuat dan gagal tetap berdiri seperti sebelum port: memuat sebagai kata
+(`Memeriksa…`, bukan layar kosong), gagal sebagai pesan Go yang terbaca plus tombol "Coba lagi"
+yang berbagi bentuk `.btn` 26px/13px dunia ini. Keduanya sudah lama dijaga tiga tes komponen
+`HealthStatus.svelte.test.ts` dan tetap utuh setelah markahnya berubah dari `Card`/`Badge` shadcn
+jadi modul dan tag mosaik.
+
+Dua keputusan warna diambil di sini, dan keduanya menjawab aturan yang sama — merah utilitas
+hanya dua pekerjaan, tab dan harga (DESIGN.md, Secondary; Three-Percent): port pertama sempat
+memberi tag `OK` merah seperti prototipe menggambarnya, lalu dikembalikan jadi quiet tag. Yang
+membedakan sehat dari tidak sehat adalah bentuk tag-nya dan katanya — `OK` tenang, `DEGRADED`
+bergaris tinta — bukan warna. Merah di layar ini hanya tinggal tab rel yang aktif, terukur
+0,18% pada 1440×900.
+
+Satu koreksi tes ikut terjadi karena port ini menambah teks yang sah: `tests/e2e/auth.spec.ts`
+selama ini membuktikan Kasir tidak melihat layar Pengguna dengan
+`getByText('Pengguna', { exact: true }).toHaveCount(0)`. Modul "Dari satu layar" menyebut setiap
+tab dengan namanya, jadi kata itu kini ada di Beranda dan proksinya merah walau perilakunya
+utuh. Penjaganya diganti jadi `getByRole('heading', { name: 'Pengguna', level: 1 })` yang tidak
+ada — pertanyaan yang memang sedang dibuktikan — ditambah judul `Beranda` yang terlihat
+(Guidance §12).
