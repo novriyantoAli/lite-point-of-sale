@@ -128,6 +128,43 @@ Cacah pada tab (`Produk 24`, `Stok 4`) ada di prototipe sebagai angka contoh. An
 butuh permintaan ke API dari kerangka, yang berarti setiap layar membayar dua permintaan demi
 kerangka. Untuk sekarang tab membawa katanya saja.
 
+## Tabular-nums — angka Inter Variable proporsional, 2026-09-28
+
+Diukur pada Inter Variable 13px, sepuluh digit:
+
+| `font-variant-numeric` | `1111111111` | `0000000000` | `8888888888` |
+| --- | --- | --- | --- |
+| `normal` | 50px | 80px | 80px |
+| `tabular-nums` | 80px | 80px | 80px |
+
+Jadi kelas itu **menahan lebar**, bukan hiasan: angka yang berubah tanpa kelasnya menggeser
+tetangganya sampai 30px per sepuluh digit. Dua tempat paling terasa dampaknya — cacah yang
+berubah sambil orang mengetik di kolom saringan, dan nominal yang sedang diketik di dalam
+fieldnya sendiri. DESIGN.md menuntutnya "tanpa kecuali", dan prototipe menandai `tnum` bahkan
+di field nominal (`<input id="bayar" class="input tnum">`).
+
+**Cara memeriksa, dan hasilnya pada Masuk + Kasir + rel.** Telusuri setiap elemen yang simpul
+teksnya sendiri memuat digit, lalu baca `font-variant-numeric`-nya — membaca kelasnya satu per
+satu di layar akan melewatkan yang justru paling sering berubah. Audit pertama menemukan 16
+elemen berangka; 5 bukan `tabular-nums`, dan **3 di antaranya benar-benar angka**:
+
+| Elemen | Sebelum | Sesudah | Kenapa |
+| --- | --- | --- | --- |
+| Cacah Katalog (`{n} Produk Aktif · tekan satu petak…`) | `normal` | `tabular-nums` | berubah sambil saringan diketik; prototipe menandai cacah yang sama `tnum` |
+| Ringkasan Keranjang (`{n} unit dalam {m} Item.`) | `normal` | `tabular-nums` | berubah setiap unit; prototipe: `mod__note tnum` |
+| Field "Jumlah bayar" (`#kasir-bayar`) | `normal` | `tabular-nums` | nominal yang sedang diketik; prototipe: `class="input tnum"` |
+
+Sisanya nama Produk yang sekadar memuat digit (`… E2E`) — bukan angka menurut aturan ini.
+
+Sengaja **tidak** disentuh: kolom pencarian Kode dan Nama (prototipe tidak menandainya, dan
+Kode adalah barcode — bukan uang, jumlah, atau Stok), dan nama Pengguna di rel (prototipe
+menulis `class="tnum"` pada `admin`, string tanpa angka, jadi tanda itu tidak menggambar apa
+pun — bukan pernyataan tentang digit).
+
+Field angka memakai satu const terpisah dari pakaian field-nya — `FIELD_ANGKA = ${FIELD}
+tabular-nums` di `Pembayaran.svelte` — supaya yang dibaca dari kelasnya bukan "field",
+melainkan "field yang isinya angka". Kolom pencarian memakai `FIELD` biasa.
+
 ## Related
 
 - `DESIGN.md` — sumber token, ukuran, dan aturan bernama (Zero-Grey, State-Is-Not-Faded, No-Shadow).
