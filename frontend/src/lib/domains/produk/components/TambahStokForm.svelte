@@ -56,38 +56,75 @@
 			// `add.error` carries the normalized message, rendered below.
 		}
 	}
+
+	/**
+	 * Fields & Inputs (DESIGN.md): field 26px dengan label 12px/600 di atasnya,
+	 * jaraknya 3px. Ukurannya literal, bukan token baru.
+	 */
+	const FIELD = 'flex flex-col gap-[3px]';
+	const LABEL = 'text-xs leading-[1.2] font-semibold';
+	/**
+	 * Field yang isinya angka: jumlah masuk, bukan nama atau Kode. `tabular-nums`
+	 * menahan lebar digit yang sedang diketik, seperti setiap angka lain di dunia
+	 * ini (DESIGN.md, Typography: "tanpa kecuali").
+	 */
+	const INPUT =
+		'h-[26px] w-32 border-border bg-card px-1.5 py-0 text-[13px] tabular-nums shadow-none focus-visible:border-foreground aria-invalid:ring-0 md:text-[13px]';
+	/**
+	 * Field yang tidak valid: pesannya 12px/600 di bawah field, bertinta — bukan
+	 * merah utilitas. Merah hanya milik garis dan outline field-nya (DESIGN.md,
+	 * Fields & Inputs).
+	 */
+	const ERROR = 'text-xs font-semibold';
+	/**
+	 * Commit Button: satu-satunya bidang bertinta penuh di formulir ini. DESIGN.md
+	 * menggambarnya 40px selebar kolom keranjang; di dalam baris dan sel tabel ia
+	 * memakai tinggi `.btn` dunia ini, 26px, karena ukuran baris tabel yang dipakai
+	 * di luar tabel adalah ukuran yang diciptakan di sini — yang tetap ia bawa
+	 * adalah tintanya, dan saat mati ia kehilangan tinta itu alih-alih memudar
+	 * (DESIGN.md, Commit Button & State-Is-Not-Faded).
+	 */
+	const COMMIT =
+		'h-[26px] border-foreground bg-primary px-2 text-[13px] font-semibold text-primary-foreground hover:border-foreground hover:bg-primary hover:text-primary-foreground focus-visible:border-foreground disabled:pointer-events-auto disabled:cursor-not-allowed disabled:border-dashed disabled:border-border disabled:bg-card disabled:text-foreground disabled:opacity-100';
+	/**
+	 * Tombol berbingkai memakai `variant="ghost"` lebih dulu: varian itu sudah
+	 * membawa `hover:bg-muted`, persis latar hover dunia ini, dan tidak membawa
+	 * apa pun yang harus dilawan (solution doc §3).
+	 */
+	const BATAL =
+		'h-[26px] border-border bg-card px-2 text-[13px] font-semibold hover:border-foreground focus-visible:border-foreground';
 </script>
 
 <form
-	class="flex flex-wrap items-end gap-2"
+	class="flex flex-wrap items-end gap-1.5"
 	aria-label={`Formulir Tambah Stok ${produk.name}`}
 	onsubmit={submit}
 	novalidate
 >
-	<div class="space-y-2">
-		<Label for={`stok-${produk.id}`}>Jumlah masuk</Label>
+	<div class={FIELD}>
+		<Label for={`stok-${produk.id}`} class={LABEL}>Jumlah masuk</Label>
 		<Input
 			id={`stok-${produk.id}`}
 			name="quantity"
 			inputmode="numeric"
 			autocomplete="off"
-			class="w-32"
+			class={INPUT}
 			bind:value={quantity}
 			aria-invalid={fieldErrors.quantity ? true : undefined}
 		/>
 		{#if fieldErrors.quantity}
-			<p class="text-sm text-destructive">{fieldErrors.quantity}</p>
+			<p class={ERROR}>{fieldErrors.quantity}</p>
 		{/if}
 	</div>
 
-	<Button type="submit" size="sm" disabled={pending}>
+	<Button type="submit" class={COMMIT} disabled={pending}>
 		{pending ? 'Menyimpan…' : 'Tambah Stok'}
 	</Button>
 	{#if onCancel}
-		<Button type="button" variant="outline" size="sm" onclick={onCancel}>Batal</Button>
+		<Button type="button" variant="ghost" class={BATAL} onclick={onCancel}>Batal</Button>
 	{/if}
 </form>
 
 {#if add.error}
-	<p class="text-sm text-destructive" role="alert">{add.error.message}</p>
+	<p class="text-xs font-semibold" role="alert">{add.error.message}</p>
 {/if}

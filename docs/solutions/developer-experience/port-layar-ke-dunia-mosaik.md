@@ -176,6 +176,29 @@ catatan di bawah). Rasternya: `.impeccable/preview/shots/produk-sveltekit.png`,
 | Dialog: Commit Button | tinggi 40px, latar `rgb(0,0,0)`, radius 0 | Commit Button |
 | Dialog: field & label | field 26px radius 0 · label 12px/600 | Fields & Inputs |
 
+## Evidence — layar Stok, 2026-09-28
+
+Diukur dari DOM aplikasi yang berjalan pada 1440×900 (`build/` yang baru dibangun), dengan
+skrip Playwright sekali pakai yang menyalin `getComputedStyle` (pola §6). Rasternya:
+`.impeccable/preview/shots/stok-sveltekit.png` dan `stok-mobile-sveltekit.png`.
+
+| Yang diukur | Hasil | DESIGN.md |
+| --- | --- | --- |
+| Kontras seluruh teks | 12/12 pasangan unik lolos AA | Zero-Grey |
+| `border-radius` selain 0 | tidak ada | Square-Corner |
+| `box-shadow` yang terlihat | nol di seluruh 161 elemen | No-Shadow |
+| Merah pada permukaan | 0,1% (hanya tab rel yang aktif) | Three-Percent (≤ 3%) |
+| Monospace | 0 elemen | tanpa monospace |
+| Strip judul | 24px/700, `-0.015em`, garis bawah `rgb(0,0,0)` | Title |
+| Kepala modul (2 modul) | latar `rgb(245,245,245)`, garis bawah `rgb(0,0,0)` | Wash Grey + garis tinta |
+| Kolom tabel | tepat 4: Nama, Kode, Stok, Aksi | tabel `Nama \| Kode \| Stok \| Aksi` |
+| Quiet tag (`menipis`, `habis`, `Menipis`, `Nonaktif`) | tinggi 15px, 12px/600, isian `rgb(245,245,245)`, `opacity: 1` | Tags; State-Is-Not-Faded |
+| Keadaan habis | nama dicoret (`line-through`); kata `Stok habis` di daftar, `Habis` di tabel | "habis kehilangan tintanya", bukan dipudarkan |
+| `tabular-nums` | Stok, Kode, ambang, cacah modul, paragraf "Stok di bawah 5", field jumlah, pemberitahuan hasil restock | "setiap angka uang, jumlah, dan Stok", tanpa kecuali |
+| Pemberitahuan hasil restock | berbagi satu garis dengan strip lewat `-mb-px` + `z-[2]`; `role="status"` di luar kedua region | Shared-Hairline |
+| 1440×900 | dokumen 900px, tanpa geser mendatar | One-Screen |
+| 390×844 | tanpa geser mendatar; tabel menggeser di dalam kotaknya | layar sempit menumpuk, bukan menyusut |
+
 ## Kesalahan yang hampir dilakukan
 
 `pnpm exec playwright test <spec>` **tidak** membangun ulang SvelteKit — ia menyajikan
