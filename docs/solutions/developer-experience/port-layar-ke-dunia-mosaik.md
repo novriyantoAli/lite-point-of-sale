@@ -275,6 +275,43 @@ yang ditulis di `DESIGN.md` §Commit Button — kolom 40px/15px/600 dan baris 26
 dengan tinta, radius, dan keadaan mati yang sama — supaya layar berikutnya tidak menebaknya
 sendiri dari prototipe masing-masing.
 
+## Evidence — layar Laporan, 2026-09-29
+
+Diukur dari DOM aplikasi yang berjalan pada 1440×900 (`build/` yang baru dibangun), dengan
+skrip Playwright sekali pakai yang menyalin `getComputedStyle` (pola §6). Rasternya:
+`.impeccable/preview/shots/laporan-sveltekit.png` dan `laporan-mobile-sveltekit.png`.
+
+| Yang diukur | Hasil | DESIGN.md |
+| --- | --- | --- |
+| Kontras seluruh teks | 13/13 pasangan unik lolos AA | Zero-Grey |
+| `border-radius` selain 0 | tidak ada | Square-Corner |
+| `box-shadow` yang terlihat | nol | No-Shadow |
+| Merah pada permukaan | 0,15% (hanya tab rel yang aktif) | Three-Percent (≤ 3%) |
+| Monospace | 0 elemen | tanpa monospace, termasuk angka |
+| Strip judul | 24px/700, `-0.015em`, garis bawah `rgb(0,0,0)` | Title + strip judul |
+| Field Tanggal | tinggi 26px, radius 0, `box-shadow` nol, label 12px/600 tepat 3px di atasnya | Fields & Inputs |
+| Kepala modul (Omzet harian, Daftar Penjualan) | latar `rgb(245,245,245)`, garis bawah `rgb(0,0,0)` | Wash Grey + garis tinta |
+| Sub-judul Omzet per Kasir | garis rambut, bukan Wash Grey — rincian di dalam modul, bukan kepala modul kedua | Modules |
+| Figures (Total omzet, Jumlah transaksi) | 20px/700 `tabular-nums`, didahului label 12px/600 | Figures |
+| Metode tanpa transaksi (Debit, Transfer) | `—`, bukan `0` — dan tidak satu pun selnya berisi nol | Figures |
+| `tabular-nums` | 16 simpul berdigit di UI (tanggal, cacah, nominal, Nomor Struk, waktu) semuanya tabular | "setiap angka uang, jumlah, dan Stok", tanpa kecuali |
+| Aksi Buka / Cetak ulang Struk | selalu terlihat sebagai kata, tidak ada aksi di balik hover | Named-Not-Hidden |
+| 1440×900 | dokumen 1440px, tanpa geser mendatar | One-Screen |
+| 390×844 | tanpa geser mendatar; tabel menggeser di dalam kotaknya | layar sempit menumpuk, bukan menyusut |
+
+Keadaan memuat, gagal, dan kosong ketiganya berdiri di tiap modul: memuat sebagai kata
+("Memuat omzet…"), gagal sebagai pesan Go yang terbaca plus tombol "Coba lagi", dan kosong
+sebagai kalimat yang menjelaskan. Hari kosong tidak dijawab dengan empat baris nol: tabelnya
+menulis `—`, dan kalimat "Belum ada Penjualan pada tanggal ini." yang berdiri di atasnya yang
+mengatakannya. Field Tanggal yang rusak (mis. `2026-02-30`) ditolak dengan pesan 12px/600 di
+bawah fieldnya, bukan layar kosong — dan tes di `LaporanHarian.svelte.test.ts` mengunci
+ketiganya (angka `—` menggantikan `0`, kalimat field, dan hari kosong).
+
+Markah yang dikunci e2e tetap utuh: "Total omzet" tetap diikuti `Rp 0` pada hari kosong (yang
+belum bisa dihitung adalah angka *per metode*, bukan total harinya), baris Kasir tetap di dalam
+`region "Omzet harian"`, dan rincian yang dibuka tetap memakai `PenjualanTersimpan` yang sama
+dengan layar Penjualan — bukan salinan kedua (solution doc §9).
+
 ## Kesalahan yang hampir dilakukan
 
 `pnpm exec playwright test <spec>` **tidak** membangun ulang SvelteKit — ia menyajikan
