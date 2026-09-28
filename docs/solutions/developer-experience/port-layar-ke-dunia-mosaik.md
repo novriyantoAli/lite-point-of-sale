@@ -180,12 +180,30 @@ bidang bertinta ia bahkan sempat putih. Obatnya satu aturan tingkat dunia, di lu
 `:focus-visible { transition-property: background-color, border-color, color }` — cincinnya
 mendarat seketika, sementara latar dan garisnya tetap halus.
 
-**Yang belum diputuskan, dan bukan hak port.** Setelah tenang, cincinnya `2px solid
-var(--foreground)` di atas bidang bertinta pada tombol strip, Commit Button, dan tab rel yang
-aktif: terukur **1,00:1** — tak terlihat. Prototipe melakukan hal yang sama (`:focus-visible`
-global dengan `outline: 2px solid var(--ink)`, dan `.method:focus-within` pun memakai tinta,
-padahal sel metode yang terpilih justru bidang bertinta). Jadi port ini setia; yang cacat adalah
-sistemnya, dan DESIGN.md hanya menyebut "outline 2px ke dalam" tanpa menyebut warnanya. Tiga
-jalan yang sama-sama masuk akal — `var(--primary-foreground)` (petak, 21:1), `var(--destructive)`
-(merah utilitas, 5,88:1), atau membiarkannya seperti prototipe — dan itu keputusan pemilik, bukan
-keputusan orang yang memport.
+**Diputuskan: petak.** Setelah tenang, cincinnya `2px solid var(--foreground)` di atas bidang
+bertinta pada tombol aksi utama — strip Produk, Commit Button, field Masuk — terukur **1,00:1**,
+tak terlihat, dan itu salah satu pengendali pertama yang dituju Tab. Prototipe melakukan hal yang
+sama (`:focus-visible` global dengan `outline: 2px solid var(--ink)`, dan `.method:focus-within`
+pun memakai tinta padahal sel metode yang terpilih justru bidang bertinta), jadi port ini setia;
+yang cacat sistemnya, dan DESIGN.md hanya menyebut "outline 2px ke dalam" tanpa warna.
+
+Tiga kandidat diukur pada dua permukaan sekaligus, dan raster perbandingannya — diperbesar 3×
+supaya cincin 2px bisa dinilai mata — disimpan sebagai rekaman keputusan:
+
+| Kandidat | Di atas tinta `rgb(0,0,0)` | Di atas tab merah `rgb(204,13,13)` |
+| --- | --- | --- |
+| tinta (sebelum) | 1,00:1 ✗ | 4,33:1 ✓ |
+| **petak (dipilih)** | **21:1** ✓ | **4,85:1** ✓ |
+| merah utilitas | 5,88:1 ✓ | 1,00:1 ✗ |
+
+Merah ditolak bukan karena seleranya: ia **memindahkan** cacatnya ke tab rel yang aktif, dan
+DESIGN.md sudah membatasi merah pada harga dan tab. Petak satu-satunya warna palet yang lolos di
+kedua permukaan, dan ia membaca sebagai kebalikan cincin dunia ini — tombol yang hidup kehilangan
+tintanya di tepinya, seperti tombol yang mati kehilangan seluruhnya.
+
+Aturannya berdiri sekali di `app.css`, dan menemukan bidang bertintanya lewat `bg-primary`:
+`--primary` memetakan ke tinta, dan varian `default` milik `Button` — satu-satunya bidang bertinta
+penuh yang sistem ini kenal — membawa kelas itu. Jadi tidak ada satu pun tombol yang perlu
+ditambahi apa pun, dan port berikutnya tidak bisa lupa. Sel metode Pembayaran adalah pengecualian
+yang membuktikan aturannya: tintanya datang dari `has-[:checked]`, bukan dari `bg-primary`, jadi
+cincinnya ditanggung di komponennya.
