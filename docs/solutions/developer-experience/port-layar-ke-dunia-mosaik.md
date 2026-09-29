@@ -521,3 +521,39 @@ tab dengan namanya, jadi kata itu kini ada di Beranda dan proksinya merah walau 
 utuh. Penjaganya diganti jadi `getByRole('heading', { name: 'Pengguna', level: 1 })` yang tidak
 ada — pertanyaan yang memang sedang dibuktikan — ditambah judul `Beranda` yang terlihat
 (Guidance §12).
+
+## Evidence — layar Backup, 2026-09-29
+
+Diukur dari DOM aplikasi yang berjalan pada 1440×900 dan 390×844 (`build/` yang baru dibangun),
+dengan skrip Playwright sekali pakai yang menyalin `getComputedStyle` (pola §6). Rasternya:
+`.impeccable/preview/shots/backup-sveltekit.png` dan `backup-mobile-sveltekit.png`.
+
+| Yang diukur | Hasil | DESIGN.md |
+| --- | --- | --- |
+| Kontras seluruh teks | 4/4 pasangan unik lolos AA (terendah 5,78:1 — teks putih di atas merah: tab rel aktif) | Zero-Grey |
+| `border-radius` selain 0 | tidak ada | Square-Corner |
+| `box-shadow` yang terlihat | nol | No-Shadow |
+| Merah pada permukaan | 0,08% (1440×900) · 0,22% (390×844) — hanya tab rel aktif | Three-Percent (≤ 3%) |
+| Monospace | 0 elemen | tanpa monospace, termasuk angka |
+| Strip judul | 24px/700, `-0.36px` (=-0.015em), tinggi baris 24px, latar petak | Title + strip judul |
+| Commit Button (Backup sekarang) | tinggi 26px, latar `rgb(0,0,0)`, teks putih, `opacity: 1`, radius 0, `box-shadow: none`, 13px/600 | Commit Button baris; State-Is-Not-Faded |
+| Kepala modul (Salinan tersimpan) | latar `rgb(245,245,245)` | Wash Grey + garis tinta |
+| `tabular-nums` | 7 simpul berdigit di UI semuanya tabular — nama berkas, ukuran, cacah modul; satu-satunya non-tabular adalah tag `<script>` yang tak terlihat | "setiap angka uang, jumlah, dan Stok", tanpa kecuali |
+| 1440×900 | dokumen 900px, tanpa geser mendatar | One-Screen |
+| 390×844 | tanpa geser mendatar | layar sempit menumpuk, bukan menyusut |
+
+Keadaan memuat, gagal, dan kosong ketiganya berdiri di modul Salinan tersimpan: memuat sebagai
+kerangka baris pada bentuk yang sama (bukan layar kosong), gagal sebagai pesan Go yang terbaca
+plus tombol "Coba lagi", dan kosong sebagai kalimat yang menjelaskan apa yang akan muncul dan
+apa yang harus dilakukan. Ketiganya sudah lama dijaga `BackupPanel.svelte.test.ts` dan tetap
+utuh setelah markahnya berubah.
+
+Dua baris di luar modul — pemberitahuan hasil ekspor (`role="status"`) dan galatnya
+(`role="alert"`) — berbagi satu pita selebar papan di bawah strip lewat `-mb-px` milik strip,
+pola yang sama dengan pemberitahuan hasil restock StokList (Shared-Hairline).
+
+Satu keputusan Figures yang issue ini memang minta ditegakkan: saat daftar gagal dibaca, kepala
+modul menulis `—`, bukan `0 file`. Angka yang belum bisa dihitung tidak ditulis nol
+(DESIGN.md, Figures), tepat seperti LaporanHarian menulis `—` untuk metode tanpa transaksi.
+Sisi lain dari kontrak yang sama: daftar **terbaru di atas**, sesuai catatan kepala modul di
+prototipe — API menjawab paling lama dulu, jadi layar yang membalik urutannya, bukan API.
