@@ -2,8 +2,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
-	import * as Select from '$lib/components/ui/select';
-	import { collectFieldErrors } from '$lib/utils';
+	import { cn, collectFieldErrors } from '$lib/utils';
 	import {
 		createPengaturanQuery,
 		createUpdatePengaturanMutation
@@ -46,24 +45,8 @@
 		seeded = true;
 	});
 
-	const paperWidthOption = $derived(
-		PAPER_WIDTH_OPTIONS.find((option) => option.value === paperWidth) ?? PAPER_WIDTH_OPTIONS[1]
-	);
-
-	function setPaperWidth(value: string) {
-		paperWidth = value === '58' ? '58' : '80';
-	}
-
 	const pending = $derived(update.isPending);
 	const error = $derived(update.error);
-
-	/**
-	 * The shared style of the two template textareas. The block fields read alike
-	 * because they are alike — header and footer are two textareas of the same
-	 * kind, so the class lives here once rather than drifting between copies.
-	 */
-	const textareaClass =
-		'w-full rounded-md border border-input bg-transparent px-2.5 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm';
 
 	async function submit(event: SubmitEvent) {
 		event.preventDefault();
@@ -91,111 +74,216 @@
 			// `error` carries the normalized message, rendered below.
 		}
 	}
+
+	/**
+	 * Papan mosaik (DESIGN.md, Layout): satu kolom selebar papan — layar Pengaturan
+	 * bukan papan tiga kolom milik Kasir. Padding luarnya milik rel (`(app)/+layout`),
+	 * jadi di sini tidak ada padding lagi.
+	 */
+	const PAPAN = 'grid grid-cols-1 gap-0';
+	/**
+	 * Strip judul: satu-satunya tempat ukuran 24px muncul di layar ini. `-mb-px`
+	 * plus `z-[2]` menariknya turun satu piksel, jadi garis tintanya yang menutup
+	 * modul di bawahnya alih-alih bertumpuk dengan garis rambut (DESIGN.md,
+	 * Shared-Hairline).
+	 */
+	const STRIP =
+		'z-[2] col-span-full -mb-px flex flex-wrap items-baseline gap-x-3 gap-y-1 border border-border border-b-foreground bg-card px-2 py-2';
+	const JUDUL = 'text-2xl leading-none font-bold tracking-[-0.015em]';
+	/** Seluruh teks 12px; lantai huruf dunia ini (DESIGN.md, Legibility Floor). */
+	const CATATAN = 'text-xs';
+	/** Modul: latar petak dengan garis rambut, ditutup baris terakhirnya. */
+	const MODUL = 'border border-border border-b-0 bg-card';
+	/** Kepala modul: Wash Grey, ditutup garis tinta — satu-satunya penanda kepala. */
+	const MODUL_KEPALA =
+		'flex items-center justify-between gap-2 border-b border-foreground bg-muted px-2 py-1.5';
+	const MODUL_JUDUL = 'text-[13px] font-bold tracking-[0.01em]';
+	/** Satu baris catatan atau keadaan di dalam modul, selebar modulnya. */
+	const MODUL_BARIS = 'border-b border-border px-2 py-1.5';
+	const MODUL_CATATAN = `${MODUL_BARIS} text-xs`;
+	/**
+	 * Fields & Inputs (DESIGN.md): field 26px dengan label 12px/600 di atasnya,
+	 * jaraknya 3px. Ukurannya literal, bukan token baru — kosakata yang sudah
+	 * dipakai layar Produk dan Kasir (solution doc §1).
+	 */
+	const FIELD = 'flex flex-col gap-[3px]';
+	const LABEL = 'text-xs leading-[1.2] font-semibold';
+	const INPUT =
+		'h-[26px] border-border bg-card px-1.5 py-0 text-[13px] shadow-none focus-visible:border-foreground aria-invalid:ring-0 md:text-[13px]';
+	/**
+	 * Field yang isinya angka: Ambang Stok menipis. Angkanya tabular seperti setiap
+	 * angka lain di dunia ini (DESIGN.md, Typography: "tanpa kecuali"), dan
+	 * prototipe menulis `class="input tnum"` tepat di field ini.
+	 */
+	const INPUT_ANGKA = `${INPUT} tabular-nums`;
+	/**
+	 * `.textarea` prototipe: min-height 88px, padding 6px, huruf 13px/1.4, garis
+	 * rambut, radius nol, `resize: vertical`. Tidak ada primitif shadcn untuknya,
+	 * jadi pakaiannya ditulis di sini.
+	 */
+	const TEXTAREA =
+		'min-h-[88px] w-full resize-y rounded-none border border-border bg-card p-1.5 text-[13px] leading-[1.4] text-foreground shadow-none outline-none focus-visible:border-foreground';
+	/**
+	 * Sel lebar kertas: radio asli yang disembunyikan, sel persegi yang terlihat —
+	 * persis sel metode Pembayaran di Kasir. Terpilih berarti bidang tinta penuh
+	 * dengan teks putih, bukan tint dan bukan centang. Karena tintanya datang dari
+	 * `has-[:checked]` (bukan `bg-primary`), cincin fokusnya ditanggung di sini:
+	 * tinta di atas tinta terukur 1,00:1 (DESIGN.md, Browser surfaces).
+	 */
+	const METODE =
+		'flex h-[26px] cursor-pointer items-center justify-center border border-border bg-card text-[13px] font-medium transition-colors hover:bg-muted focus-within:outline-2 focus-within:outline-solid focus-within:-outline-offset-2 focus-within:outline-foreground has-[:checked]:focus-within:outline-primary-foreground has-[:checked]:border-foreground has-[:checked]:bg-foreground has-[:checked]:font-semibold has-[:checked]:text-primary-foreground';
+	/** Field yang tidak valid: pesannya 12px/600 di bawah field, warnanya tinta. */
+	const ERROR = 'text-xs font-semibold';
+	/**
+	 * `.btn` 26px/13px — petak berbingkai rambut, keadaan mati kehilangan kursor
+	 * alih-alih tintanya. Dipakai dengan `variant="ghost"`, yang sudah membawa
+	 * `hover:bg-muted` dan tidak membawa apa pun yang harus dilawan (solution doc §3).
+	 */
+	const AKSI_MODUL =
+		'h-[26px] border-border bg-card px-2 text-[13px] font-semibold hover:border-foreground focus-visible:border-foreground disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-100';
+	/**
+	 * Commit Button kolom (DESIGN.md): 40px, lebar penuh kolomnya, huruf 15px/600.
+	 * Saat mati ia kehilangan tintanya lalu jadi putih bergaris putus-putus, bukan
+	 * pudar (State-Is-Not-Faded).
+	 */
+	const COMMIT =
+		'h-10 w-full text-[15px] font-semibold hover:bg-primary disabled:pointer-events-auto disabled:cursor-not-allowed disabled:border-dashed disabled:border-border disabled:bg-card disabled:text-foreground disabled:opacity-100';
 </script>
 
-<div class="space-y-6">
-	<div class="space-y-1">
-		<h1 class="text-2xl font-semibold">Pengaturan</h1>
-		<p class="text-sm text-muted-foreground">
-			Setelan toko: template Struk dan ambang Stok menipis.
-		</p>
+<div class={PAPAN}>
+	<!--
+		Strip judul: judul 24px/700 dengan satu kalimat 12px di sebelahnya
+		(DESIGN.md, Typography). Layar ini tidak punya aksi di strip: satu-satunya
+		aksi adalah Simpan, dan ia menutup modulnya.
+	-->
+	<div class={STRIP}>
+		<h1 class={JUDUL}>Pengaturan</h1>
+		<p class={CATATAN}>Setelan toko: template Struk dan ambang Stok menipis.</p>
 	</div>
 
-	{#if pengaturan.isPending}
-		<p class="text-sm text-muted-foreground">Memuat Pengaturan…</p>
-	{:else if pengaturan.error}
-		<div class="space-y-3">
-			<p class="text-sm text-destructive">{pengaturan.error.message}</p>
-			<Button variant="outline" size="sm" onclick={() => void pengaturan.refetch()}>
-				Coba lagi
-			</Button>
+	<section class={MODUL} aria-labelledby="setelan-judul" aria-busy={pengaturan.isPending}>
+		<div class={MODUL_KEPALA}>
+			<h2 id="setelan-judul" class={MODUL_JUDUL}>Setelan toko</h2>
+			<span class={CATATAN}>satu baris, tersimpan utuh</span>
 		</div>
-	{:else}
-		<form
-			class="space-y-6 rounded-lg border p-4"
-			aria-label="Formulir Pengaturan"
-			onsubmit={submit}
-			novalidate
-		>
-			<div class="space-y-2">
-				<Label for="pengaturan-header">Header Struk</Label>
-				<textarea
-					id="pengaturan-header"
-					name="header"
-					rows={4}
-					bind:value={header}
-					class={textareaClass}></textarea>
-				<p class="text-sm text-muted-foreground">
-					Blok teks di atas baris Item pada Struk — misalnya nama dan alamat toko.
-				</p>
-			</div>
 
-			<div class="space-y-2">
-				<Label for="pengaturan-footer">Footer Struk</Label>
-				<textarea
-					id="pengaturan-footer"
-					name="footer"
-					rows={4}
-					bind:value={footer}
-					class={textareaClass}></textarea>
-				<p class="text-sm text-muted-foreground">
-					Blok teks di bawah total pada Struk — misalnya ucapan terima kasih.
-				</p>
+		{#if pengaturan.isPending}
+			<p class={MODUL_CATATAN}>Memuat Pengaturan…</p>
+		{:else if pengaturan.error}
+			<div class={MODUL_BARIS}>
+				<p class="text-xs font-semibold" role="alert">{pengaturan.error.message}</p>
+				<Button
+					variant="ghost"
+					class={cn(AKSI_MODUL, 'mt-1.5')}
+					onclick={() => void pengaturan.refetch()}>Coba lagi</Button
+				>
 			</div>
+		{:else}
+			<form aria-label="Formulir Pengaturan" onsubmit={submit} novalidate>
+				<div class={MODUL_BARIS}>
+					<div class={FIELD}>
+						<Label for="pengaturan-header" class={LABEL}>Header Struk</Label>
+						<textarea
+							id="pengaturan-header"
+							name="header"
+							rows={4}
+							bind:value={header}
+							class={TEXTAREA}></textarea>
+						<p class="text-xs">
+							Blok teks di atas baris Item pada Struk — misalnya nama dan alamat toko. Baris pertama
+							yang tidak kosong di sini menjadi nama toko di rel dan layar Masuk.
+						</p>
+					</div>
+				</div>
 
-			<div class="grid gap-4 sm:grid-cols-2">
-				<div class="space-y-2">
-					<Label for="pengaturan-lebar">Lebar kertas</Label>
-					<Select.Root type="single" value={paperWidth} onValueChange={setPaperWidth}>
-						<Select.Trigger id="pengaturan-lebar" class="w-full">
-							<span data-slot="select-value">{paperWidthOption.label}</span>
-						</Select.Trigger>
-						<Select.Content>
+				<div class={MODUL_BARIS}>
+					<div class={FIELD}>
+						<Label for="pengaturan-footer" class={LABEL}>Footer Struk</Label>
+						<textarea
+							id="pengaturan-footer"
+							name="footer"
+							rows={4}
+							bind:value={footer}
+							class={TEXTAREA}></textarea>
+						<p class="text-xs">
+							Blok teks di bawah total pada Struk — misalnya ucapan terima kasih.
+						</p>
+					</div>
+				</div>
+
+				<!--
+					Kisi field menumpuk di 900px, bukan di titik papan 1080px
+					(ADR-0020): kisi field bukan papan.
+				-->
+				<div
+					class={cn(MODUL_BARIS, 'grid grid-cols-1 gap-x-3 gap-y-[10px] min-[901px]:grid-cols-2')}
+				>
+					<div class={FIELD}>
+						<p class={LABEL} id="lebar-kertas-label">Lebar kertas</p>
+						<!--
+							Native radios, so arrow keys move between the two widths and the
+							group is announced as one choice. The input is only hidden from
+							sight: the cell is what shows the width and what carries the focus
+							ring (DESIGN.md, Methods).
+						-->
+						<div
+							class="grid grid-cols-2 gap-1"
+							role="radiogroup"
+							aria-labelledby="lebar-kertas-label"
+						>
 							{#each PAPER_WIDTH_OPTIONS as option (option.value)}
-								<Select.Item value={option.value} label={option.label}>
+								<label class={METODE}>
+									<input
+										type="radio"
+										name="paper_width"
+										value={option.value}
+										bind:group={paperWidth}
+										class="sr-only"
+									/>
 									{option.label}
-								</Select.Item>
+								</label>
 							{/each}
-						</Select.Content>
-					</Select.Root>
-					{#if fieldErrors.paper_width}
-						<p class="text-sm text-destructive">{fieldErrors.paper_width}</p>
-					{/if}
-					<p class="text-sm text-muted-foreground">Lebar kertas thermal: 58 atau 80 mm.</p>
+						</div>
+						{#if fieldErrors.paper_width}
+							<p class={ERROR}>{fieldErrors.paper_width}</p>
+						{/if}
+						<p class="text-xs">Lebar kertas thermal: 58 atau 80 mm.</p>
+					</div>
+
+					<div class={FIELD}>
+						<Label for="pengaturan-ambang" class={LABEL}>Ambang Stok menipis</Label>
+						<Input
+							id="pengaturan-ambang"
+							name="low_stock_threshold"
+							inputmode="numeric"
+							autocomplete="off"
+							class={INPUT_ANGKA}
+							bind:value={threshold}
+							aria-invalid={fieldErrors.low_stock_threshold ? true : undefined}
+						/>
+						{#if fieldErrors.low_stock_threshold}
+							<p class={ERROR}>{fieldErrors.low_stock_threshold}</p>
+						{/if}
+						<p class="text-xs">
+							Produk Aktif dengan Stok di bawah angka ini masuk daftar Stok menipis.
+						</p>
+					</div>
 				</div>
 
-				<div class="space-y-2">
-					<Label for="pengaturan-ambang">Ambang Stok menipis</Label>
-					<Input
-						id="pengaturan-ambang"
-						name="low_stock_threshold"
-						inputmode="numeric"
-						autocomplete="off"
-						bind:value={threshold}
-						aria-invalid={fieldErrors.low_stock_threshold ? true : undefined}
-					/>
-					{#if fieldErrors.low_stock_threshold}
-						<p class="text-sm text-destructive">{fieldErrors.low_stock_threshold}</p>
-					{/if}
-					<p class="text-sm text-muted-foreground">
-						Produk Aktif dengan Stok di bawah angka ini masuk daftar Stok menipis.
-					</p>
+				{#if error}
+					<p class={cn(MODUL_BARIS, ERROR)} role="alert">{error.message}</p>
+				{/if}
+
+				{#if notice}
+					<p class={cn(MODUL_BARIS, ERROR)} role="status">{notice}</p>
+				{/if}
+
+				<div class="border-b border-border px-2 py-2">
+					<Button type="submit" class={COMMIT} disabled={pending}>
+						{pending ? 'Menyimpan…' : 'Simpan Pengaturan'}
+					</Button>
 				</div>
-			</div>
-
-			{#if error}
-				<p class="text-sm text-destructive" role="alert">{error.message}</p>
-			{/if}
-
-			{#if notice}
-				<p class="text-sm text-muted-foreground" role="status">{notice}</p>
-			{/if}
-
-			<div class="flex gap-2">
-				<Button type="submit" disabled={pending}>
-					{pending ? 'Menyimpan…' : 'Simpan Pengaturan'}
-				</Button>
-			</div>
-		</form>
-	{/if}
+			</form>
+		{/if}
+	</section>
 </div>

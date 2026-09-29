@@ -42,8 +42,10 @@ test('the Admin sets the Struk template and it persists', async ({ page }) => {
 	// The two template blocks and the paper width are what "template" means here.
 	await page.getByLabel('Header Struk').fill('Toko Kopi Purnama\nJl. Melati 1');
 	await page.getByLabel('Footer Struk').fill('Terima kasih sudah belanja');
-	await page.getByLabel('Lebar kertas').click();
-	await page.getByRole('option', { name: '58 mm' }).click();
+	// The width is a square cell: the radio is hidden from sight and the visible
+	// label carries both the choice and the focus ring (DESIGN.md, Methods).
+	await page.getByText('58 mm', { exact: true }).click();
+	await expect(page.getByRole('radio', { name: '58 mm' })).toBeChecked();
 
 	await page.getByRole('button', { name: 'Simpan Pengaturan' }).click();
 
@@ -58,7 +60,7 @@ test('the Admin sets the Struk template and it persists', async ({ page }) => {
 	await page.reload();
 	await expect(page.getByLabel('Header Struk')).toHaveValue('Toko Kopi Purnama\nJl. Melati 1');
 	await expect(page.getByLabel('Footer Struk')).toHaveValue('Terima kasih sudah belanja');
-	await expect(page.getByLabel('Lebar kertas')).toHaveText('58 mm');
+	await expect(page.getByRole('radio', { name: '58 mm' })).toBeChecked();
 	await expect(page.getByLabel('Ambang Stok menipis')).toHaveValue('5');
 });
 
@@ -95,8 +97,8 @@ test('changing the template changes a reprint of an old sale', async ({ page }) 
 		.getByLabel('Header Struk')
 		.fill('Toko Baru E2E\nJl. Melati Nomor Dua Kelurahan Sukamaju');
 	await page.getByLabel('Footer Struk').fill('Terima kasih E2E');
-	await page.getByLabel('Lebar kertas').click();
-	await page.getByRole('option', { name: '58 mm' }).click();
+	await page.getByText('58 mm', { exact: true }).click();
+	await expect(page.getByRole('radio', { name: '58 mm' })).toBeChecked();
 	await page.getByRole('button', { name: 'Simpan Pengaturan' }).click();
 	await expect(page.getByRole('status')).toContainText('Pengaturan disimpan.');
 

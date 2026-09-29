@@ -18,10 +18,10 @@ export const PAPER_WIDTH_OPTIONS = [
 ] as const;
 
 /**
- * The Struk paper width as a form submits it: the Select's string choice, parsed
- * into the integer the API stores. It is a backstop behind a Select that only
- * offers the two widths — a direct caller sending anything else is refused here
- * with the same rule the Go side enforces.
+ * The Struk paper width as a form submits it: the radio cells' string choice,
+ * parsed into the integer the API stores. It is a backstop behind the two cells
+ * that only offer 58 and 80 mm — a direct caller sending anything else is refused
+ * here with the same rule the Go side enforces.
  */
 const paperWidthInput = z.preprocess(
 	(value) => (typeof value === 'string' ? Number(value) : value),

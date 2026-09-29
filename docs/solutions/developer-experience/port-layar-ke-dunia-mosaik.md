@@ -557,3 +557,52 @@ modul menulis `—`, bukan `0 file`. Angka yang belum bisa dihitung tidak dituli
 (DESIGN.md, Figures), tepat seperti LaporanHarian menulis `—` untuk metode tanpa transaksi.
 Sisi lain dari kontrak yang sama: daftar **terbaru di atas**, sesuai catatan kepala modul di
 prototipe — API menjawab paling lama dulu, jadi layar yang membalik urutannya, bukan API.
+
+## Evidence — layar Pengaturan, 2026-09-29
+
+Diukur dari DOM aplikasi yang berjalan pada 1440×900 dan 390×844 (`build/` yang baru dibangun),
+dengan skrip Playwright sekali pakai yang menyalin `getComputedStyle` (pola §6). Rasternya:
+`.impeccable/preview/shots/pengaturan-sveltekit.png` dan `pengaturan-mobile-sveltekit.png`.
+
+| Yang diukur | Hasil | DESIGN.md |
+| --- | --- | --- |
+| Kontras seluruh teks | 4/4 pasangan unik lolos AA (terendah 5,78:1 — teks putih di atas merah: tab rel aktif) | Zero-Grey |
+| `border-radius` selain 0 | tidak ada | Square-Corner |
+| `box-shadow` yang terlihat | nol | No-Shadow |
+| Merah pada permukaan | 0,05% (1440×900) · 0,12% (390×844) — hanya tab rel aktif | Three-Percent (≤ 3%) |
+| Monospace | 0 elemen | tanpa monospace, termasuk angka |
+| Strip judul | 24px/700, `-0.36px` (=-0.015em) | Title + strip judul |
+| Kepala modul (Setelan toko) | latar `rgb(245,245,245)`, ditutup garis tinta | Wash Grey + garis tinta |
+| Label field | 12px/600 | Fields & Inputs |
+| Textarea | `min-height: 88px`, 13px/18,2, radius 0, `resize: vertical`, garis rambut | Fields & Inputs |
+| Sel lebar kertas terpilih | tinggi 26px, latar `rgb(0,0,0)`, teks putih, bobot 600, radius 0 — bidang tinta penuh, bukan tint dan bukan centang | Methods; Square-Corner |
+| Sel lebar kertas diam | tinggi 26px, latar `rgb(255,255,255)`, teks tinta, bobot 500, radius 0 | Methods |
+| Cincin fokus sel | `2px solid rgb(255,255,255)` (petak) offset `-2px`, **di sel**, sementara radio-nya terukur tak terlihat (lebar ≤ 2px) | Methods; Browser surfaces |
+| Commit Button (Simpan Pengaturan) | tinggi 40px; saat mati latar putih, teks tinta, `border-style: dashed`, `opacity: 1`, radius 0, 15px/600 — kehilangan tinta, bukan memudar | Commit Button kolom; State-Is-Not-Faded |
+| Field invalid (Ambang kosong) | garis `rgb(204,13,13)` **dan** outline `2px solid rgb(204,13,13)`, `aria-invalid="true"`, pesan 12px/600 di bawah field | Fields & Inputs |
+| `tabular-nums` | field Ambang; tiga simpul berdigit lain (label lebar "58 mm"/"80 mm" dan catatannya) adalah lebar kertas, bukan uang/jumlah/Stok, jadi tidak dituntut tabular | Typography |
+| 1440×900 | dokumen 900px, tanpa geser mendatar | One-Screen |
+| 390×844 | tanpa geser mendatar | layar sempit menumpuk, bukan menyusut |
+
+Keadaan memuat, gagal (setelan gagal dibaca), dan sukses-tersimpan ketiganya berdiri: memuat
+sebagai kata, gagal sebagai pesan Go yang terbaca plus tombol "Coba lagi", dan sukses sebagai
+pemberitahuan `role="status"` "Pengaturan disimpan.".
+
+Dua keputusan di sini layak dicatat.
+
+**Sel lebar kertas menggantikan Select.** Prototipe menggambar lebar kertas sebagai dua sel
+persegi (radio asli yang disembunyikan), bukan dropdown, jadi kendalinya berubah dan klaim
+a11y-nya ikut: grupnya sekarang membawa `role="radiogroup"` dengan `aria-labelledby`, karena
+`<Label for>` yang dulu menamai Select tidak lagi menamai apa pun. Kosakata selnya disalin utuh
+dari sel metode Pembayaran (`Pembayaran.svelte`), termasuk cincin fokus yang berbalik jadi petak
+di atas bidang bertinta.
+
+**Kisi field menumpuk di 900px, bukan 1080px.** Acceptance criteria #38 menulis 1080px, tetapi
+ADR-0020 (dan prototipe, yang memakai media query 900px untuk `.formgrid`) sudah memutuskan kisi
+field menumpuk di 900px — 1080px adalah titik papan Kasir. Kode mengikuti ADR-0020.
+
+Satu proksi tes diganti karena markahnya memang berubah, bukan karena perilakunya (§9/§12):
+`tests/e2e/pengaturan.spec.ts` selama ini memilih lebar kertas lewat `getByRole('option')` milik
+Select. Dengan sel radio, kontrak yang sama diuji lewat klik label yang terlihat lalu
+`getByRole('radio', { name: '58 mm' })` `toBeChecked()` — pola yang sama dengan `bayarNonTunai`
+di suite Kasir — dan tes tetap tiga, dengan alur dan asersi yang sama.
