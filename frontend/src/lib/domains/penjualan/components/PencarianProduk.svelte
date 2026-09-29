@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { MODUL_KEPALA } from '$lib/components/shared/mosaik';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { createPengaturanQuery } from '$lib/domains/pengaturan';
@@ -28,9 +29,7 @@
 </script>
 
 <section class="flex flex-col" aria-labelledby="kasir-cari-judul">
-	<div
-		class="flex items-center justify-between gap-2 border-b border-foreground bg-muted px-2 py-1.5"
-	>
+	<div class={MODUL_KEPALA}>
 		<h2 id="kasir-cari-judul" class="text-[13px] font-bold tracking-[0.01em]">Cari Produk</h2>
 		<span class="text-xs">Kasir</span>
 	</div>

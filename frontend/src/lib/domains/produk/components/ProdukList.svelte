@@ -1,4 +1,23 @@
 <script lang="ts">
+	import {
+		AKSI_BARIS,
+		AKSI_MODUL,
+		AKSI_STRIP,
+		CATATAN,
+		CATATAN_ANGKA,
+		COMMIT_BARIS,
+		CORET,
+		FIELD,
+		INPUT,
+		JUDUL,
+		LABEL,
+		MODUL,
+		MODUL_JUDUL,
+		MODUL_KEPALA,
+		PAPAN,
+		STRIP,
+		TAG
+	} from '$lib/components/shared/mosaik';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
@@ -165,57 +184,18 @@
 	}
 
 	/**
-	 * Papan mosaik (DESIGN.md, Layout): satu kolom selebar papan — katalog ini
-	 * bukan papan tiga kolom milik Kasir. Padding luarnya milik rel (`(app)/+layout`),
-	 * jadi di sini tidak ada padding lagi.
-	 */
-	const PAPAN = 'grid grid-cols-1 gap-0';
-	/**
-	 * Strip judul: satu-satunya tempat ukuran 24px muncul di layar ini. `-mb-px`
-	 * plus `z-[2]` menariknya turun satu piksel, jadi garis tintanya yang menutup
-	 * modul di bawahnya alih-alih bertumpuk dengan garis rambut (DESIGN.md,
-	 * Shared-Hairline).
-	 */
-	const STRIP =
-		'z-[2] col-span-full -mb-px flex flex-wrap items-baseline gap-x-3 gap-y-1 border border-border border-b-foreground bg-card px-2 py-2';
-	const JUDUL = 'text-2xl leading-none font-bold tracking-[-0.015em]';
-	/** Seluruh teks 12px; lantai huruf dunia ini (DESIGN.md, Legibility Floor). */
-	const CATATAN = 'text-xs';
-	/**
-	 * Cacah modul. `tabular-nums` bukan hiasan di sini: DESIGN.md (Typography)
-	 * menuntutnya untuk "setiap angka uang, jumlah, dan Stok", tanpa kecuali, dan
-	 * prototipe menulis kelas `tnum` di catatan kepala modulnya.
-	 */
-	const CATATAN_ANGKA = `${CATATAN} tabular-nums`;
-	const AKSI_STRIP = 'ml-auto flex items-center gap-1.5';
-	/**
-	 * Modul: latar petak dengan garis rambut, dan hanya garis bawahnya yang
-	 * digambar — dua modul bersebelahan berbagi satu garis, bukan dua
-	 * (DESIGN.md, Shared-Hairline).
-	 */
-	const MODUL = 'border border-border border-b-0 bg-card';
-	/**
 	 * Jarak 8px sebelum modul Katalog bukan kelalaian: prototipe layar ini sendiri
 	 * yang memisahkan dua modul dengan `margin-top: 8px`, jadi keduanya memang tidak
-	 * bersebelahan — dan garis yang dihemat Shared-Hairline tetap dihemat di tempat
-	 * yang berlaku, yaitu antara strip judul dan modul Saring di atasnya.
+	 * bersebelahan.
 	 */
-	const MODUL_KATALOG = `${MODUL} mt-2`;
-	/** Kepala modul: Wash Grey, ditutup garis tinta — satu-satunya penanda kepala. */
-	const MODUL_KEPALA =
-		'flex items-center justify-between gap-2 border-b border-foreground bg-muted px-2 py-1.5';
-	const MODUL_JUDUL = 'text-[13px] font-bold tracking-[0.01em]';
+	const MODUL_KATALOG = cn(MODUL, 'mt-2');
 	/**
-	 * Fields & Inputs: field 26px, label 12px/600 di atasnya dengan jarak 3px. Kisi field
-	 * menumpuk di 900px, bukan di titik papan 1080px (ADR-0020).
+	 * Kisi field empat kolom; menumpuk di 900px, bukan di titik papan 1080px
+	 * (ADR-0020).
 	 */
 	const FORMGRID = 'grid grid-cols-1 gap-x-3 gap-y-[10px] min-[901px]:grid-cols-4';
-	const FIELD = 'flex flex-col gap-[3px]';
-	const FIELD_LABEL = 'text-xs leading-[1.2] font-semibold';
-	const FIELD_INPUT =
-		'h-[26px] border-border bg-card px-1.5 py-0 text-[13px] shadow-none focus-visible:border-foreground aria-invalid:ring-0 md:text-[13px]';
 	const FIELD_SELECT = cn(
-		FIELD_INPUT,
+		INPUT,
 		'w-full data-[size=default]:h-[26px] [&_svg:not([class*=size-])]:size-3'
 	);
 	/** Tabel: satu garis rambut bersama antar baris, kepala Wash Grey + garis tinta. */
@@ -231,45 +211,10 @@
 	const TD_SUB = `${TD} text-xs`;
 	const TD_AKSI = `${TD} whitespace-nowrap`;
 	/**
-	 * Quiet tag: Wash Grey bergaris rambut, tinggi 15px. Nonaktif menambahkan garis
-	 * coret.
-	 *
-	 * Coretnya datang dari prototipe layar ini (`.tag--nonaktif {
-	 * text-decoration: line-through }`), bukan diciptakan di sini. Yang dilarang
-	 * issue ini adalah memudarkan keadaannya: prototipe memakai garis coret dan
-	 * opasitas tetap 1, dan itu memang kosakata dunia ini untuk hal yang mati
-	 * (DESIGN.md, State-Is-Not-Faded, dan Do's: "let a disabled control lose its ink
-	 * or take a strike, never its opacity").
+	 * Quiet tag yang mati: garis coretnya, bukan opasitasnya (DESIGN.md,
+	 * State-Is-Not-Faded).
 	 */
-	const TAG =
-		'inline-flex h-[15px] items-center border border-border bg-muted px-[5px] text-xs font-semibold whitespace-nowrap';
-	const TAG_NONAKTIF = `${TAG} line-through decoration-1`;
-	/**
-	 * Tiga petak tombol dunia ini, dan yang membedakan mereka ukurannya, bukan
-	 * warnanya.
-	 *
-	 * `.btn` di prototipe tinggi 26px dengan huruf 13px; ukuran 22px/12px hanya milik
-	 * `.tbl__acts .btn`, yaitu aksi di dalam sel tabel. Karena itu aksi di kepala
-	 * modul, di badan galat, dan di kepala dialog memakai `AKSI_MODUL`: ukuran baris
-	 * tabel yang dipakai di luar tabel adalah ukuran yang diciptakan di sini, bukan
-	 * ukuran dunia.
-	 *
-	 * Saat mati ketiganya mempertahankan tintanya dan hanya kehilangan kursor — yang
-	 * kehilangan tinta adalah tombol bertinta penuh (DESIGN.md, Commit Button).
-	 *
-	 * `AKSI_MODUL` dan `AKSI_BARIS` selalu dipakai dengan `variant="ghost"`: varian
-	 * itu sudah membawa `hover:bg-muted` — persis latar hover dunia ini — dan tidak
-	 * membawa apa pun yang harus dilawan. Varian `default` membawa
-	 * `text-primary-foreground`, jadi tombol berbingkai tanpa varian berakhir putih
-	 * di atas putih (solution doc §3). `AKSI_UTAMA` justru memakai varian `default`
-	 * dengan sengaja: bidang bertinta penuh memang varian itu.
-	 */
-	const AKSI_UTAMA =
-		'h-[26px] border-foreground bg-primary px-2 text-[13px] font-semibold text-primary-foreground hover:border-foreground hover:bg-primary hover:text-primary-foreground focus-visible:border-foreground disabled:pointer-events-auto disabled:cursor-not-allowed disabled:border-dashed disabled:border-border disabled:bg-card disabled:text-foreground disabled:opacity-100';
-	const AKSI_MODUL =
-		'h-[26px] border-border bg-card px-2 text-[13px] font-semibold hover:border-foreground focus-visible:border-foreground disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-100';
-	const AKSI_BARIS =
-		'h-[22px] border-border bg-card px-1.5 text-xs font-semibold hover:border-foreground focus-visible:border-foreground disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-100';
+	const TAG_NONAKTIF = `${TAG} ${CORET}`;
 </script>
 
 <!--
@@ -303,7 +248,7 @@
 			tetap tersimpan.
 		</p>
 		<span class={AKSI_STRIP}>
-			<Button class={AKSI_UTAMA} onclick={startAdding}>Tambah Produk</Button>
+			<Button class={COMMIT_BARIS} onclick={startAdding}>Tambah Produk</Button>
 		</span>
 	</div>
 
@@ -326,27 +271,27 @@
 		<div class="border-b border-border px-2 py-1.5">
 			<div class={FORMGRID}>
 				<div class={FIELD}>
-					<Label for="saring-nama" class={FIELD_LABEL}>Nama</Label>
+					<Label for="saring-nama" class={LABEL}>Nama</Label>
 					<Input
 						id="saring-nama"
 						autocomplete="off"
-						class={FIELD_INPUT}
+						class={INPUT}
 						bind:value={produkFilterState.name}
 					/>
 				</div>
 
 				<div class={FIELD}>
-					<Label for="saring-kode" class={FIELD_LABEL}>Kode</Label>
+					<Label for="saring-kode" class={LABEL}>Kode</Label>
 					<Input
 						id="saring-kode"
 						autocomplete="off"
-						class={FIELD_INPUT}
+						class={INPUT}
 						bind:value={produkFilterState.code}
 					/>
 				</div>
 
 				<div class={FIELD}>
-					<Label for="saring-kategori" class={FIELD_LABEL}>Kategori</Label>
+					<Label for="saring-kategori" class={LABEL}>Kategori</Label>
 					<Select.Root type="single" value={kategoriValue} onValueChange={setKategori}>
 						<Select.Trigger id="saring-kategori" class={FIELD_SELECT}>
 							<!--
@@ -373,7 +318,7 @@
 				</div>
 
 				<div class={FIELD}>
-					<Label for="saring-status" class={FIELD_LABEL}>Status</Label>
+					<Label for="saring-status" class={LABEL}>Status</Label>
 					<Select.Root type="single" value={statusValue} onValueChange={setStatus}>
 						<Select.Trigger id="saring-status" class={FIELD_SELECT}>
 							<span data-slot="select-value">{statusLabel}</span>

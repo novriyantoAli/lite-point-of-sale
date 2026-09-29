@@ -1,4 +1,20 @@
 <script lang="ts">
+	import {
+		AKSI_MODUL,
+		AKSI_STRIP,
+		CATATAN,
+		CATATAN_ANGKA,
+		COMMIT_BARIS,
+		DAFTAR,
+		JUDUL,
+		MODUL,
+		MODUL_BARIS,
+		MODUL_JUDUL,
+		MODUL_KEPALA,
+		MODUL_TEKS,
+		PAPAN,
+		STRIP
+	} from '$lib/components/shared/mosaik';
 	import { Button } from '$lib/components/ui/button';
 	import { cn } from '$lib/utils';
 	import { createBackupListQuery, createBackupMutation } from '../queries/backup.queries';
@@ -89,52 +105,12 @@
 	}
 
 	/**
-	 * Papan mosaik (DESIGN.md, Layout): satu kolom selebar papan — layar Backup
-	 * bukan papan tiga kolom milik Kasir. Padding luarnya milik rel
-	 * (`(app)/+layout`), jadi di sini tidak ada padding lagi.
-	 */
-	const PAPAN = 'grid grid-cols-1 gap-0';
-	/**
-	 * Strip judul: satu-satunya tempat ukuran 24px muncul di layar ini. `-mb-px`
-	 * plus `z-[2]` menariknya turun satu piksel, jadi garis tintanya yang menutup
-	 * modul di bawahnya alih-alih bertumpuk dengan garis rambut (DESIGN.md,
-	 * Shared-Hairline).
-	 */
-	const STRIP =
-		'z-[2] col-span-full -mb-px flex flex-wrap items-baseline gap-x-3 gap-y-1 border border-border border-b-foreground bg-card px-2 py-2';
-	const JUDUL = 'text-2xl leading-none font-bold tracking-[-0.015em]';
-	/** Seluruh teks 12px; lantai huruf dunia ini (DESIGN.md, Legibility Floor). */
-	const CATATAN = 'text-xs';
-	/**
-	 * Cacah salinan di kepala modul. `tabular-nums` bukan hiasan: DESIGN.md
-	 * (Typography) menuntutnya untuk "setiap angka uang, jumlah, dan Stok", tanpa
-	 * kecuali, dan prototipe menulis kelas `tnum` di catatan kepala.
-	 */
-	const CATATAN_ANGKA = `${CATATAN} tabular-nums`;
-	/** Aksi strip mengambil sisa baris ke kanan, seperti `strip__act` prototipe. */
-	const AKSI_STRIP = 'ml-auto flex items-center gap-1.5';
-	/**
-	 * Modul: latar petak dengan garis rambut, dan hanya garis bawahnya yang
-	 * digambar — modul terakhir menutup papan, jadi garis bawahnya milik papan
-	 * (DESIGN.md, Shared-Hairline).
-	 */
-	const MODUL = 'border border-border border-b-0 bg-card';
-	/** Kepala modul: Wash Grey, ditutup garis tinta — satu-satunya penanda kepala. */
-	const MODUL_KEPALA =
-		'flex items-center justify-between gap-2 border-b border-foreground bg-muted px-2 py-1.5';
-	const MODUL_JUDUL = 'text-[13px] font-bold tracking-[0.01em]';
-	/** Satu baris catatan atau keadaan di dalam modul, selebar modulnya. */
-	const MODUL_BARIS = 'border-b border-border px-2 py-1.5';
-	const MODUL_CATATAN = `${MODUL_BARIS} text-xs`;
-	/**
 	 * Baris pemberitahuan hasil ekspor dan baris galatnya: satu pita selebar papan
 	 * di bawah strip, di luar modul daftar. Satu kosakata untuk keduanya supaya
 	 * dua baris yang berdampingan tidak berbeda baju; yang menambahkan
 	 * `tabular-nums` adalah pemberitahuan yang memuat nama berkas berdigit.
 	 */
 	const BARIS_PESAN = 'border border-b-0 border-border bg-card px-2 py-1.5 text-xs font-semibold';
-	/** Daftar salinan: baris nama + keterangan, satu garis rambut bersama. */
-	const DAFTAR = 'divide-y divide-border border-b border-border';
 	const LIROW = 'flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-2 py-1.5';
 	const LIROW_UTAMA = 'min-w-0';
 	/**
@@ -143,23 +119,6 @@
 	 */
 	const LIROW_NAMA = 'text-[13px] font-medium tabular-nums';
 	const LIROW_META = 'text-xs tabular-nums';
-	/**
-	 * Commit Button baris dunia ini: 26px, selebar katanya, huruf 13px/600, bidang
-	 * tinta penuh saat hidup dan — saat mati — kehilangan tintanya jadi putih
-	 * bergaris putus-putus, bukan dipudar (DESIGN.md, Commit Button;
-	 * State-Is-Not-Faded). "Backup sekarang" adalah Commit Button layar ini karena
-	 * ia satu-satunya bidang bertinta penuh di sini.
-	 */
-	const AKSI_UTAMA =
-		'h-[26px] border-foreground bg-primary px-2 text-[13px] font-semibold text-primary-foreground hover:border-foreground hover:bg-primary hover:text-primary-foreground focus-visible:border-foreground disabled:pointer-events-auto disabled:cursor-not-allowed disabled:border-dashed disabled:border-border disabled:bg-card disabled:text-foreground disabled:opacity-100';
-	/**
-	 * Tombol berbingkai memakai `variant="ghost"` lebih dulu: varian itu sudah
-	 * membawa `hover:bg-muted` — persis latar hover dunia ini — dan tidak membawa
-	 * apa pun yang harus dilawan (solution doc §3). Ukurannya `.btn` dunia ini:
-	 * 26px, 13px/600, keadaan mati tidak dipudarkan.
-	 */
-	const AKSI_MODUL =
-		'h-[26px] border-border bg-card px-2 text-[13px] font-semibold hover:border-foreground focus-visible:border-foreground disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-100';
 	/** Baris kerangka selama memuat: bentuk baris yang sama, tanpa datanya. */
 	const BARIS_HANTU = [0, 1, 2];
 </script>
@@ -181,7 +140,7 @@
 				berputar tanpa kalimat — dan keadaannya disampaikan dengan kehilangan
 				tinta, bukan opasitas (DESIGN.md, State-Is-Not-Faded).
 			-->
-			<Button class={AKSI_UTAMA} onclick={backupNow} disabled={exportBackup.isPending}>
+			<Button class={COMMIT_BARIS} onclick={backupNow} disabled={exportBackup.isPending}>
 				{exportBackup.isPending ? 'Membuat backup…' : 'Backup sekarang'}
 			</Button>
 		</span>
@@ -245,7 +204,7 @@
 				dilakukan — bukan daftar kosong yang tak bisa dibedakan dari kegagalan
 				(DESIGN.md, Do's).
 			-->
-			<p class={MODUL_CATATAN}>
+			<p class={MODUL_TEKS}>
 				Belum ada backup. Tekan “Backup sekarang” untuk membuat yang pertama — salinan akan muncul
 				di sini beserta nama, ukuran, dan waktunya.
 			</p>

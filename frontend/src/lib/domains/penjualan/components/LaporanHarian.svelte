@@ -1,4 +1,23 @@
 <script lang="ts">
+	import {
+		AKSI_MODUL,
+		CATATAN,
+		CATATAN_ANGKA,
+		DAFTAR,
+		ERROR,
+		FIGURE,
+		FIELD,
+		INPUT,
+		JUDUL,
+		LABEL,
+		MODUL,
+		MODUL_BARIS,
+		MODUL_JUDUL,
+		MODUL_KEPALA,
+		MODUL_TEKS,
+		PAPAN,
+		STRIP
+	} from '$lib/components/shared/mosaik';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
@@ -81,72 +100,31 @@
 	const tanggalPanjang = $derived(DAY_FORMAT.format(new Date(`${tanggal}T00:00:00Z`)));
 
 	/**
-	 * Papan mosaik (DESIGN.md, Layout): satu kolom selebar papan — layar Laporan
-	 * bukan papan tiga kolom milik Kasir. Padding luarnya milik rel
-	 * (`(app)/+layout`), jadi di sini tidak ada padding lagi.
-	 */
-	const PAPAN = 'grid grid-cols-1 gap-0';
-	/**
-	 * Strip judul: satu-satunya tempat ukuran 24px muncul di layar ini. `-mb-px`
-	 * plus `z-[2]` menariknya turun satu piksel, jadi garis tintanya yang menutup
-	 * modul di bawahnya alih-alih bertumpuk dengan garis rambut (DESIGN.md,
-	 * Shared-Hairline).
-	 */
-	const STRIP =
-		'z-[2] col-span-full -mb-px flex flex-wrap items-baseline gap-x-3 gap-y-1 border border-border border-b-foreground bg-card px-2 py-2';
-	const JUDUL = 'text-2xl leading-none font-bold tracking-[-0.015em]';
-	/** Seluruh teks 12px; lantai huruf dunia ini (DESIGN.md, Legibility Floor). */
-	const CATATAN = 'text-xs';
-	/**
-	 * Cacah dan tanggal di kepala modul. `tabular-nums` bukan hiasan di sini: angka
-	 * yang berubah tanpa kelasnya menggeser tetangganya (DESIGN.md, Typography:
-	 * "setiap angka uang, jumlah, dan Stok", tanpa kecuali).
-	 */
-	const CATATAN_ANGKA = `${CATATAN} tabular-nums`;
-	/**
 	 * Field Tanggal berdiri di ujung strip: `margin-left: auto` milik prototipe
 	 * (`.strip__act`). Labelnya di ATAS field dengan jarak 3px, seperti setiap field
 	 * lain di dunia ini (DESIGN.md, Fields & Inputs) — bukan di sebelahnya seperti
 	 * prototipe menggambarnya.
 	 */
-	const FIELD_GRUP = 'ml-auto flex flex-col gap-[3px]';
-	/** Fields & Inputs: field 26px, label 12px/600 di sebelahnya. */
-	const FIELD_LABEL = 'text-xs leading-[1.2] font-semibold';
-	const FIELD_INPUT =
-		'h-[26px] w-[150px] border-border bg-card px-1.5 py-0 text-[13px] shadow-none focus-visible:border-foreground aria-invalid:ring-0 md:text-[13px]';
+	const FIELD_GRUP = cn(FIELD, 'ml-auto');
+	/** Field Tanggal menyempit ke 150px; sisa pakaiannya milik field dunia ini. */
+	const INPUT_TANGGAL = cn(INPUT, 'w-[150px]');
 	/**
 	 * Baris pesan — galat maupun keadaan — bertinta, bukan merah utilitas: merah
 	 * hanya dua pekerjaan, tab dan harga (DESIGN.md, Secondary & Three-Percent
 	 * Rule). Merah yang menandai field rusak milik garis dan outline field-nya.
 	 */
-	const PESAN = 'text-xs font-semibold';
-
-	/**
-	 * Modul: latar petak dengan garis rambut, dan hanya garis bawahnya yang
-	 * digambar — dua modul bersebelahan berbagi satu garis, bukan dua
-	 * (DESIGN.md, Shared-Hairline).
-	 */
-	const MODUL = 'border border-border border-b-0 bg-card';
+	const PESAN = ERROR;
 	/**
 	 * Jarak 8px sebelum modul Daftar bukan kelalaian: prototipe layar ini sendiri
-	 * yang memisahkan dua modul dengan `margin-top: 8px`, jadi keduanya memang tidak
-	 * bersebelahan.
+	 * yang memisahkan dua modul dengan `margin-top: 8px`.
 	 */
-	const MODUL_DAFTAR = `${MODUL} mt-2`;
-	/** Kepala modul: Wash Grey, ditutup garis tinta — satu-satunya penanda kepala. */
-	const MODUL_KEPALA =
-		'flex items-center justify-between gap-2 border-b border-foreground bg-muted px-2 py-1.5';
-	const MODUL_JUDUL = 'text-[13px] font-bold tracking-[0.01em]';
+	const MODUL_DAFTAR = cn(MODUL, 'mt-2');
 	/**
 	 * Sub-judul di dalam satu modul. Ia bergaris rambut, bukan Wash Grey ditutup
 	 * garis tinta — supaya rincian yang berdiri di dalam modul tidak membaca
 	 * sebagai modul ketiga (prototipe layar ini punya dua kepala).
 	 */
 	const SUB_JUDUL = 'border-b border-border px-2 py-1.5 text-[13px] font-bold tracking-[0.01em]';
-	/** Satu baris catatan atau keadaan di dalam modul, selebar modulnya. */
-	const MODUL_BARIS = 'border-b border-border px-2 py-1.5';
-	const MODUL_CATATAN = `${MODUL_BARIS} text-xs`;
-
 	/**
 	 * Figures (DESIGN.md): angka yang jadi jawaban layar, 20px/700 `tabular-nums`,
 	 * selalu didahului label 12px/600 yang menyebut apa angka itu. Dua selnya
@@ -155,9 +133,8 @@
 	const STAT_GRID = 'grid grid-cols-2 border-b border-border';
 	const STAT = 'flex flex-col gap-1 px-2 py-2.5';
 	const STAT_KEDUA = `${STAT} border-l border-border`;
-	const STAT_LABEL = 'text-xs leading-[1.2] font-semibold';
-	const STAT_NILAI = 'text-[20px] leading-[1.1] font-bold tabular-nums';
-
+	const STAT_LABEL = LABEL;
+	const STAT_NILAI = FIGURE;
 	/** Tabel: satu garis rambut bersama antar baris, kepala Wash Grey + garis tinta. */
 	const TABEL = 'w-full border-collapse text-[13px] leading-[1.25]';
 	const TH =
@@ -168,21 +145,11 @@
 	const TD_NUM = `${TD} text-right tabular-nums`;
 	/** Kotak tabel: gulir mendatar di dalam modul kalau layarnya sempit. */
 	const TABEL_BUNGKUS = 'overflow-x-auto border-b border-border';
-
 	/** Daftar Penjualan: baris nama + keterangan + aksi, satu garis rambut bersama. */
-	const DAFTAR = 'divide-y divide-border border-b border-border';
 	const LIROW = 'flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 px-2 py-1.5';
 	const LIROW_NAMA = 'text-[13px] font-medium';
 	const LIROW_META = 'text-xs tabular-nums';
 	const LIROW_AKSI = 'flex items-center gap-1.5';
-	/**
-	 * Tombol berbingkai memakai `variant="ghost"` lebih dulu: varian itu sudah
-	 * membawa `hover:bg-muted`, persis latar hover dunia ini, dan tidak membawa apa
-	 * pun yang harus dilawan (solution doc §3). Ukurannya `.lirow__acts .btn`
-	 * prototipe: 26px, 13px/600.
-	 */
-	const AKSI_MODUL =
-		'h-[26px] border-border bg-card px-2 text-[13px] font-semibold hover:border-foreground focus-visible:border-foreground disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-100';
 
 	/**
 	 * A method nobody used never had a number to show, so the Figures rule writes
@@ -203,11 +170,11 @@
 		<h1 class={JUDUL}>Laporan</h1>
 		<p class={CATATAN}>Omzet harian dan daftar Penjualan, dibaca dalam waktu lokal toko.</p>
 		<div class={FIELD_GRUP}>
-			<Label for="laporan-tanggal" class={FIELD_LABEL}>Tanggal</Label>
+			<Label for="laporan-tanggal" class={LABEL}>Tanggal</Label>
 			<Input
 				id="laporan-tanggal"
 				type="date"
-				class={FIELD_INPUT}
+				class={INPUT_TANGGAL}
 				bind:value={laporanState.tanggal}
 				aria-invalid={tanggalRusak ? 'true' : undefined}
 				aria-describedby={tanggalRusak ? 'laporan-tanggal-error' : undefined}
@@ -237,7 +204,7 @@
 		</div>
 
 		{#if omzet.isPending}
-			<p class={MODUL_CATATAN}>Memuat omzet…</p>
+			<p class={MODUL_TEKS}>Memuat omzet…</p>
 		{:else if omzet.error}
 			<div class={MODUL_BARIS}>
 				<p class={PESAN} role="alert">{omzet.error.message}</p>
@@ -265,7 +232,7 @@
 				(DESIGN.md, Figures).
 			-->
 			{#if tanpaTransaksi(omzet.data.transactions)}
-				<p class={MODUL_CATATAN}>Belum ada Penjualan pada tanggal ini.</p>
+				<p class={MODUL_TEKS}>Belum ada Penjualan pada tanggal ini.</p>
 			{/if}
 
 			<div class={TABEL_BUNGKUS}>
@@ -304,7 +271,7 @@
 			-->
 			<h3 class={SUB_JUDUL}>Omzet per Kasir</h3>
 			{#if omzet.data.by_cashier.length === 0}
-				<p class={MODUL_CATATAN}>Belum ada Penjualan, jadi belum ada yang bisa diatribusikan.</p>
+				<p class={MODUL_TEKS}>Belum ada Penjualan, jadi belum ada yang bisa diatribusikan.</p>
 			{:else}
 				<div class={TABEL_BUNGKUS}>
 					<table class={TABEL}>
@@ -348,7 +315,7 @@
 		</div>
 
 		{#if daftar.isPending}
-			<p class={MODUL_CATATAN}>Memuat Penjualan…</p>
+			<p class={MODUL_TEKS}>Memuat Penjualan…</p>
 		{:else if daftar.error}
 			<div class={MODUL_BARIS}>
 				<p class={PESAN} role="alert">{daftar.error.message}</p>
@@ -359,7 +326,7 @@
 				>
 			</div>
 		{:else if daftar.data?.length === 0}
-			<p class={MODUL_CATATAN}>Belum ada Penjualan pada tanggal ini.</p>
+			<p class={MODUL_TEKS}>Belum ada Penjualan pada tanggal ini.</p>
 		{:else}
 			<ul class={DAFTAR}>
 				{#each daftar.data ?? [] as penjualan (penjualan.receipt_number)}

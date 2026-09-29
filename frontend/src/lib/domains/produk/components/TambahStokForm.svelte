@@ -1,8 +1,9 @@
 <script lang="ts">
+	import { COMMIT_BARIS, ERROR, FIELD, INPUT_ANGKA, LABEL } from '$lib/components/shared/mosaik';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
-	import { collectFieldErrors } from '$lib/utils';
+	import { cn, collectFieldErrors } from '$lib/utils';
 	import { createAddStokMutation } from '../queries/produk.queries';
 	import { TambahStokInputSchema, type Produk } from '../schemas/produk.schema';
 
@@ -57,35 +58,8 @@
 		}
 	}
 
-	/**
-	 * Fields & Inputs (DESIGN.md): field 26px dengan label 12px/600 di atasnya,
-	 * jaraknya 3px. Ukurannya literal, bukan token baru.
-	 */
-	const FIELD = 'flex flex-col gap-[3px]';
-	const LABEL = 'text-xs leading-[1.2] font-semibold';
-	/**
-	 * Field yang isinya angka: jumlah masuk, bukan nama atau Kode. `tabular-nums`
-	 * menahan lebar digit yang sedang diketik, seperti setiap angka lain di dunia
-	 * ini (DESIGN.md, Typography: "tanpa kecuali").
-	 */
-	const INPUT =
-		'h-[26px] w-32 border-border bg-card px-1.5 py-0 text-[13px] tabular-nums shadow-none focus-visible:border-foreground aria-invalid:ring-0 md:text-[13px]';
-	/**
-	 * Field yang tidak valid: pesannya 12px/600 di bawah field, bertinta — bukan
-	 * merah utilitas. Merah hanya milik garis dan outline field-nya (DESIGN.md,
-	 * Fields & Inputs).
-	 */
-	const ERROR = 'text-xs font-semibold';
-	/**
-	 * Commit Button: satu-satunya bidang bertinta penuh di formulir ini. DESIGN.md
-	 * menggambarnya 40px selebar kolom keranjang; di dalam baris dan sel tabel ia
-	 * memakai tinggi `.btn` dunia ini, 26px, karena ukuran baris tabel yang dipakai
-	 * di luar tabel adalah ukuran yang diciptakan di sini — yang tetap ia bawa
-	 * adalah tintanya, dan saat mati ia kehilangan tinta itu alih-alih memudar
-	 * (DESIGN.md, Commit Button & State-Is-Not-Faded).
-	 */
-	const COMMIT =
-		'h-[26px] border-foreground bg-primary px-2 text-[13px] font-semibold text-primary-foreground hover:border-foreground hover:bg-primary hover:text-primary-foreground focus-visible:border-foreground disabled:pointer-events-auto disabled:cursor-not-allowed disabled:border-dashed disabled:border-border disabled:bg-card disabled:text-foreground disabled:opacity-100';
+	/** Field jumlah: field angka dunia ini yang menyempit ke `w-32`. */
+	const INPUT_JUMLAH = cn(INPUT_ANGKA, 'w-32');
 	/**
 	 * Tombol berbingkai memakai `variant="ghost"` lebih dulu: varian itu sudah
 	 * membawa `hover:bg-muted`, persis latar hover dunia ini, dan tidak membawa
@@ -108,7 +82,7 @@
 			name="quantity"
 			inputmode="numeric"
 			autocomplete="off"
-			class={INPUT}
+			class={INPUT_JUMLAH}
 			bind:value={quantity}
 			aria-invalid={fieldErrors.quantity ? true : undefined}
 		/>
@@ -117,7 +91,7 @@
 		{/if}
 	</div>
 
-	<Button type="submit" class={COMMIT} disabled={pending}>
+	<Button type="submit" class={COMMIT_BARIS} disabled={pending}>
 		{pending ? 'Menyimpan…' : 'Tambah Stok'}
 	</Button>
 	{#if onCancel}

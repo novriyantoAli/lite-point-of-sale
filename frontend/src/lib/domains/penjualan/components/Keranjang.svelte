@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { MODUL_KEPALA } from '$lib/components/shared/mosaik';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { formatRupiah } from '$lib/utils';
@@ -58,9 +59,7 @@
 </script>
 
 <section aria-labelledby="kasir-keranjang-judul">
-	<div
-		class="flex items-center justify-between gap-2 border-b border-foreground bg-muted px-2 py-1.5"
-	>
+	<div class={MODUL_KEPALA}>
 		<h2 id="kasir-keranjang-judul" class="text-[13px] font-bold tracking-[0.01em]">Keranjang</h2>
 		<!--
 			Ringkasan keranjang: dua angka yang berubah setiap kali satu unit ditambah
@@ -155,9 +154,7 @@
 			aksi keranjang sendiri berdiri. Garis tintanya yang memisahkannya dari
 			Pembayaran di bawah — bukan bayangan, tidak pernah bayangan.
 		-->
-		<div
-			class="flex items-center justify-between gap-2 border-b border-foreground bg-muted px-2 py-1.5"
-		>
+		<div class={MODUL_KEPALA}>
 			<span
 				class="flex items-baseline gap-2"
 				role="status"

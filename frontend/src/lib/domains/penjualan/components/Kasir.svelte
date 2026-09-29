@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { CATATAN, JUDUL, PAPAN } from '$lib/components/shared/mosaik';
 	import { cn } from '$lib/utils';
 	import type { HasilCheckout } from '../schemas/penjualan.schema';
 	import { keranjangState } from '../state/keranjang.state.svelte';
@@ -37,13 +38,6 @@
 	}
 
 	/**
-	 * Papan mosaik: tiga kolom dengan lebar tetap di tepinya, dan strip judul
-	 * selebar papan di atasnya. Di bawah 1081px papan menumpuk jadi satu kolom —
-	 * laptop di meja kasir adalah perangkatnya, jadi ini hanya supaya tidak rusak
-	 * (DESIGN.md, Layout).
-	 */
-	const PAPAN = 'grid grid-cols-1 gap-0';
-	/**
 	 * Kolom: tumpukan modul, dan tiap modul membawa garis bawahnya sendiri — dua
 	 * modul bersebelahan berbagi satu garis rambut (DESIGN.md, Shared-Hairline).
 	 * Garis tegaknya dipasang per kolom supaya garis antara dua kolom digambar satu
@@ -68,8 +62,8 @@
 	<div
 		class="col-span-full flex flex-wrap items-baseline gap-x-3 gap-y-1 border border-border border-b-foreground bg-card px-2 py-2"
 	>
-		<h1 class="text-2xl leading-none font-bold tracking-[-0.015em]">Kasir</h1>
-		<p class="text-xs">
+		<h1 class={JUDUL}>Kasir</h1>
+		<p class={CATATAN}>
 			Temukan Produk, susun keranjang, lalu bayar. Stok berkurang sendiri saat Penjualan tersimpan.
 		</p>
 	</div>

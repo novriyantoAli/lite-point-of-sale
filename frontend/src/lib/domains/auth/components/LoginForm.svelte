@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import { MODUL_KEPALA } from '$lib/components/shared/mosaik';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
@@ -41,9 +42,7 @@
   Kepala modul: latar isian, ditutup garis tinta — satu-satunya penanda kepala
   di dunia ini, tanpa bayangan.
 -->
-<div
-	class="flex items-center justify-between gap-2 border-b border-foreground bg-muted px-2 py-1.5"
->
+<div class={MODUL_KEPALA}>
 	<h2 class="text-[13px] font-bold">Masuk</h2>
 	<span class="text-xs">username &amp; password Pengguna</span>
 </div>
