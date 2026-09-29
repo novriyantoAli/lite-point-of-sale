@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { MODUL_KEPALA, TAG_MERAH } from '$lib/components/shared/mosaik';
 	import { Button } from '$lib/components/ui/button';
 	import type { HasilCetak, Penjualan } from '../schemas/penjualan.schema';
 	import CetakStruk from './CetakStruk.svelte';
@@ -26,9 +27,7 @@
 	aria-labelledby="kasir-struk-judul"
 >
 	<div class="flex flex-col border-border min-[1081px]:border-r">
-		<div
-			class="flex items-center justify-between gap-2 border-b border-foreground bg-muted px-2 py-1.5"
-		>
+		<div class={MODUL_KEPALA}>
 			<h2 id="kasir-struk-judul" class="text-[13px] font-bold tracking-[0.01em]">
 				Penjualan tercatat
 			</h2>
@@ -36,11 +35,7 @@
 				Penjualan bersifat final — tidak ada void dan tidak ada refund — dan tab
 				merah inilah yang mengatakannya, bukan kalimat penjelas (CONTEXT.md).
 			-->
-			<span
-				class="inline-flex h-[15px] items-center bg-destructive px-[5px] text-xs font-semibold text-primary-foreground"
-			>
-				tersegel
-			</span>
+			<span class={TAG_MERAH}> tersegel </span>
 		</div>
 
 		<RincianPenjualan {sale} />

@@ -354,13 +354,33 @@ memakai `.formgrid--4` dari `sistem/style.css`, dan satu-satunya media query-nya
 `.formgrid`, `.formgrid--3`, dan `.formgrid--4` di **900px**. Yang benar: kisi field menumpuk
 di 900px, papan Kasir di 1080px. `ProdukList` dan `ProdukForm` sudah diselaraskan ke 900px.
 
-Satu hal yang tiap port berikutnya akan temui lagi, dan yang belum punya satu jawaban:
+**Ekstraksi kosakata bersama — dikerjakan (2026-09-29).** Poin di bawah ini sudah selesai
+setelah layar terakhir mendarat, jadi ia bukan lagi utang. Kosakata dunia kini tinggal di satu
+modul, `frontend/src/lib/components/shared/mosaik.ts`: strip judul (`STRIP`, `JUDUL`,
+`CATATAN`, `AKSI_STRIP`), kepala modul (`MODUL`, `MODUL_KEPALA`, `MODUL_JUDUL`, `MODUL_BARIS`,
+`MODUL_TEKS`, `DAFTAR`), tag (`TAG`, `TAG_TENANG`, `TAG_TINTA`, `TAG_MERAH`, `CORET`), Commit
+Button (`COMMIT_BARIS`, `COMMIT_KOLOM`), tombol petak (`AKSI_MODUL`, `AKSI_BARIS`), field
+(`FIELD`, `LABEL`, `INPUT`, `INPUT_ANGKA`, `ERROR`, `METODE`, `FIGURE`), dan papan (`PAPAN`).
+Empat belas komponen mengimpor dari sana, dan nilai tiap konstanta diperiksa satu per satu
+sama persis dengan aslinya — jadi port murni tanpa perilaku baru; 408 tes unit dan 53 tes e2e
+tetap hijau.
 
-- **Kelas quiet tag disalin per komponen.** `TAG`/`TAG_NONAKTIF` sekarang hidup di
-  `ProdukList`, `StokList`, dan `PenggunaList` (§1 menoleransi pengulangan di tengah port).
-  Setelah layar terakhir mendarat, satu `lib/components/shared/` yang memuat strip judul,
-  kepala modul, tag, dan Commit Button akan menghapus tiga salinan sekaligus — dan itu
-  perubahan yang harus ditunggu sampai tidak ada port yang sedang berjalan.
+Yang tetap lokal, dengan alasan: `TABEL`/`TH`/`TD` (variannya berbeda per layar — kolom,
+keselarasan, tag di dalam sel), `KOLOM` (papan Kasir saja), `SELECT`/`FIELD_SELECT` (turunan
+`cn(INPUT, …)` per lebar), `LIROW` (tiap daftar punya gap sendiri), `TEXTAREA` (satu pemakai),
+dan `BATAL` (satu pemakai). Semuanya satu-dua salinan, jadi mengekstraknya hanya menambah satu
+lapisan tanpa menghapus apa pun.
+
+Dua catatan pelaksanaan yang layak diingat: (1) **Tailwind tetap men-generate kelas di `.ts`** —
+pemindai membaca teks berkas, jadi `has-[:checked]` dan `tracking-[-0.015em]` tetap muncul di
+CSS hasil build (diverifikasi dengan grep, bukan diasumsikan); (2) mencari bidang bertinta
+penuh tetap boleh lewat `bg-primary` yang dibawa `variant="default"`. Satu perbedaan nilai ikut
+disatukan: Commit Button baris di `PencarianPenjualan` tadinya kehilangan kelas `disabled:*`,
+kini memakai `COMMIT_BARIS` yang sama dengan tujuh tombol lain.
+
+- **Kelas quiet tag disalin per komponen.** `TAG`/`TAG_NONAKTIF` hidup di `ProdukList`,
+  `StokList`, dan `PenggunaList` (§1 menoleransi pengulangan di tengah port). Sekarang ketiganya
+  mengimpor dari `mosaik.ts`.
 
 ## Tabular-nums — angka Inter Variable proporsional, 2026-09-28
 

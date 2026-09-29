@@ -1,4 +1,21 @@
 <script lang="ts">
+	import {
+		AKSI_BARIS,
+		AKSI_MODUL,
+		CATATAN,
+		CATATAN_ANGKA,
+		CORET,
+		DAFTAR,
+		JUDUL,
+		MODUL,
+		MODUL_BARIS,
+		MODUL_JUDUL,
+		MODUL_KEPALA,
+		MODUL_TEKS,
+		PAPAN,
+		STRIP,
+		TAG
+	} from '$lib/components/shared/mosaik';
 	import { Button } from '$lib/components/ui/button';
 	import { cn } from '$lib/utils';
 	import TambahStokForm from './TambahStokForm.svelte';
@@ -45,49 +62,11 @@
 	}
 
 	/**
-	 * Papan mosaik (DESIGN.md, Layout): satu kolom selebar papan — layar Stok bukan
-	 * papan tiga kolom milik Kasir. Padding luarnya milik rel (`(app)/+layout`), jadi
-	 * di sini tidak ada padding lagi.
-	 */
-	const PAPAN = 'grid grid-cols-1 gap-0';
-	/**
-	 * Strip judul: satu-satunya tempat ukuran 24px muncul di layar ini. `-mb-px`
-	 * plus `z-[2]` menariknya turun satu piksel, jadi garis tintanya yang menutup
-	 * modul di bawahnya alih-alih bertumpuk dengan garis rambut (DESIGN.md,
-	 * Shared-Hairline).
-	 */
-	const STRIP =
-		'z-[2] col-span-full -mb-px flex flex-wrap items-baseline gap-x-3 gap-y-1 border border-border border-b-foreground bg-card px-2 py-2';
-	const JUDUL = 'text-2xl leading-none font-bold tracking-[-0.015em]';
-	/** Seluruh teks 12px; lantai huruf dunia ini (DESIGN.md, Legibility Floor). */
-	const CATATAN = 'text-xs';
-	/**
-	 * Cacah dan ambang di kepala modul. `tabular-nums` bukan hiasan di sini:
-	 * DESIGN.md (Typography) menuntutnya untuk "setiap angka uang, jumlah, dan
-	 * Stok", tanpa kecuali, dan prototipe menulis kelas `tnum` di catatan kepala.
-	 */
-	const CATATAN_ANGKA = `${CATATAN} tabular-nums`;
-	/**
-	 * Modul: latar petak dengan garis rambut, dan hanya garis bawahnya yang
-	 * digambar — dua modul bersebelahan berbagi satu garis, bukan dua
-	 * (DESIGN.md, Shared-Hairline).
-	 */
-	const MODUL = 'border border-border border-b-0 bg-card';
-	/**
 	 * Jarak 8px sebelum modul Stok per Produk bukan kelalaian: prototipe layar ini
-	 * sendiri yang memisahkan dua modul dengan `margin-top: 8px`, jadi keduanya
-	 * memang tidak bersebelahan.
+	 * sendiri yang memisahkan dua modul dengan `margin-top: 8px`.
 	 */
-	const MODUL_KATALOG = `${MODUL} mt-2`;
-	/** Kepala modul: Wash Grey, ditutup garis tinta — satu-satunya penanda kepala. */
-	const MODUL_KEPALA =
-		'flex items-center justify-between gap-2 border-b border-foreground bg-muted px-2 py-1.5';
-	const MODUL_JUDUL = 'text-[13px] font-bold tracking-[0.01em]';
-	/** Satu baris catatan atau keadaan di dalam modul, selebar modulnya. */
-	const MODUL_BARIS = 'border-b border-border px-2 py-1.5';
-	const MODUL_CATATAN = `${MODUL_BARIS} text-xs`;
+	const MODUL_KATALOG = cn(MODUL, 'mt-2');
 	/** Daftar Stok menipis: baris nama + keadaan + aksi, satu garis rambut bersama. */
-	const DAFTAR = 'divide-y divide-border border-b border-border';
 	const LIROW = 'flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 px-2 py-1.5';
 	const LIROW_UTAMA = 'min-w-0';
 	const LIROW_NAMA = 'text-[13px] font-medium';
@@ -105,32 +84,10 @@
 	const TD_SUB = `${TD} text-xs`;
 	const TD_AKSI = `${TD} whitespace-nowrap`;
 	const TD_NAMA = `${TD} font-medium`;
-	/**
-	 * Coretan garis: cara dunia ini menyampaikan keadaan mati, bukan `opacity`
-	 * (DESIGN.md, State-Is-Not-Faded; Do's: "let a disabled control lose its ink or
-	 * take a strike, never its opacity"). Produk yang habis kehilangan tintanya —
-	 * namanya di tabel dan di daftar dicoret, bukan dipudarkan.
-	 */
-	const CORET = 'line-through decoration-1';
-	/** Quiet tag: Wash Grey bergaris rambut, tinggi 15px (DESIGN.md, Tags). */
-	const TAG =
-		'inline-flex h-[15px] items-center border border-border bg-muted px-[5px] text-xs font-semibold whitespace-nowrap';
+	/** Quiet tag yang mati: garis coretnya, bukan opasitasnya (State-Is-Not-Faded). */
 	const TAG_CORET = `${TAG} ${CORET}`;
 	/** Kata keadaan yang tenang, 12px/600, tanpa kotak: Aman dan angka telanjang. */
 	const KEADAAN = 'text-xs font-semibold';
-	/**
-	 * Tiga petak tombol dunia ini, dan yang membedakan mereka ukurannya, bukan
-	 * warnanya. `.btn` di prototipe tinggi 26px dengan huruf 13px; ukuran 22px/12px
-	 * hanya milik `.tbl__acts .btn`, yaitu aksi di dalam sel tabel.
-	 *
-	 * Selalu dipakai dengan `variant="ghost"`: varian itu sudah membawa
-	 * `hover:bg-muted` — persis latar hover dunia ini — dan tidak membawa apa pun
-	 * yang harus dilawan (solution doc §3).
-	 */
-	const AKSI_MODUL =
-		'h-[26px] border-border bg-card px-2 text-[13px] font-semibold hover:border-foreground focus-visible:border-foreground disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-100';
-	const AKSI_BARIS =
-		'h-[22px] border-border bg-card px-1.5 text-xs font-semibold hover:border-foreground focus-visible:border-foreground disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-100';
 
 	/**
 	 * Whether a Produk has run out and is still for sale — the one case the world
@@ -207,7 +164,7 @@
 			ambang di Pengaturan (DESIGN.md, Typography: "setiap angka ... Stok",
 			tanpa kecuali).
 		-->
-		<div class={`${MODUL_CATATAN} tabular-nums`}>
+		<div class={`${MODUL_TEKS} tabular-nums`}>
 			{#if menipis.data}
 				Produk Aktif dengan Stok di bawah {menipis.data.threshold}, yang paling sedikit di atas.
 				Produk Nonaktif tidak dihitung — ia tidak sedang dijual.
@@ -217,7 +174,7 @@
 		</div>
 
 		{#if menipis.isPending}
-			<p class={MODUL_CATATAN}>Memuat Stok menipis…</p>
+			<p class={MODUL_TEKS}>Memuat Stok menipis…</p>
 		{:else if menipis.error}
 			<div class={MODUL_BARIS}>
 				<p class="text-xs font-semibold" role="alert">{menipis.error.message}</p>
@@ -228,7 +185,7 @@
 				>
 			</div>
 		{:else if menipis.data?.products.length === 0}
-			<p class={MODUL_CATATAN}>
+			<p class={MODUL_TEKS}>
 				Tidak ada Produk dengan Stok menipis. Semua Produk Aktif masih punya Stok di ambang atau
 				lebih.
 			</p>
@@ -282,7 +239,7 @@
 		</div>
 
 		{#if catalogue.isPending}
-			<p class={MODUL_CATATAN}>Memuat Produk…</p>
+			<p class={MODUL_TEKS}>Memuat Produk…</p>
 		{:else if catalogue.error}
 			<div class={MODUL_BARIS}>
 				<p class="text-xs font-semibold" role="alert">{catalogue.error.message}</p>
@@ -293,7 +250,7 @@
 				>
 			</div>
 		{:else if catalogue.data?.length === 0}
-			<p class={MODUL_CATATAN}>Belum ada Produk. Tambahkan yang pertama di layar Produk.</p>
+			<p class={MODUL_TEKS}>Belum ada Produk. Tambahkan yang pertama di layar Produk.</p>
 		{:else}
 			<div class="overflow-x-auto border-b border-border">
 				<table class={TABEL}>

@@ -1,4 +1,15 @@
 <script lang="ts">
+	import {
+		CATATAN,
+		JUDUL,
+		MODUL,
+		MODUL_JUDUL,
+		MODUL_KEPALA,
+		MODUL_TEKS,
+		PAPAN,
+		STRIP
+	} from '$lib/components/shared/mosaik';
+	import { cn } from '$lib/utils';
 	import HealthStatus from './HealthStatus.svelte';
 
 	/**
@@ -8,41 +19,11 @@
 	 * route tetap tipis: hanya menaruh komponen di sebuah URL (ADR-0006).
 	 */
 	/**
-	 * Papan mosaik (DESIGN.md, Layout): satu kolom selebar papan — prototipe
-	 * Beranda memakai `board--full`, bukan papan tiga kolom milik Kasir. Padding
-	 * luarnya milik rel (`(app)/+layout`), jadi di sini tidak ada padding lagi.
-	 */
-	const PAPAN = 'grid grid-cols-1 gap-0';
-	/**
-	 * Strip judul: satu-satunya tempat ukuran 24px muncul di layar ini. `-mb-px`
-	 * plus `z-[2]` menariknya turun satu piksel, jadi garis tintanya yang menutup
-	 * modul di bawahnya alih-alih bertumpuk dengan garis rambut (DESIGN.md,
-	 * Shared-Hairline).
-	 */
-	const STRIP =
-		'z-[2] col-span-full -mb-px flex flex-wrap items-baseline gap-x-3 gap-y-1 border border-border border-b-foreground bg-card px-2 py-2';
-	const JUDUL = 'text-2xl leading-none font-bold tracking-[-0.015em]';
-	/** Seluruh teks 12px; lantai huruf dunia ini (DESIGN.md, Legibility Floor). */
-	const CATATAN = 'text-xs';
-
-	/**
-	 * Modul: petak dengan garis rambut, dan hanya garis atasnya yang digambar —
-	 * dua modul bersebelahan berbagi satu garis, bukan dua (DESIGN.md,
-	 * Shared-Hairline).
-	 */
-	const MODUL = 'border border-border border-b-0 bg-card';
-	/**
 	 * Jarak 8px sebelum modul Dari satu layar bukan kelalaian: prototipe layar ini
 	 * sendiri yang memisahkan dua modul dengan `margin-top: 8px`, jadi keduanya
 	 * memang tidak bersebelahan.
 	 */
-	const MODUL_KEDUA = `${MODUL} mt-2`;
-	/** Kepala modul: Wash Grey, ditutup garis tinta — satu-satunya penanda kepala. */
-	const MODUL_KEPALA =
-		'flex items-center justify-between gap-2 border-b border-foreground bg-muted px-2 py-1.5';
-	const MODUL_JUDUL = 'text-[13px] font-bold tracking-[0.01em]';
-	/** Satu baris isi di dalam modul; garis bawahnya menutup modulnya. */
-	const MODUL_TEKS = 'border-b border-border px-2 py-1.5 text-xs';
+	const MODUL_KEDUA = cn(MODUL, 'mt-2');
 </script>
 
 <div class={PAPAN}>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { MODUL_KEPALA } from '$lib/components/shared/mosaik';
 	import { cn, formatRupiah } from '$lib/utils';
 	import { METODE_LABEL, punyaKembalian, type Penjualan } from '../schemas/penjualan.schema';
 
@@ -37,9 +38,7 @@
 		{/each}
 	</ul>
 
-	<p
-		class="flex items-center justify-between gap-2 border-b border-foreground bg-muted px-2 py-1.5"
-	>
+	<p class={MODUL_KEPALA}>
 		<span class="text-[13px] font-bold">Total</span>
 		<span class="text-[15px] font-bold tabular-nums">{formatRupiah(sale.total)}</span>
 	</p>

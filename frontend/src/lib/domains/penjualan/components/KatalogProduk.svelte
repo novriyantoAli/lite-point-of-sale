@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { MODUL_KEPALA } from '$lib/components/shared/mosaik';
 	import { Button } from '$lib/components/ui/button';
 	import { createProdukListQuery, type Produk } from '$lib/domains/produk';
 	import { formatRupiah } from '$lib/utils';
@@ -56,9 +57,7 @@
 </script>
 
 <section class="flex flex-col" aria-labelledby="kasir-katalog-judul">
-	<div
-		class="flex items-center justify-between gap-2 border-b border-foreground bg-muted px-2 py-1.5"
-	>
+	<div class={MODUL_KEPALA}>
 		<h2 id="kasir-katalog-judul" class="text-[13px] font-bold tracking-[0.01em]">Katalog</h2>
 		<!--
 			Cacah ini berubah setiap kali Kasir mengetik di kolom pencarian, dan

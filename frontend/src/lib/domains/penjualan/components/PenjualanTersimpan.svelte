@@ -1,4 +1,12 @@
 <script lang="ts">
+	import {
+		AKSI_MODUL,
+		ERROR,
+		MODUL,
+		MODUL_JUDUL,
+		MODUL_KEPALA,
+		TAG_MERAH
+	} from '$lib/components/shared/mosaik';
 	import { Button } from '$lib/components/ui/button';
 	import { cn } from '$lib/utils';
 	import { createPenjualanDetailQuery } from '../queries/penjualan.queries';
@@ -24,32 +32,13 @@
 	 * dengan `margin-top: 8px` — keduanya memang tidak bersebelahan, jadi keduanya
 	 * tidak berbagi garis (DESIGN.md, Shared-Hairline).
 	 */
-	const MODUL = 'mt-2 border border-border border-b-0 bg-card';
-	/** Kepala modul: Wash Grey, ditutup garis tinta — satu-satunya penanda kepala. */
-	const MODUL_KEPALA =
-		'flex items-center justify-between gap-2 border-b border-foreground bg-muted px-2 py-1.5';
-	const MODUL_JUDUL = 'text-[13px] font-bold tracking-[0.01em]';
-	/**
-	 * Red tag `tersegel` (DESIGN.md, Tags): Penjualan yang sudah tersimpan bersifat
-	 * final — tidak ada void dan tidak ada refund — dan tab merah inilah yang
-	 * mengatakannya, bukan kalimat penjelas (CONTEXT.md). Merah bukan warna
-	 * sendirian: katanya ikut tertulis.
-	 */
-	const TAG_MERAH =
-		'inline-flex h-[15px] items-center bg-destructive px-[5px] text-xs font-semibold text-primary-foreground';
-	/**
-	 * Tombol berbingkai memakai `variant="ghost"` lebih dulu: varian itu sudah
-	 * membawa `hover:bg-muted`, persis latar hover dunia ini, dan tidak membawa
-	 * apa pun yang harus dilawan (solution doc §3).
-	 */
-	const AKSI_MODUL =
-		'h-[26px] border-border bg-card px-2 text-[13px] font-semibold hover:border-foreground focus-visible:border-foreground disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-100';
+	const MODUL_PENJUALAN = cn(MODUL, 'mt-2');
 	/**
 	 * Baris pesan — galat maupun keadaan — bertinta, bukan merah utilitas: merah
 	 * hanya dua pekerjaan, tab dan harga (DESIGN.md, Secondary & Three-Percent
 	 * Rule).
 	 */
-	const PESAN = 'text-xs font-semibold';
+	const PESAN = ERROR;
 </script>
 
 {#if detail.isPending}
@@ -65,7 +54,7 @@
 		>
 	</div>
 {:else if detail.data}
-	<section class={MODUL} aria-label="Penjualan tersimpan">
+	<section class={MODUL_PENJUALAN} aria-label="Penjualan tersimpan">
 		<div class={MODUL_KEPALA}>
 			<h2 class={MODUL_JUDUL}>Penjualan tersimpan</h2>
 			<!--

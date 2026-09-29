@@ -1,5 +1,14 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import {
+		AKSI_MODUL,
+		COMMIT_KOLOM,
+		ERROR,
+		FIELD,
+		INPUT,
+		INPUT_ANGKA,
+		LABEL
+	} from '$lib/components/shared/mosaik';
 	import { Button } from '$lib/components/ui/button';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { Input } from '$lib/components/ui/input';
@@ -154,48 +163,10 @@
 	 * sudah dipakai layar Kasir, dan dua kosakata di tengah port lebih mahal
 	 * daripada pengulangan (solution doc §1).
 	 */
-	const FIELD = 'flex flex-col gap-[3px]';
-	const LABEL = 'text-xs leading-[1.2] font-semibold';
-	const INPUT =
-		'h-[26px] border-border bg-card px-1.5 py-0 text-[13px] shadow-none focus-visible:border-foreground aria-invalid:ring-0 md:text-[13px]';
-	/**
-	 * Field yang isinya angka: Harga dan Stok, bukan Nama, Kode, atau Kategori.
-	 *
-	 * Angkanya tabular, seperti setiap angka lain di dunia ini (DESIGN.md,
-	 * Typography: "tanpa kecuali"), dan itu bukan hiasan: pada Inter Variable 13px
-	 * sepuluh digit `1111111111` selebar 50px sementara `0000000000` selebar 80px,
-	 * jadi nominal yang sedang diketik menggeser dirinya sendiri di dalam fieldnya
-	 * tanpa kelas ini. Kasir memakai pembagian yang sama untuk field Jumlah bayar.
-	 */
-	const INPUT_ANGKA = `${INPUT} tabular-nums`;
 	const SELECT = cn(
 		INPUT,
 		'w-full data-[size=default]:h-[26px] [&_svg:not([class*=size-])]:size-3'
 	);
-	/**
-	 * Field yang tidak valid: pesannya 12px/600 di bawah field. Warnanya tinta, bukan
-	 * merah utilitas — merah hanya milik garis dan outline field-nya (DESIGN.md,
-	 * Fields & Inputs).
-	 */
-	const ERROR = 'text-xs font-semibold';
-	/**
-	 * `.btn` 26px/13px — petak berbingkai rambut, dan keadaan mati kehilangan
-	 * kursor alih-alih tintanya (DESIGN.md, Commit Button).
-	 *
-	 * Dipakai dengan `variant="ghost"`: varian itu sudah membawa `hover:bg-muted`,
-	 * persis latar hover dunia ini. Varian `default` membawa
-	 * `text-primary-foreground`, jadi tombol berbingkai tanpa varian berakhir putih
-	 * di atas putih (solution doc §3).
-	 */
-	const AKSI_MODUL =
-		'h-[26px] border-border bg-card px-2 text-[13px] font-semibold hover:border-foreground focus-visible:border-foreground disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-100';
-	/**
-	 * Commit Button: satu-satunya bidang bertinta penuh di layar ini, dan saat mati
-	 * ia kehilangan tintanya lalu jadi putih bergaris putus-putus — bukan pudar
-	 * (DESIGN.md, State-Is-Not-Faded).
-	 */
-	const COMMIT =
-		'h-10 w-full text-[15px] font-semibold hover:bg-primary disabled:pointer-events-auto disabled:cursor-not-allowed disabled:border-dashed disabled:border-border disabled:bg-card disabled:text-foreground disabled:opacity-100';
 </script>
 
 <!--
@@ -340,7 +311,7 @@
 			{/if}
 
 			<div class="border-t border-border px-2 py-2">
-				<Button type="submit" class={COMMIT} disabled={pending}>
+				<Button type="submit" class={COMMIT_KOLOM} disabled={pending}>
 					{pending ? 'Menyimpan…' : editing ? 'Simpan Perubahan' : 'Tambah'}
 				</Button>
 			</div>
