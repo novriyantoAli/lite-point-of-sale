@@ -1,0 +1,133 @@
+DIRECTION CONCEPT SEED (key: 22ccabe4; mode: operate; source: api; approved pool: c3b204a1eed6; 306/564 human-approved; rerun with --scope direction --mode operate --from 22ccabe4 --reroll 1 --candidate-count 7 to reproduce this roll against this catalog revision)
+RE-ROLL ROUND 1: every candidate presented in earlier rounds, grounded
+  and challenger alike, is eliminated and may not return reworded. Derive
+  genuinely new grounded candidates from unexplored angles before judging
+  these fresh challengers.
+ASSIGNED INDEX: 7
+  After ordering the grounded directions by resonance, build candidate
+  7 of your own grounded list; the assignment never points at a
+  challenger. The assignment is the roll, not a suggestion: your top-ranked
+  direction is what every run would ship, so the script decides which grounded
+  direction gets built. Each direction joins a durable visual system to a
+  concrete expression for the requested first surface, decided as one. It must
+  survive the current task plus navigation, quiet and dense content,
+  interaction and state, and a substantially different future surface. In an
+  attended run, present the assigned direction fully committed and offer
+  re-roll. You may add ONE card for your top-ranked grounded candidate when
+  it is not the assigned direction, kicker IMPECCABLE’S PICK, with an honest risk line
+  naming its familiarity; one pick card, never a ranked lineup, and the pick
+  never takes the lead position. When the assignment IS your top candidate,
+  there is no pick card. Re-roll yourself only
+  on named factual grounds, when the assignment cannot carry the product's
+  truth or task; taste is never grounds.
+  The assignment exists to refuse the model's ranking rut, never to outrank
+  the user or the brief. Never expose assignment metadata in user-facing labels.
+CHALLENGERS:
+  1. a tensegrity column of carbon rods and red cord, where opposing forces make a rigid body appear to inhale and lengthen
+     SOURCE ID: kinetic-sculpture-automata-tensegrity-breathing-column
+     CREATIVE SPARK: The cords tighten in sequence; black rods float apart without touching, and the column rises as if drawing a slow breath.
+     SYSTEM GRAMMAR:
+       - Palette/material: matte carbon-black rods on a pale concrete ground, red cord as the tension accent, slack members dropping to ash gray
+       - Type/composition: engineering monospaced labels with force values, annotations pinned to nodes on leader lines, layout obeys the strut network not a page grid
+       - Topology/navigation: Expose a network of tension and compression paths, letting users trace any load to its counterforce.
+       - Controls/state: Pull, release, lock, and compare members while slack, balanced, stressed, and failed states are distinct.
+       - Responsive/motion: Flatten the column into a force diagram on compact screens and substitute before-after poses for continuous breathing.
+     WEB LEVERAGE: A constraint graph can drive both spatial geometry and a semantic force diagram from the same underlying state.
+     QUALITY BAR: board https://impeccable.style/worlds/cards/kinetic-sculpture-automata-tensegrity-breathing-column.webp · hero https://impeccable.style/worlds/cards/kinetic-sculpture-automata-tensegrity-breathing-column-hero.webp
+  2. an industrial streetwear grammar, ordinary words set in straight quotation marks, zip-tie tags left on, diagonal hazard stripes crossing white cotton and black nylon
+     SOURCE ID: textiles-weave-drape-fashion-industrial-quote-grammar
+     CREATIVE SPARK: You lift a jacket and the zip-tie tag clacks against the hanger; across the back, giant caps in straight quotes name the obvious, and a hazard stripe runs diagonally under the fluorescent light of the stockroom.
+     SYSTEM GRAMMAR:
+       - Palette/material: stockroom white cotton and black nylon as ground and ink, black-on-white hazard diagonals for structure, safety orange zip-tie tags as the accent
+       - Type/composition: bold industrial caps inside straight quotation marks naming the obvious, label plates set square on the grid like stenciled crates
+       - Topology/navigation: every zone is labeled with its literal quoted name, wayfinding is reading, and the hazard stripe runs diagonally under whatever matters
+       - Controls/state: the active item keeps its orange zip tie on, toggles read "ON" and "OFF" in quotes, disabled things take the diagonal stripe across them
+       - Responsive/motion: stripes hold 45 degrees at every width while label plates stack; motion is a tag swinging once on selection
+     WEB LEVERAGE: css repeating-linear-gradient hazard stripes at 45deg, generated content wrapping every label in straight quotes via ::before and ::after
+     QUALITY BAR: board https://impeccable.style/worlds/cards/textiles-weave-drape-fashion-industrial-quote-grammar.webp · hero https://impeccable.style/worlds/cards/textiles-weave-drape-fashion-industrial-quote-grammar-hero.webp
+  3. a music festival lineup sheet where every act is set in the same face and the entire hierarchy is carried by size and line breaks alone, headliners spanning the width and the smallest names packed into a justified block at the foot
+     SOURCE ID: posters-covers-sleeves-festival-lineup-poster
+     CREATIVE SPARK: No pictures at all, just names, and you can tell exactly who matters most from across the room purely by how big they are.
+     SYSTEM GRAMMAR:
+       - Palette/material: one saturated ground with a single contrasting ink, no imagery whatsoever, and the type doing every job on the sheet
+       - Type/composition: one condensed face at eight sizes, headliners spanning full width, and the long tail justified into a dense block at the foot
+       - Topology/navigation: billing is the only structure, so navigation moves down through decreasing importance
+       - Controls/state: controls are names, the active one inverts out of the ground, and sold-out days take a struck rule across their block
+       - Responsive/motion: names rebreak to keep the block justified at any width, and motion is a size step as billing changes
+     WEB LEVERAGE: responsive justified type blocks that rebreak at any width, billing-rank state, and size-step transitions
+     QUALITY BAR: board https://impeccable.style/worlds/cards/posters-covers-sleeves-festival-lineup-poster.webp · hero https://impeccable.style/worlds/cards/posters-covers-sleeves-festival-lineup-poster-hero.webp
+  4. a metropolitan rail map fired as a midnight-blue enamel mural, where scarlet, cobalt, amber, and green lines bend at disciplined angles, interchange circles bloom at crossings, and the entire city becomes a legible promise of movement
+     SOURCE ID: wayfinding-cartography-signage-midnight-transit-diagram
+     CREATIVE SPARK: Under the station's white light, four colored lines meet in one porcelain interchange; a fingertip follows the scarlet route outward until the dense center opens toward the river.
+     SYSTEM GRAMMAR:
+       - Palette/material: midnight-blue enamel ground with porcelain white station ticks, scarlet, cobalt, amber, and green line inks, the chosen line burning brightest
+       - Type/composition: humanist transit sans in fixed-size station labels, lines bending only at 45 and 90 degrees, the diagram's discipline is the composition
+       - Topology/navigation: Organize movement by line, station order, branch, interchange, fare boundary, and destination rather than literal geographic distance.
+       - Controls/state: Trace, transfer, reverse, reroute, and compare journeys with open, arriving, delayed, suspended, crowded, and accessible states.
+       - Responsive/motion: Focus the chosen corridor while preserving transfer context; never shrink the whole network into an unreadable miniature.
+     WEB LEVERAGE: Live service state can recompute only affected routes and transfer promises, while deep-linked itineraries, native search, and offline caching preserve a usable journey beyond the mural.
+     QUALITY BAR: board https://impeccable.style/worlds/cards/wayfinding-cartography-signage-midnight-transit-diagram.webp · hero https://impeccable.style/worlds/cards/wayfinding-cartography-signage-midnight-transit-diagram-hero.webp
+  5. A film cutting bench flattened into a sheet: a perforated select rail crossing a grain-orange field, each step a punched frame held between two pins, the place you stopped marked by a folded tape flag, and everything set aside still hanging on pins below the rail.
+     SOURCE ID: operate-a-cutting-bench-select-rail
+     CREATIVE SPARK: A work print strung between two pins under a bench lamp, white grease crosses struck across three frames, a folded orange tape flag doubled over the perforation where the editor stopped, and a dozen trims hanging on pins in the bin below.
+     SYSTEM GRAMMAR:
+       - Palette/material: one ink, flag orange in coarse film grain on true black; orange holds a third of any screen. Running copy and foreign images sit only in punched white windows.
+       - Type/composition: one size of condensed grotesk throughout, caps for labels; rank is cell count not size, a window may span twelve frame cells while edge ticks stay hairline.
+       - Topology/navigation: a perforated rail crosses every sheet at a fixed height; sections string along it as frames, and anything set aside hangs below on pins in an open bin.
+       - Controls/state: state is a mark, not a hue: grease cross done, punched corner unavailable, tape band committed, folded flag where you stopped, hung on a pin deferred.
+       - Responsive/motion: the strip scrubs with inertia and settles on perforation pitch, never between frames; hung trims swing and damp. Narrow screens drop frame count, not size.
+     WEB LEVERAGE: The rail is one virtual strip whose scrub snaps to a fixed frame pitch; the frame you left is persisted and re-flagged on return, and every discarded frame stays reachable on a pin below the rail.
+     QUALITY BAR: board https://impeccable.style/worlds/cards/operate-a-cutting-bench-select-rail.webp · hero https://impeccable.style/worlds/cards/operate-a-cutting-bench-select-rail-hero.webp
+  6. A worked queue built from a cracktro title screen: one bitmap face riding baselines over an emissive black void, where rank is depth, fields of grey dust drift behind the work at layered speeds, and nothing is ever enclosed by a rule or a box.
+     SOURCE ID: operate-c-cracktro-scroller-queue
+     CREATIVE SPARK: At 2am one ivory line of bitmap text sits dead still on a black screen while three fields of grey pinpricks drift behind it at different speeds, and a single amber caret blinks at the head of the line.
+     SYSTEM GRAMMAR:
+       - Palette/material: emissive black void, four dust neutrals ash to ivory, one signal amber; prose is ivory on void only; foreign images sit unretouched on the void, never tinted.
+       - Type/composition: one bitmap face at two sizes; all text rides baselines on a single unit; overlap allowed, enclosure never; no rules, boxes or dividers.
+       - Topology/navigation: layers stacked front to back; every baseline continues past both screen edges, so nothing is contained; navigating means pulling a layer forward.
+       - Controls/state: state is depth: brightness step plus letterspacing plus drift rate; the frontmost brightest widest item outranks all; a reversed glyph cell marks failure.
+       - Responsive/motion: only rear layers drift, one slow rate halved per step forward; the front plane holds still while read; narrow widths drop depth steps, not brightness steps.
+     WEB LEVERAGE: Every element declares an integer depth; one stylesheet maps depth to brightness step, letterspacing and drift rate off a single shared clock, and focus freezes the front plane to full stillness.
+     QUALITY BAR: board https://impeccable.style/worlds/cards/operate-c-cracktro-scroller-queue.webp · hero https://impeccable.style/worlds/cards/operate-c-cracktro-scroller-queue-hero.webp
+Fuse each challenger before judging it: the challenger supplies the form
+  and its system grammar, the product supplies every fact, and clarity wins
+  conflicts. Weigh the fused result against the assigned direction on exactly
+  two axes, audience identification and product clarity. Losing to strong
+  grounded material is a valid outcome; beating a thin or tool-monoculture
+  list is the point. A fused challenger that wins both axes becomes the build.
+  Close the weighing with a verdict per challenger, decided before any
+  borrowing is considered: wins (beats the assigned direction on both axes),
+  competitive (holds one axis), or declined (loses both). A declined
+  challenger is not spent: name the one discipline of its system the assigned
+  direction lacks, and raise the assigned direction to match before
+  presenting it. A donation transfers ambition and system discipline, never
+  the challenger's clothes; one world owns the page. Write each raise as its
+  own named line on the presented direction, and carry every verdict, kept
+  line, and raise into the decision page payload.
+When you can view images, open the QUALITY BAR board and hero for any
+challenger you weigh seriously and for the world you build. They exist as a
+craft bar, the finish level and commitment the build is expected to reach,
+never as a mockup to copy; your surface serves this product, not that render.
+PRODUCT.md and explicit incumbent brand commitments constrain every direction.
+The seed never chooses exact colors, fonts, tokens, or a user preference, and
+it never permits the world and first surface to be selected independently.
+The CREATIVE SPARK is a complete visual system, not a theme or decorative
+reference. Translate every supplied system rule into the product: palette and
+material, type and composition, topology, controls and states, and adaptation.
+Keep the source's visible character, scale, rhythm, and interaction instead of
+reducing vivid grammar to generic nouns. When the source is already a credible
+interface language, commit to it across navigation, content, controls, and
+states. Otherwise keep a literal carrier only when it becomes functional.
+Ambitious motion, spatial media, or interaction is welcome when it strengthens
+the product without weakening semantics, performance, or fallback behavior.
+TELEMETRY: after the user's choice resolves, rerun this script once with
+  --kind <assigned|pick|challenger|canon> --from 22ccabe4 --scope direction --mode operate,
+  adding --chosen <challenger-id> when a dealt challenger won and keeping
+  --register <safer|bolder> when the resolved round came from a steered hand.
+  One ping per resolved attended round. The ping is anonymous, the card kind
+  plus the catalog id when one won; your grounded candidates' names never
+  leave the machine, and the ping is skipped automatically when DO_NOT_TRACK
+  or IMPECCABLE_NO_TELEMETRY is set.
+A user- or brief-pinned decision beats the roll, always.
+ASSIGNED INDEX (restated for truncated readers): 7. Build candidate
+7 of your own grounded list; seed key 22ccabe4.

@@ -1,0 +1,129 @@
+DIRECTION CONCEPT SEED (key: 22ccabe4; mode: operate; source: api; approved pool: c3b204a1eed6; 306/564 human-approved; rerun with --scope direction --mode operate --from 22ccabe4 --candidate-count 7 to reproduce this roll against this catalog revision)
+ASSIGNED INDEX: 4
+  After ordering the grounded directions by resonance, build candidate
+  4 of your own grounded list; the assignment never points at a
+  challenger. The assignment is the roll, not a suggestion: your top-ranked
+  direction is what every run would ship, so the script decides which grounded
+  direction gets built. Each direction joins a durable visual system to a
+  concrete expression for the requested first surface, decided as one. It must
+  survive the current task plus navigation, quiet and dense content,
+  interaction and state, and a substantially different future surface. In an
+  attended run, present the assigned direction fully committed and offer
+  re-roll. You may add ONE card for your top-ranked grounded candidate when
+  it is not the assigned direction, kicker IMPECCABLE’S PICK, with an honest risk line
+  naming its familiarity; one pick card, never a ranked lineup, and the pick
+  never takes the lead position. When the assignment IS your top candidate,
+  there is no pick card. Re-roll yourself only
+  on named factual grounds, when the assignment cannot carry the product's
+  truth or task; taste is never grounds.
+  The assignment exists to refuse the model's ranking rut, never to outrank
+  the user or the brief. Never expose assignment metadata in user-facing labels.
+CHALLENGERS:
+  1. a nixie-tube laboratory counter, where stacked digits glow orange inside glass envelopes and every count arrives as visible plasma
+     SOURCE ID: signals-instruments-nixie-laboratory-counter
+     CREATIVE SPARK: Inside each glass tube ten metal numerals nest; the lit one hovers orange, and a count change is a tiny change of physical depth.
+     SYSTEM GRAMMAR:
+       - Palette/material: neon orange digit glow inside clear glass envelopes, blackened steel chassis as ground, hairline anode mesh gray; the lit digit is the only warm accent
+       - Type/composition: stacked metal numerals of one engineered digit form, each tube a fixed decimal place; labels sit as engraved caps on the panel below the banks
+       - Topology/navigation: quantities are the interface; each metric owns a tube bank with fixed digit positions.
+       - Controls/state: value changes cross-fade between physical digit layers; overflow and reset are visible mechanical events.
+       - Responsive/motion: banks drop to essential digits on phones; digit transitions are single cross-fades under
+     WEB LEVERAGE: Layered DOM digits with depth-true cross-fades render tube physics in pure CSS.
+     QUALITY BAR: board https://impeccable.style/worlds/cards/signals-instruments-nixie-laboratory-counter.webp · hero https://impeccable.style/worlds/cards/signals-instruments-nixie-laboratory-counter-hero.webp
+  2. a pixel-art arcade cabinet screen, where fat luminous pixels, scanlines, and phosphor bloom turn a 240-line grid into a stage with real glow
+     SOURCE ID: medium-native-crt-arcade-pixel-glow
+     CREATIVE SPARK: Up close it is just squares; at play distance the squares fuse into a hero, and the black between scanlines is doing half the work.
+     SYSTEM GRAMMAR:
+       - Palette/material: a sixteen-color sprite palette over phosphor black, scanline gaps doing half the shading, flashing white-gold reserved by law for power-ups
+       - Type/composition: eight-by-eight pixel caps for score and menus pinned to the top edge, the playfield composing in whole tiles with nothing allowed off-grid
+       - Topology/navigation: space is a tile grid with screen-by-screen rooms; the camera moves in whole-pixel steps.
+       - Controls/state: states are sprite swaps with strict palette discipline; damage, power, and rarity are palette laws.
+       - Responsive/motion: integer scaling preserves the grid at every size; bloom and scanlines are togglable capability layers.
+     WEB LEVERAGE: Crisp integer-scaled canvas with shader scanline glow, and every sprite state addressable in code.
+     QUALITY BAR: board https://impeccable.style/worlds/cards/medium-native-crt-arcade-pixel-glow.webp · hero https://impeccable.style/worlds/cards/medium-native-crt-arcade-pixel-glow-hero.webp
+  3. a sneaker archive wall, stacked cardboard boxes with silhouette line art printed on the ends, colorway names read as poetry beside monospaced size runs, tissue folded inside each lid
+     SOURCE ID: textiles-weave-drape-fashion-sneaker-box-stacks
+     CREATIVE SPARK: You slide a box from a stack taller than you; the end label lists the colorway name like a line of verse, the lid lifts with a cardboard sigh, and tissue paper folds back from the shape you already know by silhouette.
+     SYSTEM GRAMMAR:
+       - Palette/material: burnt orange box board as the ground, black one-line silhouette art for ink, tissue white interiors, the colorway chip strip carrying accent states
+       - Type/composition: condensed caps on the end label over monospaced size-run digits, the label grid of name, colorway, and size ruling every card
+       - Topology/navigation: a wall of stacked boxes indexed by their end labels; you browse the stack face, pull a box halfway, and open the lid to go deeper
+       - Controls/state: the selected box slides half out of the stack, opening hinges the lid and folds back tissue, the colorway chip marks which variant is live
+       - Responsive/motion: the wall re-shelves to a single column of end labels on narrow screens; motion is lid hinge and tissue lift
+     WEB LEVERAGE: css 3d transforms hinging box lids open on interaction, grid re-shelving the stack from wall to single column across breakpoints
+     QUALITY BAR: board https://impeccable.style/worlds/cards/textiles-weave-drape-fashion-sneaker-box-stacks.webp · hero https://impeccable.style/worlds/cards/textiles-weave-drape-fashion-sneaker-box-stacks-hero.webp
+  4. a seamless cyclorama passing from black night through cobalt and rose into white day, where light alone creates an infinite horizon behind the actors
+     SOURCE ID: stagecraft-theater-lighting-cyclorama-dawn
+     CREATIVE SPARK: The curved wall begins as depthless black; a low cobalt band appears, rose gathers above it, and the actors acquire shadows before the stage becomes day.
+     SYSTEM GRAMMAR:
+       - Palette/material: depthless cyc black as ground, a low cobalt horizon band as structure, rose gathering above it, white-day wash reserved for the fully active state
+       - Type/composition: lighting-plot stencil caps for cue names with tabular numerals, content held in horizontal horizon bands stacked from dark to light
+       - Topology/navigation: Organize atmosphere by horizon band, time phase, subject relation, and transition interval.
+       - Controls/state: Raise, blend, hold, and compare with night, first light, dawn, day, and blackout states.
+       - Responsive/motion: Offer discrete atmospheric phases with labels and patterns so color is never the sole signal.
+     WEB LEVERAGE: A scrubbable cue timeline binds horizon bands to actor and scene state, making each light transition inspectable while named cue states remain deep-linkable and text-equivalent.
+     QUALITY BAR: board https://impeccable.style/worlds/cards/stagecraft-theater-lighting-cyclorama-dawn.webp · hero https://impeccable.style/worlds/cards/stagecraft-theater-lighting-cyclorama-dawn-hero.webp
+  5. a busytown cross-section spread, a cutaway world where every building loses its wall, every vehicle its hull, and every object wears a small printed label, dozens of workers mid-task in one continuous gouache scene
+     SOURCE ID: graphic-worlds-publishing-busytown-cross-section
+     CREATIVE SPARK: You lie on the rug tracing a tiny car through a page where the bakery has no front wall, the flour sack says flour, and every fireman, pig, and pickle truck is busy doing exactly what its label promises.
+     SYSTEM GRAMMAR:
+       - Palette/material: cheerful gouache flats on paper white, brick red, school-bus yellow, and grass green in even midtones, a thin warm brown outline holding every shape
+       - Type/composition: small roman labels beside every object with a hairline pointer, one hand-lettered headline per spread, constant scale so no label outranks another
+       - Topology/navigation: one continuous scene pans edge to edge; entering a building slices its facade away as a cutaway, and roads carry you between districts
+       - Controls/state: hover names anything with its printed label, busy items show a worker mid-task, and an opened building swings its wall aside while neighbors keep working
+       - Responsive/motion: small screens frame one building at a time and pan along the road; motion is the facade swinging open like a dollhouse hinge
+     WEB LEVERAGE: svg cutaway layers toggle facades while css transforms pan one continuous labeled scene under pointer or touch
+     QUALITY BAR: board https://impeccable.style/worlds/cards/graphic-worlds-publishing-busytown-cross-section.webp · hero https://impeccable.style/worlds/cards/graphic-worlds-publishing-busytown-cross-section-hero.webp
+  6. a consumer application surface built from soft-cornered cards on a warm tinted ground, generous touch targets, friendly plain-language labels and a single saturated action color that appears only where something can actually be done
+     SOURCE ID: digital-design-canon-warm-consumer-app-surface
+     CREATIVE SPARK: Everything has a comfortable radius, the labels sound like a person wrote them, and the one bright color on screen is always something you can press.
+     SYSTEM GRAMMAR:
+       - Palette/material: a warm tinted ground with white cards, soft large corner radii, and one saturated action color reserved strictly for actionable elements
+       - Type/composition: a rounded humanist sans at comfortable sizes, plain-language labels, and cards holding one idea each with generous internal padding
+       - Topology/navigation: cards stack in a single scrolling column with a persistent bottom bar, so navigation stays reachable by thumb
+       - Controls/state: controls are cards and the bottom bar, the active tab takes the action color, and disabled actions lose the color entirely
+       - Responsive/motion: cards go full width and the bottom bar persists, and motion is a soft spring on press with no bounce on entry
+     WEB LEVERAGE: an action-only accent as a theme custom property, spring press feedback, and a thumb-reachable persistent bottom bar
+     QUALITY BAR: board https://impeccable.style/worlds/cards/digital-design-canon-warm-consumer-app-surface.webp · hero https://impeccable.style/worlds/cards/digital-design-canon-warm-consumer-app-surface-hero.webp
+Fuse each challenger before judging it: the challenger supplies the form
+  and its system grammar, the product supplies every fact, and clarity wins
+  conflicts. Weigh the fused result against the assigned direction on exactly
+  two axes, audience identification and product clarity. Losing to strong
+  grounded material is a valid outcome; beating a thin or tool-monoculture
+  list is the point. A fused challenger that wins both axes becomes the build.
+  Close the weighing with a verdict per challenger, decided before any
+  borrowing is considered: wins (beats the assigned direction on both axes),
+  competitive (holds one axis), or declined (loses both). A declined
+  challenger is not spent: name the one discipline of its system the assigned
+  direction lacks, and raise the assigned direction to match before
+  presenting it. A donation transfers ambition and system discipline, never
+  the challenger's clothes; one world owns the page. Write each raise as its
+  own named line on the presented direction, and carry every verdict, kept
+  line, and raise into the decision page payload.
+When you can view images, open the QUALITY BAR board and hero for any
+challenger you weigh seriously and for the world you build. They exist as a
+craft bar, the finish level and commitment the build is expected to reach,
+never as a mockup to copy; your surface serves this product, not that render.
+PRODUCT.md and explicit incumbent brand commitments constrain every direction.
+The seed never chooses exact colors, fonts, tokens, or a user preference, and
+it never permits the world and first surface to be selected independently.
+The CREATIVE SPARK is a complete visual system, not a theme or decorative
+reference. Translate every supplied system rule into the product: palette and
+material, type and composition, topology, controls and states, and adaptation.
+Keep the source's visible character, scale, rhythm, and interaction instead of
+reducing vivid grammar to generic nouns. When the source is already a credible
+interface language, commit to it across navigation, content, controls, and
+states. Otherwise keep a literal carrier only when it becomes functional.
+Ambitious motion, spatial media, or interaction is welcome when it strengthens
+the product without weakening semantics, performance, or fallback behavior.
+TELEMETRY: after the user's choice resolves, rerun this script once with
+  --kind <assigned|pick|challenger|canon> --from 22ccabe4 --scope direction --mode operate,
+  adding --chosen <challenger-id> when a dealt challenger won and keeping
+  --register <safer|bolder> when the resolved round came from a steered hand.
+  One ping per resolved attended round. The ping is anonymous, the card kind
+  plus the catalog id when one won; your grounded candidates' names never
+  leave the machine, and the ping is skipped automatically when DO_NOT_TRACK
+  or IMPECCABLE_NO_TELEMETRY is set.
+A user- or brief-pinned decision beats the roll, always.
+ASSIGNED INDEX (restated for truncated readers): 4. Build candidate
+4 of your own grounded list; seed key 22ccabe4.

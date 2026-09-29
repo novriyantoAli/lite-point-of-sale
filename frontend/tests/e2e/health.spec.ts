@@ -12,8 +12,11 @@ test('dashboard reports the service healthy through the BFF', async ({ page }) =
 
 	await expect(page.getByText('Status layanan')).toBeVisible();
 
-	// Scoped to the health card: the header carries a Badge of its own now.
-	const card = page.locator('[data-slot="card"]').filter({ hasText: 'Status layanan' });
-	await expect(card.locator('[data-slot="badge"]')).toHaveText('OK');
-	await expect(card.getByText('Basis data: ok')).toBeVisible();
+	// The module is a ruled region of the mosaic, not a shadcn card: it is found by
+	// the accessible name its own heading gives it, and the tag's word is read
+	// exactly — `Basis data: ok` also contains "ok" (DESIGN.md, Do's: write every
+	// state's word next to its mark).
+	const status = page.getByRole('region', { name: 'Status layanan' });
+	await expect(status.getByText('OK', { exact: true })).toBeVisible();
+	await expect(status.getByText('Basis data: ok')).toBeVisible();
 });

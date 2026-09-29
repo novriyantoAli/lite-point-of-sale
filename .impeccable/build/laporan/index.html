@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="id">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Laporan — Japanese High-Density Grid</title>
+		<link rel="stylesheet" href="../sistem/style.css" />
+	</head>
+	<body>
+		<div class="bar">
+			<p>
+				<b>Prototipe arah</b> — dunia <b>Japanese High-Density Grid</b>, layar Laporan. Angka di
+				sini <b>contoh</b>, bukan data toko.
+			</p>
+			<p><a href="../kasir/index.html">layar Kasir</a></p>
+		</div>
+
+		<nav class="rail" aria-label="Navigasi utama">
+			<div class="rail__top">
+				<span class="rail__brand">Lite Point of Sale</span>
+				<span class="rail__who">
+					<span class="tnum">admin</span>
+					<span class="tag tag--quiet">Admin</span>
+					<button class="btn" type="button">Keluar</button>
+				</span>
+			</div>
+			<div class="rail__row">
+				<a class="tab" href="../beranda/index.html">Beranda</a>
+				<a class="tab" href="../kasir/index.html">Kasir</a>
+				<a class="tab" href="../penjualan/index.html">Penjualan</a>
+			</div>
+			<div class="rail__row">
+				<a class="tab" href="../produk/index.html">Produk <span class="tab__n">24</span></a>
+				<a class="tab" href="../stok/index.html">Stok <span class="tab__n">4</span></a>
+				<a class="tab" href="../laporan/index.html" aria-current="page">Laporan</a>
+				<a class="tab" href="../pengguna/index.html">Pengguna</a>
+				<a class="tab" href="../pengaturan/index.html">Pengaturan</a>
+				<a class="tab" href="../backup/index.html">Backup</a>
+			</div>
+		</nav>
+
+		<main class="board board--full">
+			<div class="strip">
+				<h1 class="strip__title">Laporan</h1>
+				<p class="strip__desc">Omzet harian dan daftar Penjualan, dibaca dalam waktu lokal toko.</p>
+				<span class="strip__act">
+					<label class="field__label" for="tanggal">Tanggal</label>
+					<input id="tanggal" class="input" type="date" value="2026-09-25" style="width: 150px" />
+				</span>
+			</div>
+
+			<section class="col" aria-labelledby="omzet-judul">
+				<div class="mod mod--head">
+					<h2 class="mod__title" id="omzet-judul">Omzet harian</h2>
+					<span class="mod__note tnum">25 September 2026</span>
+				</div>
+				<div class="mod mod--flush" style="display: grid; grid-template-columns: 1fr 1fr">
+					<div class="stat" style="border: 0; border-right: 1px solid var(--hairline)">
+						<span class="stat__label">Total omzet</span>
+						<span class="stat__value">Rp 2.184.500</span>
+					</div>
+					<div class="stat" style="border: 0">
+						<span class="stat__label">Jumlah transaksi</span>
+						<span class="stat__value">7</span>
+					</div>
+				</div>
+				<div class="mod mod--flush">
+					<table class="tbl">
+						<caption class="sr-only">Omzet per metode Pembayaran</caption>
+						<thead>
+							<tr>
+								<th scope="col">Metode</th>
+								<th scope="col" class="tbl__num">Transaksi</th>
+								<th scope="col" class="tbl__num">Omzet</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>Tunai</td>
+								<td class="tbl__num">4</td>
+								<td class="tbl__num">Rp 1.150.000</td>
+							</tr>
+							<tr>
+								<td>QRIS</td>
+								<td class="tbl__num">2</td>
+								<td class="tbl__num">Rp 720.000</td>
+							</tr>
+							<tr>
+								<td>Debit</td>
+								<td class="tbl__num">1</td>
+								<td class="tbl__num">Rp 314.500</td>
+							</tr>
+							<tr>
+								<td>Transfer</td>
+								<td class="tbl__num">0</td>
+								<td class="tbl__num">Rp 0</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</section>
+
+			<section class="col" aria-labelledby="daftar-judul" style="margin-top: 8px">
+				<div class="mod mod--head">
+					<h2 class="mod__title" id="daftar-judul">Daftar Penjualan</h2>
+					<span class="mod__note tnum">7 transaksi</span>
+				</div>
+				<div class="stack">
+					<div class="lirow" style="align-items: flex-start">
+						<div class="lirow__main">
+							<p class="lirow__name">Nomor Struk <span class="tnum">6</span></p>
+							<p class="lirow__meta">
+								2026-09-25 14:30 · Kasir admin · Tunai
+							</p>
+						</div>
+						<div class="lirow__acts">
+							<span class="tnum" style="font-weight: 600">Rp 136.500</span>
+							<button class="btn" type="button">Buka</button>
+						</div>
+					</div>
+					<div class="mod" style="background: var(--wash)">
+						<p class="note">
+							Nomor Struk <b class="tnum">6</b> · 2026-09-25 14:30 · Kasir admin
+						</p>
+						<div class="stack" style="margin-top: 6px; border: 1px solid var(--hairline)">
+							<div class="row" style="grid-template-columns: 1fr auto">
+								<span class="row__name">Kabel NYM 3x2.5 mm <span class="tnum">· 5 × Rp 18.500</span></span>
+								<span class="row__sub tnum">Rp 92.500</span>
+							</div>
+							<div class="row" style="grid-template-columns: 1fr auto">
+								<span class="row__name">Saklar Panasonic 1 Gang <span class="tnum">· 2 × Rp 22.000</span></span>
+								<span class="row__sub tnum">Rp 44.000</span>
+							</div>
+							<div class="total">
+								<span class="total__label">Total</span>
+								<span class="total__value tnum">Rp 136.500</span>
+							</div>
+							<div class="mod">
+								<p class="note">Bayar · Tunai</p>
+								<p class="figure tnum" style="margin-top: 3px">Rp 150.000</p>
+								<p class="note" style="margin-top: 3px">Kembalian <b class="tnum">Rp 13.500</b></p>
+							</div>
+						</div>
+						<button class="btn" type="button" style="margin-top: 8px">Cetak ulang Struk</button>
+					</div>
+					<div class="lirow">
+						<div class="lirow__main">
+							<p class="lirow__name">Nomor Struk <span class="tnum">5</span></p>
+							<p class="lirow__meta">2026-09-25 11:12 · Kasir admin · QRIS</p>
+						</div>
+						<div class="lirow__acts">
+							<span class="tnum" style="font-weight: 600">Rp 720.000</span>
+							<button class="btn" type="button">Buka</button>
+						</div>
+					</div>
+					<div class="lirow">
+						<div class="lirow__main">
+							<p class="lirow__name">Nomor Struk <span class="tnum">4</span></p>
+							<p class="lirow__meta">2026-09-25 09:40 · Kasir admin · Tunai</p>
+						</div>
+						<div class="lirow__acts">
+							<span class="tnum" style="font-weight: 600">Rp 314.500</span>
+							<button class="btn" type="button">Buka</button>
+						</div>
+					</div>
+					<div class="lirow">
+						<div class="lirow__main">
+							<p class="lirow__name">Nomor Struk <span class="tnum">3</span></p>
+							<p class="lirow__meta">2026-09-25 08:55 · Kasir admin · Debit</p>
+						</div>
+						<div class="lirow__acts">
+							<span class="tnum" style="font-weight: 600">Rp 210.000</span>
+							<button class="btn" type="button">Buka</button>
+						</div>
+					</div>
+					<div class="lirow">
+						<div class="lirow__main">
+							<p class="lirow__name">Nomor Struk <span class="tnum">2</span></p>
+							<p class="lirow__meta">2026-09-25 08:10 · Kasir admin · Tunai</p>
+						</div>
+						<div class="lirow__acts">
+							<span class="tnum" style="font-weight: 600">Rp 98.000</span>
+							<button class="btn" type="button">Buka</button>
+						</div>
+					</div>
+				</div>
+			</section>
+		</main>
+	</body>
+</html>

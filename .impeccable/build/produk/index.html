@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="id">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Produk — Japanese High-Density Grid</title>
+		<link rel="stylesheet" href="../sistem/style.css" />
+	</head>
+	<body>
+		<div class="bar">
+			<p>
+				<b>Prototipe arah</b> — dunia <b>Japanese High-Density Grid</b>, layar Produk. Isi
+				katalog di sini <b>contoh</b>, bukan data toko.
+			</p>
+			<p><a href="../kasir/index.html">layar Kasir</a></p>
+		</div>
+
+		<nav class="rail" aria-label="Navigasi utama">
+			<div class="rail__top">
+				<span class="rail__brand">Lite Point of Sale</span>
+				<span class="rail__who">
+					<span class="tnum">admin</span>
+					<span class="tag tag--quiet">Admin</span>
+					<button class="btn" type="button">Keluar</button>
+				</span>
+			</div>
+			<div class="rail__row">
+				<a class="tab" href="../beranda/index.html">Beranda</a>
+				<a class="tab" href="../kasir/index.html">Kasir</a>
+				<a class="tab" href="../penjualan/index.html">Penjualan</a>
+			</div>
+			<div class="rail__row">
+				<a class="tab" href="../produk/index.html" aria-current="page">Produk <span class="tab__n">24</span></a>
+				<a class="tab" href="../stok/index.html">Stok <span class="tab__n">4</span></a>
+				<a class="tab" href="../laporan/index.html">Laporan</a>
+				<a class="tab" href="../pengguna/index.html">Pengguna</a>
+				<a class="tab" href="../pengaturan/index.html">Pengaturan</a>
+				<a class="tab" href="../backup/index.html">Backup</a>
+			</div>
+		</nav>
+
+		<main class="board board--full">
+			<div class="strip">
+				<h1 class="strip__title">Produk</h1>
+				<p class="strip__desc">
+					Katalog yang dijual di kasir. Produk Nonaktif tidak muncul di lookup kasir, tetapi
+					riwayatnya tetap tersimpan.
+				</p>
+				<span class="strip__act">
+					<button class="btn btn--solid" type="button">Tambah Produk</button>
+				</span>
+			</div>
+
+			<section class="col" aria-labelledby="saring-judul">
+				<div class="mod mod--head">
+					<h2 class="mod__title" id="saring-judul">Saring katalog</h2>
+					<span class="mod__note">saringan berlaku saat mengetik</span>
+				</div>
+				<div class="mod">
+					<div class="formgrid formgrid--4">
+						<div class="field">
+							<label class="field__label" for="s-nama">Nama</label>
+							<input id="s-nama" class="input" autocomplete="off" />
+						</div>
+						<div class="field">
+							<label class="field__label" for="s-kode">Kode</label>
+							<input id="s-kode" class="input" autocomplete="off" />
+						</div>
+						<div class="field">
+							<label class="field__label" for="s-kategori">Kategori</label>
+							<select id="s-kategori" class="select">
+								<option>Semua Kategori</option>
+								<option>Kabel</option>
+								<option>Saklar &amp; Kontak</option>
+								<option>Pengaman</option>
+								<option>Lampu</option>
+								<option>Alat</option>
+								<option>Aksesori</option>
+							</select>
+						</div>
+						<div class="field">
+							<label class="field__label" for="s-status">Status</label>
+							<select id="s-status" class="select">
+								<option>Semua</option>
+								<option>Aktif</option>
+								<option>Nonaktif</option>
+							</select>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="col" aria-labelledby="katalog-judul" style="margin-top: 8px">
+				<div class="mod mod--head">
+					<h2 class="mod__title" id="katalog-judul">Katalog</h2>
+					<span class="mod__note tnum">24 Produk</span>
+				</div>
+				<div class="mod mod--flush">
+					<table class="tbl">
+						<thead>
+							<tr>
+								<th scope="col">Nama</th>
+								<th scope="col">Kode</th>
+								<th scope="col">Kategori</th>
+								<th scope="col" class="tbl__num">Harga</th>
+								<th scope="col" class="tbl__num">Stok</th>
+								<th scope="col">Status</th>
+								<th scope="col">Aksi</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td class="tbl__name">Kabel NYM 3x2.5 mm</td>
+								<td class="tbl__sub tnum">NYM325</td>
+								<td class="tbl__sub">Kabel</td>
+								<td class="tbl__num price">Rp 18.500</td>
+								<td class="tbl__num">120</td>
+								<td><span class="tag tag--quiet">Aktif</span></td>
+								<td class="tbl__acts">
+									<button class="btn" type="button">Ubah</button>
+									<button class="btn" type="button">Nonaktifkan</button>
+									<span class="tbl__sub">Pernah terjual</span>
+								</td>
+							</tr>
+							<tr>
+								<td class="tbl__name">Saklar Panasonic 1 Gang</td>
+								<td class="tbl__sub tnum">WEG5001</td>
+								<td class="tbl__sub">Saklar &amp; Kontak</td>
+								<td class="tbl__num price">Rp 22.000</td>
+								<td class="tbl__num">34</td>
+								<td><span class="tag tag--quiet">Aktif</span></td>
+								<td class="tbl__acts">
+									<button class="btn" type="button">Ubah</button>
+									<button class="btn" type="button">Nonaktifkan</button>
+									<span class="tbl__sub">Pernah terjual</span>
+								</td>
+							</tr>
+							<tr>
+								<td class="tbl__name">MCB Schneider 10A</td>
+								<td class="tbl__sub tnum">SCH10A</td>
+								<td class="tbl__sub">Pengaman</td>
+								<td class="tbl__num price">Rp 65.000</td>
+								<td class="tbl__num">12</td>
+								<td><span class="tag tag--quiet">Aktif</span></td>
+								<td class="tbl__acts">
+									<button class="btn" type="button">Ubah</button>
+									<button class="btn" type="button">Nonaktifkan</button>
+									<span class="tbl__sub">Pernah terjual</span>
+								</td>
+							</tr>
+							<tr>
+								<td class="tbl__name">Lampu LED Philips 12W</td>
+								<td class="tbl__sub tnum">PHL12W</td>
+								<td class="tbl__sub">Lampu</td>
+								<td class="tbl__num price">Rp 32.000</td>
+								<td class="tbl__num">48</td>
+								<td><span class="tag tag--quiet">Aktif</span></td>
+								<td class="tbl__acts">
+									<button class="btn" type="button">Ubah</button>
+									<button class="btn" type="button">Nonaktifkan</button>
+									<button class="btn" type="button">Hapus</button>
+								</td>
+							</tr>
+							<tr>
+								<td class="tbl__name">Stop Kontak Broco 2 Lubang</td>
+								<td class="tbl__sub tnum">BRC2L</td>
+								<td class="tbl__sub">Saklar &amp; Kontak</td>
+								<td class="tbl__num price">Rp 15.500</td>
+								<td class="tbl__num">60</td>
+								<td><span class="tag tag--quiet">Aktif</span></td>
+								<td class="tbl__acts">
+									<button class="btn" type="button">Ubah</button>
+									<button class="btn" type="button">Nonaktifkan</button>
+									<button class="btn" type="button">Hapus</button>
+								</td>
+							</tr>
+							<tr>
+								<td class="tbl__name">Kabel NYA 1x1.5 mm</td>
+								<td class="tbl__sub">tanpa Kode</td>
+								<td class="tbl__sub">Kabel</td>
+								<td class="tbl__num price">Rp 4.200</td>
+								<td class="tbl__num">300</td>
+								<td><span class="tag tag--quiet">Aktif</span></td>
+								<td class="tbl__acts">
+									<button class="btn" type="button">Ubah</button>
+									<button class="btn" type="button">Nonaktifkan</button>
+									<button class="btn" type="button">Hapus</button>
+								</td>
+							</tr>
+							<tr>
+								<td class="tbl__name">Steker Tanam Legrand</td>
+								<td class="tbl__sub tnum">LEGST</td>
+								<td class="tbl__sub">Saklar &amp; Kontak</td>
+								<td class="tbl__num price">Rp 28.000</td>
+								<td class="tbl__num">Stok habis</td>
+								<td><span class="tag tag--quiet">Aktif</span></td>
+								<td class="tbl__acts">
+									<button class="btn" type="button">Ubah</button>
+									<button class="btn" type="button">Nonaktifkan</button>
+									<button class="btn" type="button">Hapus</button>
+								</td>
+							</tr>
+							<tr>
+								<td class="tbl__name">Gland Kabel 3/4 inci</td>
+								<td class="tbl__sub">tanpa Kode</td>
+								<td class="tbl__sub">Aksesori</td>
+								<td class="tbl__num price">Rp 3.500</td>
+								<td class="tbl__num">90</td>
+								<td><span class="tag tag--quiet">Aktif</span></td>
+								<td class="tbl__acts">
+									<button class="btn" type="button">Ubah</button>
+									<button class="btn" type="button">Nonaktifkan</button>
+									<button class="btn" type="button">Hapus</button>
+								</td>
+							</tr>
+							<tr>
+								<td class="tbl__name">Sekring 2A</td>
+								<td class="tbl__sub tnum">SKR2A</td>
+								<td class="tbl__sub">Pengaman</td>
+								<td class="tbl__num price">Rp 1.500</td>
+								<td class="tbl__num">150</td>
+								<td><span class="tag tag--quiet">Aktif</span></td>
+								<td class="tbl__acts">
+									<button class="btn" type="button">Ubah</button>
+									<button class="btn" type="button">Nonaktifkan</button>
+									<button class="btn" type="button">Hapus</button>
+								</td>
+							</tr>
+							<tr>
+								<td class="tbl__name">Tespen</td>
+								<td class="tbl__sub tnum">TSP01</td>
+								<td class="tbl__sub">Alat</td>
+								<td class="tbl__num price">Rp 12.000</td>
+								<td class="tbl__num">25</td>
+								<td><span class="tag tag--quiet">Aktif</span></td>
+								<td class="tbl__acts">
+									<button class="btn" type="button">Ubah</button>
+									<button class="btn" type="button">Nonaktifkan</button>
+									<button class="btn" type="button">Hapus</button>
+								</td>
+							</tr>
+							<tr>
+								<td class="tbl__name">Isolasi Nitto 3M</td>
+								<td class="tbl__sub tnum">NIT3M</td>
+								<td class="tbl__sub">Aksesori</td>
+								<td class="tbl__num price">Rp 8.000</td>
+								<td class="tbl__num">40</td>
+								<td><span class="tag tag--quiet">Aktif</span></td>
+								<td class="tbl__acts">
+									<button class="btn" type="button">Ubah</button>
+									<button class="btn" type="button">Nonaktifkan</button>
+									<button class="btn" type="button">Hapus</button>
+								</td>
+							</tr>
+							<tr>
+								<td class="tbl__name">Terminal Skun 1.5 mm</td>
+								<td class="tbl__sub tnum">SKN15</td>
+								<td class="tbl__sub">Aksesori</td>
+								<td class="tbl__num price">Rp 500</td>
+								<td class="tbl__num">500</td>
+								<td><span class="tag tag--quiet">Aktif</span></td>
+								<td class="tbl__acts">
+									<button class="btn" type="button">Ubah</button>
+									<button class="btn" type="button">Nonaktifkan</button>
+									<button class="btn" type="button">Hapus</button>
+								</td>
+							</tr>
+							<tr>
+								<td class="tbl__name">Pipa Konduit 20 mm</td>
+								<td class="tbl__sub tnum">KND20</td>
+								<td class="tbl__sub">Kabel</td>
+								<td class="tbl__num price">Rp 9.500</td>
+								<td class="tbl__num">75</td>
+								<td><span class="tag tag--quiet tag--nonaktif">Nonaktif</span></td>
+								<td class="tbl__acts">
+									<button class="btn" type="button">Ubah</button>
+									<button class="btn" type="button">Aktifkan</button>
+									<button class="btn" type="button">Hapus</button>
+								</td>
+							</tr>
+							<tr>
+								<td class="tbl__name">Baut Fisher 8 mm</td>
+								<td class="tbl__sub tnum">FSH8</td>
+								<td class="tbl__sub">Aksesori</td>
+								<td class="tbl__num price">Rp 1.000</td>
+								<td class="tbl__num">200</td>
+								<td><span class="tag tag--quiet">Aktif</span></td>
+								<td class="tbl__acts">
+									<button class="btn" type="button">Ubah</button>
+									<button class="btn" type="button">Nonaktifkan</button>
+									<button class="btn" type="button">Hapus</button>
+								</td>
+							</tr>
+							<tr>
+								<td class="tbl__name">Trafo 5A</td>
+								<td class="tbl__sub tnum">TRF5A</td>
+								<td class="tbl__sub">Pengaman</td>
+								<td class="tbl__num price">Rp 145.000</td>
+								<td class="tbl__num">4 · menipis</td>
+								<td><span class="tag tag--quiet">Aktif</span></td>
+								<td class="tbl__acts">
+									<button class="btn" type="button">Ubah</button>
+									<button class="btn" type="button">Nonaktifkan</button>
+									<button class="btn" type="button">Hapus</button>
+								</td>
+							</tr>
+							<tr>
+								<td class="tbl__name">Box Panel 20x30</td>
+								<td class="tbl__sub tnum">BOX2030</td>
+								<td class="tbl__sub">Aksesori</td>
+								<td class="tbl__num price">Rp 85.000</td>
+								<td class="tbl__num">6</td>
+								<td><span class="tag tag--quiet tag--nonaktif">Nonaktif</span></td>
+								<td class="tbl__acts">
+									<button class="btn" type="button">Ubah</button>
+									<button class="btn" type="button">Aktifkan</button>
+									<button class="btn" type="button">Hapus</button>
+								</td>
+							</tr>
+							<tr>
+								<td class="tbl__name">Klem Kabel 10 mm</td>
+								<td class="tbl__sub tnum">KLM10</td>
+								<td class="tbl__sub">Aksesori</td>
+								<td class="tbl__num price">Rp 1.200</td>
+								<td class="tbl__num">180</td>
+								<td><span class="tag tag--quiet">Aktif</span></td>
+								<td class="tbl__acts">
+									<button class="btn" type="button">Ubah</button>
+									<button class="btn" type="button">Nonaktifkan</button>
+									<button class="btn" type="button">Hapus</button>
+								</td>
+							</tr>
+							<tr>
+								<td class="tbl__name">Timer Lampu</td>
+								<td class="tbl__sub tnum">TMR01</td>
+								<td class="tbl__sub">Alat</td>
+								<td class="tbl__num price">Rp 55.000</td>
+								<td class="tbl__num">9</td>
+								<td><span class="tag tag--quiet">Aktif</span></td>
+								<td class="tbl__acts">
+									<button class="btn" type="button">Ubah</button>
+									<button class="btn" type="button">Nonaktifkan</button>
+									<button class="btn" type="button">Hapus</button>
+								</td>
+							</tr>
+							<tr>
+								<td class="tbl__name">Kabel Roll 50 m</td>
+								<td class="tbl__sub tnum">ROL50</td>
+								<td class="tbl__sub">Kabel</td>
+								<td class="tbl__num price">Rp 210.000</td>
+								<td class="tbl__num">3 · menipis</td>
+								<td><span class="tag tag--quiet">Aktif</span></td>
+								<td class="tbl__acts">
+									<button class="btn" type="button">Ubah</button>
+									<button class="btn" type="button">Nonaktifkan</button>
+									<span class="tbl__sub">Pernah terjual</span>
+								</td>
+							</tr>
+							<tr>
+								<td class="tbl__name">Fitting Lampu</td>
+								<td class="tbl__sub tnum">FTG01</td>
+								<td class="tbl__sub">Lampu</td>
+								<td class="tbl__num price">Rp 6.500</td>
+								<td class="tbl__num">44</td>
+								<td><span class="tag tag--quiet">Aktif</span></td>
+								<td class="tbl__acts">
+									<button class="btn" type="button">Ubah</button>
+									<button class="btn" type="button">Nonaktifkan</button>
+									<button class="btn" type="button">Hapus</button>
+								</td>
+							</tr>
+							<tr>
+								<td class="tbl__name">Gergaji Besi</td>
+								<td class="tbl__sub tnum">GRG02</td>
+								<td class="tbl__sub">Alat</td>
+								<td class="tbl__num price">Rp 25.000</td>
+								<td class="tbl__num">Stok habis</td>
+								<td><span class="tag tag--quiet">Aktif</span></td>
+								<td class="tbl__acts">
+									<button class="btn" type="button">Ubah</button>
+									<button class="btn" type="button">Nonaktifkan</button>
+									<button class="btn" type="button">Hapus</button>
+								</td>
+							</tr>
+							<tr>
+								<td class="tbl__name">Meteran 5 m</td>
+								<td class="tbl__sub tnum">MTR5</td>
+								<td class="tbl__sub">Alat</td>
+								<td class="tbl__num price">Rp 18.000</td>
+								<td class="tbl__num">15</td>
+								<td><span class="tag tag--quiet">Aktif</span></td>
+								<td class="tbl__acts">
+									<button class="btn" type="button">Ubah</button>
+									<button class="btn" type="button">Nonaktifkan</button>
+									<button class="btn" type="button">Hapus</button>
+								</td>
+							</tr>
+							<tr>
+								<td class="tbl__name">Tang Kombinasi</td>
+								<td class="tbl__sub tnum">TNG01</td>
+								<td class="tbl__sub">Alat</td>
+								<td class="tbl__num price">Rp 45.000</td>
+								<td class="tbl__num">8</td>
+								<td><span class="tag tag--quiet">Aktif</span></td>
+								<td class="tbl__acts">
+									<button class="btn" type="button">Ubah</button>
+									<button class="btn" type="button">Nonaktifkan</button>
+									<button class="btn" type="button">Hapus</button>
+								</td>
+							</tr>
+							<tr>
+								<td class="tbl__name">Multimeter Digital</td>
+								<td class="tbl__sub tnum">MMD01</td>
+								<td class="tbl__sub">Alat</td>
+								<td class="tbl__num price">Rp 125.000</td>
+								<td class="tbl__num">2 · menipis</td>
+								<td><span class="tag tag--quiet">Aktif</span></td>
+								<td class="tbl__acts">
+									<button class="btn" type="button">Ubah</button>
+									<button class="btn" type="button">Nonaktifkan</button>
+									<button class="btn" type="button">Hapus</button>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</section>
+		</main>
+	</body>
+</html>

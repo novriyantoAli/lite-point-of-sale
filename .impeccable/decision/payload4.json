@@ -1,0 +1,249 @@
+{
+  "title": "Pilih dunia visual — layar Kasir (tangan keempat)",
+  "question": "Derivasinya saya rombak: tujuh kandidat dari tujuh keluarga bahan yang belum tersentuh. Satu arah di bawah ini dibangun penuh; ambil yang lain, atau lempar ulang lagi.",
+  "steer": true,
+  "canon": true,
+  "buildPath": {
+    "value": "code",
+    "toggle": false
+  },
+  "reroll": {
+    "registers": [
+      "safer",
+      "bolder"
+    ]
+  },
+  "options": [
+    {
+      "id": "assigned",
+      "label": "The Cable Tie",
+      "kicker": "THE ROLL",
+      "lineage": "cable tie nilon dan selang heat-shrink: bahan yang hanya bekerja sekali",
+      "thesis": "Penjualan itu satu arah seperti cable tie: ia hanya bisa dikencangkan, tidak pernah bisa dilonggarkan lagi.",
+      "palette": [
+        "#e9e9e7",
+        "#1b1b1d",
+        "#a8a8a4",
+        "#1a4f8a"
+      ],
+      "materials": [
+        "nilon alam tanpa warna",
+        "nilon hitam bergerigi",
+        "selang heat-shrink",
+        "ekor yang dipotong",
+        "kunci satu arah"
+      ],
+      "viewport": "Keranjang adalah ikatan: barang dikumpulkan sebagai satu bundel, setiap langkah checkout mengklik satu gigi yang tidak bisa mundur, dan Penjualan yang sudah tersimpan disegel heat-shrink biru sementara ekornya yang terpotong tetap tertinggal sebagai bukti.",
+      "risk": "Bahan yang hanya bisa sekali membuat setiap langkah terasa berat; kalau kliknya terlalu dramatis, kasir jadi ragu menekan apa pun.",
+      "raised": [
+        {
+          "from": "challenger-gravity",
+          "raise": "The Level Legend — hanya legendanya yang ditahan tetap mendatar; total berjalan tidak pernah ikut miring atau bergerak oleh apa pun."
+        },
+        {
+          "from": "challenger-cape",
+          "raise": "The Named Tension — satu tindakan punya lima keadaan bernama, dan tiap keadaan punya bentuknya sendiri, bukan cuma warna berbeda."
+        },
+        {
+          "from": "challenger-streamingwall",
+          "raise": "The One Axis at a Time — daftar hanya bergerak pada satu sumbu, jadi mata tidak pernah diminta melacak dua arah sekaligus."
+        },
+        {
+          "from": "challenger-darkroom",
+          "raise": "The Test Strip — Struk bisa muncul sebagai pratinjau sebelum apa pun dikunci, dan pratinjau itu murah sedangkan commit tidak."
+        },
+        {
+          "from": "challenger-variablefont",
+          "raise": "The Named Instance — gerak melompat di antara keadaan bernama, tidak pernah beranimasi di antaranya."
+        }
+      ]
+    },
+    {
+      "id": "model-pick",
+      "label": "The Cable Reel",
+      "kicker": "IMPECCABLE’S PICK",
+      "lineage": "gulungan kabel yang dijual per meter, angka meter tercetak di selubungnya",
+      "thesis": "Selubung kabel mencetak panjangnya sendiri sambil diurai: jumlah berjalan adalah bagian dari bendanya.",
+      "palette": [
+        "#17181a",
+        "#b06a2c",
+        "#ffffff",
+        "#7d8f1f"
+      ],
+      "materials": [
+        "tembaga serat",
+        "selubung PVC hitam",
+        "angka meter tercetak di selubung",
+        "inti biru, coklat, hijau-kuning",
+        "gunting potong"
+      ],
+      "viewport": "Keranjang adalah kabel yang sedang diurai: setiap meter yang ditambahkan mencetak angkanya di selubung, dan total berjalan adalah cetakan yang tumbuh di sepanjang benda itu.",
+      "risk": "Angka yang tumbuh di sepanjang benda menarik perhatian ke gerak, dan gerak bisa mengalahkan angka yang harus dibaca cepat."
+    },
+    {
+      "id": "challenger-density",
+      "label": "Japanese High-Density Grid",
+      "verdict": "competitive",
+      "lineage": "situs Jepang kontemporer berkepadatan tinggi",
+      "thesis": "Ratusan modul kecil berbingkai rambut memadat satu layar, dan tidak ada satu piksel yang terbuang.",
+      "palette": [
+        "#ffffff",
+        "#111111",
+        "#d0202f",
+        "#c8ccd2"
+      ],
+      "materials": [
+        "kisi modul berbingkai rambut",
+        "tab merah utilitas",
+        "gothic padat ukuran kecil",
+        "aksen hanya di tab dan harga"
+      ],
+      "viewport": "Mosaik modul persegi panjang berbingkai tipis, masing-masing dengan tab kepala kecilnya sendiri, dipadatkan tepi ke tepi tanpa inflasi ruang kosong.",
+      "case": "Menang di kejelasan: kepadatan adalah kecepatan, dan bingkai rambut membiarkan ratusan blok kecil memadat tanpa inflasi ruang kosong ala SaaS. Kalah di pengenalan: tradisi web Jepang bukan dunia toko ini.",
+      "risk": "Kepadatan yang dipaksakan lewat huruf kecil menabrak batasan Anda sendiri: pemilik yang belum pernah memakai sistem butuh huruf yang terbaca.",
+      "hero": "https://impeccable.style/worlds/cards/japanese-high-density-web-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/japanese-high-density-web.webp"
+    },
+    {
+      "id": "challenger-gravity",
+      "label": "Gravity Rain Garden",
+      "verdict": "declined",
+      "lineage": "taman hujan surealis: gravitasi ditentukan warna awan",
+      "thesis": "Setiap awan menentukan arah jatuhnya hujan di wilayahnya sendiri.",
+      "palette": [
+        "#5a6b5f",
+        "#1a1a1a",
+        "#3f6fb5",
+        "#b53f4f"
+      ],
+      "materials": [
+        "gravitasi lokal per wilayah",
+        "hujan biru dan merah sebagai arah",
+        "bunga hitam sebagai jangkar",
+        "hanya legenda yang ditahan mendatar"
+      ],
+      "viewport": "Baseline huruf membungkuk mengikuti gravitasi setempat, label jatuh atau naik menuju awannya, dan hanya legenda yang ditahan tetap mendatar.",
+      "case": "Yang disimpan: The Level Legend — hanya legenda yang ditahan tetap mendatar. Ditolak karena dunia surealis bukan dunia toko, dan warna yang menentukan hukum justru kode yang harus dipelajari lebih dulu.",
+      "risk": "Warna yang menjadi hukum membuat tata letaknya tidak bisa dibaca tanpa menghafal arti tiap warna.",
+      "hero": "https://impeccable.style/worlds/cards/dream-surreal-impossible-worlds-gravity-rain-garden-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/dream-surreal-impossible-worlds-gravity-rain-garden.webp"
+    },
+    {
+      "id": "challenger-cape",
+      "label": "Drawcord Cape",
+      "verdict": "declined",
+      "lineage": "cape sutra dengan saluran tali tersembunyi",
+      "thesis": "Satu tarikan mengubah bidang datar menjadi rusuk, kerutan, dan volume.",
+      "palette": [
+        "#101012",
+        "#c9a227",
+        "#3a3a3e",
+        "#5c6470"
+      ],
+      "materials": [
+        "sutra hitam matte",
+        "tali emas sebagai kontrol",
+        "jahitan saluran grafit",
+        "bayangan terkumpul slate"
+      ],
+      "viewport": "Label menunggangi saluran tali, dan radius setengah lingkaran mengatur semua kesejajaran di halaman.",
+      "case": "Yang disimpan: The Named Tension — satu tindakan dengan lima keadaan bernama, masing-masing punya bentuknya sendiri. Ditolak karena cape bukan benda di toko ini, dan metafora transformasi kain terlalu jauh dari menekan tombol bayar.",
+      "risk": "Keadaan yang hanya dibedakan bentuk kain menuntut pembacaan lambat, dan meja kasir tidak punya waktu itu.",
+      "hero": "https://impeccable.style/worlds/cards/textiles-weave-drape-fashion-drawcord-transforming-cape-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/textiles-weave-drape-fashion-drawcord-transforming-cape.webp"
+    },
+    {
+      "id": "challenger-streamingwall",
+      "label": "Streaming Title Wall",
+      "verdict": "declined",
+      "lineage": "dinding katalog layanan streaming",
+      "thesis": "Baris poster bergulir mendatar, dan petak yang disinggahi membesar untuk menjelaskan dirinya.",
+      "palette": [
+        "#0d0d10",
+        "#ffffff",
+        "#e0b23a",
+        "#3a3a44"
+      ],
+      "materials": [
+        "petak poster rasio tetap",
+        "satu aksen di bingkai petak fokus",
+        "baris aktif terangkat",
+        "snap rel mendatar"
+      ],
+      "viewport": "Baris bergulir mendatar dan dinding bergulir tegak, jadi navigasinya adalah kisi yang ditelusuri satu sumbu sekaligus.",
+      "case": "Yang disimpan: The One Axis at a Time — daftar hanya bergerak pada satu sumbu. Ditolak karena meredupkan sisanya adalah kebalikan dari kebutuhan kasir, yang justru harus terus melihat keranjang dan total saat bekerja di satu baris.",
+      "risk": "Petak yang membesar saat fokus menggeser tata letak, dan tata letak yang bergeser membuat angka pindah tempat di bawah jari.",
+      "hero": "https://impeccable.style/worlds/cards/pop-culture-shelf-streaming-title-card-wall-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/pop-culture-shelf-streaming-title-card-wall.webp"
+    },
+    {
+      "id": "challenger-darkroom",
+      "label": "Darkroom Safelight Bay",
+      "verdict": "declined",
+      "lineage": "kamar gelap cetak foto di bawah lampu kuning",
+      "thesis": "Pekerjaan bergerak melalui stasiun tetap, dan ada titik yang tidak bisa dimundurkan lagi.",
+      "palette": [
+        "#c98a2e",
+        "#1c1c1c",
+        "#f0ede6",
+        "#8a8a8a"
+      ],
+      "materials": [
+        "lampu kuning menyelimuti semua permukaan",
+        "catatan pensil grease",
+        "stasiun berurutan",
+        "test strip sebelum commit"
+      ],
+      "viewport": "Pekerjaan melewati stasiun berurutan: susun, sinari, cuci, fiksasi, bilas, kering, dengan catatan pensil dan angka pengatur waktu di bawah cahaya kuning.",
+      "case": "Yang disimpan: The Test Strip — pratinjau muncul sebelum apa pun dikunci, dan pratinjau itu murah sedangkan commit tidak. Ditolak karena kamar gelap bukan dunia toko, dan kemunculan yang lambat adalah kebalikan dari kasir yang harus selesai dalam hitungan detik.",
+      "risk": "Satu warna kuning menyelimuti semuanya, dan latar hangat seperti itu menghapus kontras yang justru menyelamatkan angka.",
+      "hero": "https://impeccable.style/worlds/cards/signals-instruments-darkroom-safelight-bay-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/signals-instruments-darkroom-safelight-bay.webp"
+    },
+    {
+      "id": "challenger-variablefont",
+      "label": "Variable Font Specimen",
+      "verdict": "declined",
+      "lineage": "spesimen huruf variabel dengan slider sumbu",
+      "thesis": "Satu slider mengubah seluruh kisi huruf sekaligus, langsung di bawah jari.",
+      "palette": [
+        "#fbfbf9",
+        "#111111",
+        "#c2412d",
+        "#d8d8d4"
+      ],
+      "materials": [
+        "satu sumbu mengubah semua glif",
+        "label UI monospace kecil",
+        "kisi ukuran ketat",
+        "hierarki hanya dari kontras skala"
+      ],
+      "viewport": "Huruf spesimen raksasa berhadapan dengan label UI yang sangat kecil, dengan kisi ukuran dan baseline yang ketat, dan hierarki dibawa kontras skala saja.",
+      "case": "Yang disimpan: The Named Instance — gerak melompat di antara keadaan bernama, tidak pernah beranimasi di antaranya. Ditolak karena spesimen huruf adalah alat perancang huruf, bukan alat kasir, dan mengubah bentuk huruf secara langsung tidak menjawab satu pun pertanyaan di meja kasir.",
+      "risk": "Sumbu yang mengubah seluruh halaman sekaligus adalah mainan perancang; di depan pembeli ia cuma menambah satu hal yang bisa salah ditekan.",
+      "hero": "https://impeccable.style/worlds/cards/variable-font-specimen-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/variable-font-specimen.webp"
+    }
+  ],
+  "canonCard": {
+    "label": "The Category Standard",
+    "lineage": "keluarga kasir SaaS: majoo, Moka, Pawoon, Olsera, Shopify POS",
+    "thesis": "Yang dikirim setiap aplikasi kasir: sidebar indigo, kartu KPI, tabel berbayang lembut.",
+    "palette": [
+      "#f8fafc",
+      "#ffffff",
+      "#4f46e5",
+      "#0f172a",
+      "#e2e8f0"
+    ],
+    "materials": [
+      "kartu berbayang lembut",
+      "radius 12px",
+      "aksen indigo",
+      "sidebar ikon + label",
+      "thumbnail produk besar"
+    ],
+    "viewport": "Sidebar di kiri, empat kartu KPI di atas, tabel data bersudut bulat di bawahnya.",
+    "risk": "Tidak bisa dibedakan dari pesaing, dan itu memang tujuannya."
+  }
+}

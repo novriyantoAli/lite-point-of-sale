@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="id">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Pengguna — Japanese High-Density Grid</title>
+		<link rel="stylesheet" href="../sistem/style.css" />
+	</head>
+	<body>
+		<div class="bar">
+			<p>
+				<b>Prototipe arah</b> — dunia <b>Japanese High-Density Grid</b>, layar Pengguna. Isi di
+				sini <b>contoh</b>, bukan data toko.
+			</p>
+			<p><a href="../kasir/index.html">layar Kasir</a></p>
+		</div>
+
+		<nav class="rail" aria-label="Navigasi utama">
+			<div class="rail__top">
+				<span class="rail__brand">Lite Point of Sale</span>
+				<span class="rail__who">
+					<span class="tnum">admin</span>
+					<span class="tag tag--quiet">Admin</span>
+					<button class="btn" type="button">Keluar</button>
+				</span>
+			</div>
+			<div class="rail__row">
+				<a class="tab" href="../beranda/index.html">Beranda</a>
+				<a class="tab" href="../kasir/index.html">Kasir</a>
+				<a class="tab" href="../penjualan/index.html">Penjualan</a>
+			</div>
+			<div class="rail__row">
+				<a class="tab" href="../produk/index.html">Produk <span class="tab__n">24</span></a>
+				<a class="tab" href="../stok/index.html">Stok <span class="tab__n">4</span></a>
+				<a class="tab" href="../laporan/index.html">Laporan</a>
+				<a class="tab" href="../pengguna/index.html" aria-current="page">Pengguna</a>
+				<a class="tab" href="../pengaturan/index.html">Pengaturan</a>
+				<a class="tab" href="../backup/index.html">Backup</a>
+			</div>
+		</nav>
+
+		<main class="board board--full">
+			<div class="strip">
+				<h1 class="strip__title">Pengguna</h1>
+				<p class="strip__desc">
+					Kasir dan Admin yang boleh memakai kasir ini. Akun yang Nonaktif tetap tersimpan
+					riwayatnya, tetapi tidak bisa login lagi.
+				</p>
+			</div>
+
+			<section class="col" aria-labelledby="tambah-judul">
+				<div class="mod mod--head">
+					<h2 class="mod__title" id="tambah-judul">Tambah Pengguna</h2>
+					<span class="mod__note">Admin membuat akun Kasir</span>
+				</div>
+				<div class="mod">
+					<div class="formgrid formgrid--3">
+						<div class="field">
+							<label class="field__label" for="u-username">Username</label>
+							<input id="u-username" class="input" autocomplete="off" />
+						</div>
+						<div class="field">
+							<label class="field__label" for="u-password">Password</label>
+							<input id="u-password" class="input" type="password" autocomplete="new-password" />
+						</div>
+						<div class="field">
+							<label class="field__label" for="u-peran">Peran</label>
+							<select id="u-peran" class="select">
+								<option>Kasir</option>
+								<option>Admin</option>
+							</select>
+						</div>
+					</div>
+					<div class="actions" style="margin-top: 10px">
+						<button class="btn btn--solid" type="button">Tambah</button>
+					</div>
+				</div>
+			</section>
+
+			<section class="col" aria-labelledby="daftar-judul" style="margin-top: 8px">
+				<div class="mod mod--head">
+					<h2 class="mod__title" id="daftar-judul">Daftar Pengguna</h2>
+					<span class="mod__note tnum">3 akun</span>
+				</div>
+				<div class="stack">
+					<div class="lirow">
+						<div class="lirow__main">
+							<p class="lirow__name">
+								admin <span class="tag tag--quiet">Admin</span>
+								<span class="lirow__meta" style="display: inline">· (Anda)</span>
+							</p>
+						</div>
+						<div class="lirow__acts">
+							<span class="lirow__meta">Tidak bisa menonaktifkan diri sendiri</span>
+						</div>
+					</div>
+					<div class="lirow">
+						<div class="lirow__main">
+							<p class="lirow__name">kasir1 <span class="tag tag--quiet">Kasir</span></p>
+						</div>
+						<div class="lirow__acts">
+							<button class="btn" type="button">Nonaktifkan</button>
+						</div>
+					</div>
+					<div class="lirow">
+						<div class="lirow__main">
+							<p class="lirow__name">
+								budi <span class="tag tag--quiet">Kasir</span>
+								<span class="tag tag--quiet tag--nonaktif">Nonaktif</span>
+							</p>
+						</div>
+						<div class="lirow__acts">
+							<button class="btn" type="button">Aktifkan</button>
+						</div>
+					</div>
+				</div>
+			</section>
+		</main>
+	</body>
+</html>

@@ -10,6 +10,7 @@ package pengaturan
 import (
 	"context"
 	"errors"
+	"strings"
 )
 
 // Settings is the store's single row of Pengaturan. One store, one terminal
@@ -43,6 +44,20 @@ func ValidPaperWidth(width int64) bool {
 // Active Produk menipis and a negative one is not a Stok at all.
 func ValidLowStockThreshold(threshold int64) bool {
 	return threshold > 0
+}
+
+// StoreName answers the name the store is known by on screen. The name has no
+// field of its own (ADR-0002, PRODUCT.md): it is the first non-empty line of the
+// Struk header block, so an empty block means the store has no name yet. The
+// caller that reads it before login (the /login screen) is the reason it is a
+// method here rather than a second stored column.
+func (s Settings) StoreName() string {
+	for _, line := range strings.Split(s.Header, "\n") {
+		if name := strings.TrimSpace(line); name != "" {
+			return name
+		}
+	}
+	return ""
 }
 
 // Sentinel errors the use cases return and the HTTP adapter maps to status

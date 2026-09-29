@@ -48,6 +48,9 @@ describe('LoginForm', () => {
 		await user.click(screen.getByRole('button', { name: 'Masuk' }));
 
 		expect(await screen.findByRole('alert')).toHaveTextContent('Username atau password salah.');
+		// The error line is ink, not utility red: red belongs to tabs and prices
+		// (DESIGN.md, Fields & Inputs).
+		expect(screen.getByRole('alert')).not.toHaveClass('text-destructive');
 		expect(goto).not.toHaveBeenCalled();
 	});
 
@@ -60,6 +63,11 @@ describe('LoginForm', () => {
 
 		expect(await screen.findByText('Username wajib diisi.')).toBeInTheDocument();
 		expect(screen.getByText('Password wajib diisi.')).toBeInTheDocument();
+		// The message is ink while the field carries the red border/outline, so the
+		// two vocabularies cannot drift apart again (DESIGN.md, Fields & Inputs).
+		expect(screen.getByText('Username wajib diisi.')).not.toHaveClass('text-destructive');
+		expect(screen.getByText('Password wajib diisi.')).not.toHaveClass('text-destructive');
+		expect(screen.getByLabelText('Username')).toHaveAttribute('aria-invalid', 'true');
 		expect(login).not.toHaveBeenCalled();
 	});
 });

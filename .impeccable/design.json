@@ -1,0 +1,329 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-25T21:20:22+08:00",
+  "title": "Design System: Lite Point of Sale",
+  "extensions": {
+    "colorMeta": {
+      "ground": {
+        "role": "neutral",
+        "displayName": "Ground Grey",
+        "canonical": "#fafafa",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(27% 0 0)",
+          "oklch(39% 0 0)",
+          "oklch(51% 0 0)",
+          "oklch(63% 0 0)",
+          "oklch(75% 0 0)",
+          "oklch(87% 0 0)",
+          "oklch(96% 0 0)"
+        ]
+      },
+      "tile": {
+        "role": "primary",
+        "displayName": "Tile White",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(27% 0 0)",
+          "oklch(39% 0 0)",
+          "oklch(51% 0 0)",
+          "oklch(63% 0 0)",
+          "oklch(75% 0 0)",
+          "oklch(87% 0 0)",
+          "oklch(96% 0 0)"
+        ]
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Hairline Grey",
+        "canonical": "#e8e8e8",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(27% 0 0)",
+          "oklch(39% 0 0)",
+          "oklch(51% 0 0)",
+          "oklch(63% 0 0)",
+          "oklch(75% 0 0)",
+          "oklch(87% 0 0)",
+          "oklch(96% 0 0)"
+        ]
+      },
+      "wash": {
+        "role": "neutral",
+        "displayName": "Wash Grey",
+        "canonical": "#f5f5f5",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(27% 0 0)",
+          "oklch(39% 0 0)",
+          "oklch(51% 0 0)",
+          "oklch(63% 0 0)",
+          "oklch(75% 0 0)",
+          "oklch(87% 0 0)",
+          "oklch(96% 0 0)"
+        ]
+      },
+      "ink": {
+        "role": "primary",
+        "displayName": "Ink Black",
+        "canonical": "#000000",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(27% 0 0)",
+          "oklch(39% 0 0)",
+          "oklch(51% 0 0)",
+          "oklch(63% 0 0)",
+          "oklch(75% 0 0)",
+          "oklch(87% 0 0)",
+          "oklch(96% 0 0)"
+        ]
+      },
+      "utility": {
+        "role": "secondary",
+        "displayName": "Utility Red",
+        "canonical": "#cc0d0d",
+        "tonalRamp": [
+          "oklch(15% 0.05 27)",
+          "oklch(30% 0.12 27)",
+          "oklch(43% 0.18 27)",
+          "oklch(0.55 0.22 27)",
+          "oklch(68% 0.19 27)",
+          "oklch(79% 0.13 27)",
+          "oklch(90% 0.06 27)",
+          "oklch(96% 0.02 27)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "title": {
+        "displayName": "Title",
+        "purpose": "Satu per layar. Satu-satunya tempat 24px muncul, dan lompatan skala yang membuat hierarki terbaca."
+      },
+      "figure": {
+        "displayName": "Figure",
+        "purpose": "Angka yang jadi jawaban layar: Kembalian, jumlah dibayar. Selalu tabular-nums."
+      },
+      "strong": {
+        "displayName": "Strong",
+        "purpose": "Total berjalan, nilai di kepala kolom, teks tombol utama."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Badan seluruh antarmuka: nama Produk, isi tabel, input, teks tombol. Ukuran kerja sistem ini."
+      },
+      "micro": {
+        "displayName": "Micro",
+        "purpose": "Tab, badge, kepala tabel, label field. Ini lantainya; tidak ada teks di bawah 12px."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "duration-swap",
+        "value": "100ms",
+        "purpose": "Satu-satunya transisi: latar dan garis berubah saat hover dan fokus."
+      },
+      {
+        "name": "ease-default",
+        "value": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "purpose": "Satu-satunya easing."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "0ms",
+        "purpose": "prefers-reduced-motion mematikan transisi; tukar keadaan tetap seketika."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "stack",
+        "value": "1080px",
+        "purpose": "Di bawah ini papan menumpuk jadi satu kolom, tidak pernah menggeser mendatar."
+      },
+      {
+        "name": "narrow",
+        "value": "560px",
+        "purpose": "Rel membungkus dan mosaik turun ke minimum 132px per petak."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Module",
+      "kind": "card",
+      "refersTo": "module",
+      "description": "Blok berisi terkecil: petak putih dengan satu garis rambut. Kepalanya memakai isian wash dan ditutup garis tinta.",
+      "html": "<div class=\"ds-mod\"><div class=\"ds-mod-head\"><span class=\"ds-mod-title\">Keranjang</span><span class=\"ds-mod-note\">7 unit · 2 Item</span></div><div class=\"ds-mod-body\">Modul isi.</div></div>",
+      "css": ".ds-mod { background: var(--tile, #ffffff); border: 1px solid var(--hairline, #e8e8e8); border-bottom: 0; font-family: 'Inter Variable', system-ui, sans-serif; color: var(--ink, #000000); }\n.ds-mod-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 8px; background: var(--wash, #f5f5f5); border-bottom: 1px solid var(--ink, #000000); }\n.ds-mod-title { font-size: 0.8125rem; font-weight: 700; }\n.ds-mod-note { font-size: 0.75rem; font-variant-numeric: tabular-nums; }\n.ds-mod-body { padding: 6px 8px; font-size: 0.8125rem; }\n.ds-mod > .ds-mod-body:last-child { border-bottom: 1px solid var(--hairline, #e8e8e8); }"
+    },
+    {
+      "name": "Product Tile",
+      "kind": "button",
+      "refersTo": "tile",
+      "description": "Unit terkecil yang bisa ditekan. Tab Kode di kiri atas, nama, lalu Stok di kiri dan harga merah di kanan. Hover menaikkan garisnya jadi tinta, tanpa bayangan.",
+      "html": "<button class=\"ds-tile\" type=\"button\"><span class=\"ds-tag\">NYM325</span><span class=\"ds-tile-name\">Kabel NYM 3x2.5 mm</span><span class=\"ds-tile-foot\"><span class=\"ds-tile-stock\">Stok 120</span><span class=\"ds-tile-price\">Rp 18.500</span></span></button>",
+      "css": ".ds-tile { position: relative; display: flex; flex-direction: column; gap: 4px; width: 154px; padding: 6px 8px 8px; text-align: left; background: var(--tile, #ffffff); border: 1px solid var(--hairline, #e8e8e8); border-radius: 0; cursor: pointer; font-family: 'Inter Variable', system-ui, sans-serif; color: var(--ink, #000000); transition: background 100ms cubic-bezier(0.4, 0, 0.2, 1), border-color 100ms cubic-bezier(0.4, 0, 0.2, 1); }\n.ds-tile:hover { background: var(--wash, #f5f5f5); border-color: var(--ink, #000000); }\n.ds-tile:focus-visible { outline: 2px solid var(--ink, #000000); outline-offset: -2px; }\n.ds-tag { align-self: flex-start; display: inline-flex; align-items: center; height: 15px; padding: 0 5px; font-size: 0.75rem; font-weight: 600; color: var(--tile, #ffffff); background: var(--utility, #cc0d0d); }\n.ds-tile-name { font-size: 0.8125rem; font-weight: 500; line-height: 1.2; }\n.ds-tile-foot { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-top: auto; }\n.ds-tile-stock { font-size: 0.75rem; font-variant-numeric: tabular-nums; }\n.ds-tile-price { font-size: 0.8125rem; font-weight: 600; color: var(--utility, #cc0d0d); font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Product Tile — Stok habis",
+      "kind": "button",
+      "refersTo": "tile-disabled",
+      "description": "Produk yang habis kehilangan tintanya: nama dan harga dicoret garis, petaknya mati. Bukan dipudarkan.",
+      "html": "<button class=\"ds-tile ds-tile--out\" type=\"button\" disabled><span class=\"ds-tag ds-tag--quiet\">tanpa Kode</span><span class=\"ds-tile-name\">Gergaji Besi</span><span class=\"ds-tile-foot\"><span class=\"ds-tile-stock\">Stok habis</span><span class=\"ds-tile-price\">Rp 25.000</span></span></button>",
+      "css": ".ds-tile--out { cursor: not-allowed; }\n.ds-tile--out:hover { background: var(--tile, #ffffff); border-color: var(--hairline, #e8e8e8); }\n.ds-tile--out .ds-tile-name, .ds-tile--out .ds-tile-price { text-decoration: line-through; text-decoration-thickness: 1px; }\n.ds-tag--quiet { color: var(--ink, #000000); background: var(--wash, #f5f5f5); border: 1px solid var(--hairline, #e8e8e8); }"
+    },
+    {
+      "name": "Nav Tab",
+      "kind": "nav",
+      "refersTo": "tab",
+      "description": "Navigasi adalah tab, bukan daftar. Tab aktif memakai isian merah penuh dengan teks putih dan cacah tabular di sebelah namanya.",
+      "html": "<nav class=\"ds-tabs\"><a class=\"ds-tab\" href=\"#\">Beranda</a><a class=\"ds-tab ds-tab--on\" href=\"#\" aria-current=\"page\">Kasir</a><a class=\"ds-tab\" href=\"#\">Produk <span class=\"ds-tab-n\">24</span></a></nav>",
+      "css": ".ds-tabs { display: flex; align-items: stretch; font-family: 'Inter Variable', system-ui, sans-serif; }\n.ds-tab { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; font-size: 0.8125rem; color: var(--ink, #000000); background: var(--tile, #ffffff); border-right: 1px solid var(--hairline, #e8e8e8); text-decoration: none; white-space: nowrap; transition: background 100ms cubic-bezier(0.4, 0, 0.2, 1); }\n.ds-tab:hover { background: var(--wash, #f5f5f5); }\n.ds-tab--on, .ds-tab--on:hover { background: var(--utility, #cc0d0d); color: var(--tile, #ffffff); font-weight: 600; }\n.ds-tab-n { font-size: 0.75rem; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Field 26px persegi, label 12px di atasnya. Fokus memakai garis tinta plus outline ke dalam, bukan glow. Field uang memakai caret merah.",
+      "html": "<div class=\"ds-field\"><label class=\"ds-label\" for=\"ds-bayar\">Jumlah bayar</label><input id=\"ds-bayar\" class=\"ds-input\" value=\"150000\" /></div>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 3px; font-family: 'Inter Variable', system-ui, sans-serif; }\n.ds-label { font-size: 0.75rem; font-weight: 600; color: var(--ink, #000000); }\n.ds-input { height: 26px; width: 100%; padding: 0 6px; font-family: inherit; font-size: 0.8125rem; font-variant-numeric: tabular-nums; color: var(--ink, #000000); background: var(--tile, #ffffff); border: 1px solid var(--hairline, #e8e8e8); border-radius: 0; outline: none; caret-color: var(--utility, #cc0d0d); transition: border-color 100ms cubic-bezier(0.4, 0, 0.2, 1); }\n.ds-input:hover { border-color: var(--ink, #000000); }\n.ds-input:focus-visible { border-color: var(--ink, #000000); outline: 2px solid var(--ink, #000000); outline-offset: -2px; }\n.ds-input[aria-invalid='true'] { border-color: var(--utility, #cc0d0d); outline: 2px solid var(--utility, #cc0d0d); outline-offset: -2px; }"
+    },
+    {
+      "name": "Payment Method Cell",
+      "kind": "input",
+      "refersTo": "method",
+      "description": "Empat metode sebagai radio asli yang disembunyikan, dengan label sebagai sel persegi. Terpilih berarti bidang tinta penuh, bukan tint dan bukan centang.",
+      "html": "<div class=\"ds-methods\"><label class=\"ds-method\"><input type=\"radio\" name=\"ds-m\" checked />Tunai</label><label class=\"ds-method\"><input type=\"radio\" name=\"ds-m\" />QRIS</label><label class=\"ds-method\"><input type=\"radio\" name=\"ds-m\" />Debit</label><label class=\"ds-method\"><input type=\"radio\" name=\"ds-m\" />Transfer</label></div>",
+      "css": ".ds-methods { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; font-family: 'Inter Variable', system-ui, sans-serif; }\n.ds-method { display: flex; align-items: center; justify-content: center; height: 26px; font-size: 0.8125rem; font-weight: 500; color: var(--ink, #000000); background: var(--tile, #ffffff); border: 1px solid var(--hairline, #e8e8e8); border-radius: 0; cursor: pointer; transition: background 100ms cubic-bezier(0.4, 0, 0.2, 1), border-color 100ms cubic-bezier(0.4, 0, 0.2, 1); }\n.ds-method:hover { background: var(--wash, #f5f5f5); }\n.ds-method input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }\n.ds-method:focus-within { outline: 2px solid var(--ink, #000000); outline-offset: -2px; }\n.ds-method:has(input:checked) { background: var(--ink, #000000); color: var(--tile, #ffffff); border-color: var(--ink, #000000); font-weight: 600; }"
+    },
+    {
+      "name": "Commit Button",
+      "kind": "button",
+      "refersTo": "button-commit",
+      "description": "Satu-satunya bidang bertinta penuh di layar. Ia tidak diangkat dengan bayangan, ia diangkat dengan tinta.",
+      "html": "<button class=\"ds-commit\" type=\"button\">Bayar &amp; Simpan Penjualan</button>",
+      "css": ".ds-commit { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Inter Variable', system-ui, sans-serif; border: 1px solid var(--hairline, #e8e8e8); border-radius: 0; cursor: pointer; white-space: nowrap; transition: background 100ms cubic-bezier(0.4, 0, 0.2, 1), border-color 100ms cubic-bezier(0.4, 0, 0.2, 1); width: 100%; height: 40px; font-size: 0.9375rem; font-weight: 600; color: var(--tile, #ffffff); background: var(--ink, #000000); border-color: var(--ink, #000000); }\n.ds-commit:focus-visible { outline: 2px solid var(--ink, #000000); outline-offset: 2px; }"
+    },
+    {
+      "name": "Commit Button — disabled",
+      "kind": "button",
+      "refersTo": "button-commit-disabled",
+      "description": "Keadaan mati bukan warna pudar: tombolnya kehilangan tinta dan berubah jadi putih bergaris putus-putus.",
+      "html": "<button class=\"ds-commit ds-commit--off\" type=\"button\" disabled>Bayar &amp; Simpan Penjualan</button>",
+      "css": ".ds-commit--off { color: var(--ink, #000000); background: var(--tile, #ffffff); border-color: var(--ink, #000000); border-style: dashed; cursor: not-allowed; }\n.ds-commit--off:hover { background: var(--tile, #ffffff); }"
+    },
+    {
+      "name": "Figure",
+      "kind": "custom",
+      "refersTo": "figure",
+      "description": "Angka yang jadi jawaban layar, selalu didahului label yang menyebut apa angka itu. Angka yang belum bisa dihitung ditulis —.",
+      "html": "<div class=\"ds-fig\"><p class=\"ds-fig-label\">Kembalian</p><p class=\"ds-fig-value\">Rp 13.500</p></div>",
+      "css": ".ds-fig { font-family: 'Inter Variable', system-ui, sans-serif; }\n.ds-fig-label { margin: 0; font-size: 0.75rem; font-weight: 600; color: var(--ink, #000000); }\n.ds-fig-value { margin: 0; font-size: 1.25rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; color: var(--ink, #000000); }"
+    },
+    {
+      "name": "Shared Hairline Mosaic",
+      "kind": "custom",
+      "refersTo": "tile",
+      "description": "Dua petak bersebelahan berbagi satu garis 1px, bukan dua garis yang menempel. Inilah yang membuat mosaiknya padat tanpa celah.",
+      "html": "<div class=\"ds-mosaic\"><span class=\"ds-cell\">Sekring 2A</span><span class=\"ds-cell\">Tespen</span><span class=\"ds-cell\">Fitting Lampu</span><span class=\"ds-cell\">Meteran 5 m</span></div>",
+      "css": ".ds-mosaic { display: grid; grid-template-columns: repeat(2, 154px); border-left: 1px solid var(--hairline, #e8e8e8); font-family: 'Inter Variable', system-ui, sans-serif; }\n.ds-cell { padding: 6px 8px; font-size: 0.8125rem; color: var(--ink, #000000); background: var(--tile, #ffffff); border: 1px solid var(--hairline, #e8e8e8); margin: -1px 0 0 -1px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Dense Mosaic",
+    "overview": "Seluruh katalog, keranjang, dan pembayaran berada di depan mata sekaligus. Layar ini tidak punya menu yang menyembunyikan apa pun, tidak punya kartu KPI, tidak punya sidebar, dan tidak punya satu pun bayangan: yang ada hanya petak-petak berbingkai rambut yang dipadatkan tepi ke tepi sampai satu layar penuh. Yang memisahkan satu petak dari yang lain adalah satu garis 1px, dan garis itu dipakai bersama oleh kedua petaknya, bukan digambar dua kali.\n\nSistem ini dibangun dari pengukuran, bukan dari selera. Dunianya adalah tradisi web berkepadatan tinggi Jepang, dan tokennya diambil dari QUALITY BAR yang diukur piksel per piksel: dasar `#fafafa`, petak `#ffffff`, garis `#e8e8e8`, tinta `#000000`, dan satu merah utilitas `#cc0d0d` yang pada bar hanya menempati 3,03% permukaan. Warnanya sengaja dingin netral. Dasar krem hangat adalah penampilan yang dikirim hampir semua model untuk subjek apa pun, dan sistem ini tidak mendarat di sana.\n\nAturan yang paling menentukan bukan warnanya, melainkan yang tidak ada di dalamnya: **tidak ada abu-abu sebagai tinta huruf.** Di bar-nya, semua abu-abu adalah garis dan isian, dan teksnya selalu hitam. Itu yang membuat seluruh teks di layar ini lolos WCAG AA, dan itu yang memperbaiki cacat terukur di sistem sebelumnya (tint merah 3,97:1 dan keadaan mati 3,23:1 karena `opacity: 0.5`). Hierarki di sini dibawa kontras skala dan kepadatan, bukan warna.",
+    "keyCharacteristics": [
+      "Enam token, satu di antaranya merah. Dasar, petak, garis, isian, tinta, dan satu merah",
+      "Merah hanya di tab dan harga, dan tetap di bawah 3% permukaan. Terukur 1,39% pada",
+      "Radius nol dan bayangan nol di mana-mana. Kedalaman dibawa kisi berbingkai rambut.",
+      "Lima ukuran huruf dengan lompatan skala nyata: 24 / 20 / 15 / 13 / 12px.",
+      "Lantai huruf 12px. Ukuran kecil milik bar ditolak; kepadatan dibayar dengan kisi.",
+      "Satu layar tanpa menggulir. 24 Produk, keranjang, dan pembayaran muat dalam 1440×900.",
+      "Keadaan adalah tanda, bukan warna pudar. Tombol mati kehilangan tintanya; Produk habis",
+      "Tidak ada yang bersembunyi di balik hover. Setiap kontrol membawa katanya sendiri."
+    ],
+    "rules": [
+      {
+        "name": "The Zero-Grey Rule",
+        "body": "Abu-abu hanya boleh jadi garis dan isian; ia tidak pernah jadi tinta huruf. Setiap teks memakai Ink Black. Inilah sebabnya seluruh teks di layar ini lolos AA, dan ini pula yang membuat Quiet Ink di sistem sebelumnya tidak diwariskan.",
+        "section": "colors"
+      },
+      {
+        "name": "The Three-Percent Rule",
+        "body": "Merah utilitas menempati kurang dari 3% permukaan pada setiap layar, dan hanya muncul sebagai tab atau harga. Ukur, jangan kira-kira; pada layar Kasir angkanya 1,39%.",
+        "section": "colors"
+      },
+      {
+        "name": "The No-Tint Rule",
+        "body": "Tidak ada nilai warna yang dipakai sebagai tint 10% atau 20%. Keadaan yang butuh pembeda memakai bidang penuh, garis rambut, atau tanda; bukan warna yang dilembutkan. Cacat kontras sistem sebelumnya datang tepat dari tint, bukan dari warnanya.",
+        "section": "colors"
+      },
+      {
+        "name": "The Scale-Contrast Rule",
+        "body": "Hierarki dibawa kontras skala dan kepadatan, bukan warna dan bukan bobot sendirian. Lompatan terbesarnya 24 → 13px, dan itu satu-satunya lompatan besar yang dibutuhkan sebuah layar.",
+        "section": "typography"
+      },
+      {
+        "name": "The Legibility Floor Rule",
+        "body": "Tidak ada teks di bawah 12px, dan tidak ada teks abu-abu. Dunia asalnya memakai huruf kecil untuk memadatkan layar; sistem ini menolaknya dan membayar kepadatan dengan kisi serta hilangnya ruang kosong, bukan dengan huruf yang mengecil.",
+        "section": "typography"
+      },
+      {
+        "name": "The Shared-Hairline Rule",
+        "body": "Dua modul yang bersebelahan berbagi satu garis 1px, bukan dua garis yang menempel. Kalau sebuah garis bisa dihitung dua kali, ia salah dipasang.",
+        "section": "layout"
+      },
+      {
+        "name": "The One-Screen Rule",
+        "body": "Seluruh katalog, keranjang, dan pembayaran harus muat dalam satu viewport 1440×900 tanpa menggulir. Pada 24 Produk, tingginya tepat 900px. Kalau sebuah perubahan mendorongnya melewati itu, yang dikurangi adalah ruang kosong, bukan jumlah Produk yang terlihat.",
+        "section": "layout"
+      },
+      {
+        "name": "The No-Shadow Rule",
+        "body": "Nol bayangan, di mana pun. Kalau sesuatu perlu terlihat lebih tinggi, ia memakai tinta penuh atau garis yang lebih tebal, bukan bayangan. Bayangan di sistem ini berarti sistemnya sudah berubah.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Square-Corner Rule",
+        "body": "Radius nol. Sudut bulat adalah kosakata sistem lain; di sini ia akan membuat mosaiknya terbaca sebagai kumpulan kartu, dan kartu adalah hal yang sistem ini tolak.",
+        "section": "shapes"
+      },
+      {
+        "name": "The State-Is-Not-Faded Rule",
+        "body": "Keadaan mati tidak pernah disampaikan dengan menurunkan opasitas. Tombol kehilangan tintanya, Produk habis dicoret, field tidak valid diberi garis merah penuh. Sistem sebelumnya memakai `opacity: 0.5` dan itu terukur 3,23:1, di bawah AA.",
+        "section": "components"
+      },
+      {
+        "name": "The Named-Not-Hidden Rule",
+        "body": "Tidak ada aksi yang bersembunyi di balik hover. Dunia asalnya memunculkan aksi sekunder saat hover; sistem ini menolaknya, karena pemakainya belum pernah memakai sistem kasir dan kosakata tersembunyi adalah kosakata yang harus dipelajari lebih dulu. Hover hanya mengubah latar dan garis.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "keep the ground at `#fafafa`, cool and neutral. The craft bar's ground is measured, not chosen, and warm cream is the rendition this system deliberately did not land on.",
+      "keep every piece of text Ink Black on a light ground; greys are lines and fills only.",
+      "keep the utility red under 3% of any screen, spent only on tabs and prices.",
+      "share one 1px hairline between adjacent modules instead of drawing two.",
+      "keep radius at 0 and `box-shadow` at none, everywhere.",
+      "keep `tabular-nums` on every amount, count, and Stok figure.",
+      "keep the 12px floor and the 24 → 13px scale jump; hierarchy comes from scale contrast and density.",
+      "keep the whole catalogue, cart, and payment inside one 1440×900 viewport.",
+      "let a disabled control lose its ink or take a strike, never its opacity.",
+      "theme the browser surfaces — selection, caret, scrollbar, focus ring — from this palette.",
+      "write every state's word next to its mark: `menipis`, `Stok habis`, `tanpa Kode`, `tersegel`."
+    ],
+    "donts": [
+      "introduce a tint. A 10% red tint measured 3,97:1 in the previous system; full-strength red on white measures 5,88:1. Tints are how this palette loses its contrast.",
+      "put grey text anywhere, at any size.",
+      "add a shadow, a radius, a gradient, or a second hue. This system's depth is ink, and its shape is the square.",
+      "shrink type below 12px to fit more in. The density is the grid's job; the craft bar's tiny type was refused on the owner's legibility constraint.",
+      "use monospace, for numbers or anything else. It is not in this system.",
+      "hide an action behind hover, a tooltip, or a layer above the page.",
+      "mark a quiet state in red. Red means a price or an active tab; `Nonaktif` and `menipis` are quiet tags, and `Stok habis` is a strike.",
+      "wrap a screen in a card, and never nest one: a module is a ruled region of the grid, and a card is what this system refuses to look like.",
+      "let the mosaic scroll sideways at any width; below 1080px the board stacks.",
+      "treat the header as settled: PRODUCT.md commits that the store's own name leads on screen, and the header still carries the product's name. That is the next visual change, not a system rule."
+    ]
+  }
+}

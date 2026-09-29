@@ -6,6 +6,7 @@ export { default as PengaturanForm } from './components/PengaturanForm.svelte';
 export {
 	pengaturanKeys,
 	createPengaturanQuery,
+	createStoreNameQuery,
 	createUpdatePengaturanMutation
 } from './queries/pengaturan.queries';
 
@@ -13,6 +14,7 @@ export {
 	PAPER_WIDTH_OPTIONS,
 	PengaturanSchema,
 	PengaturanEnvelopeSchema,
+	StoreNameEnvelopeSchema,
 	UpdatePengaturanInputSchema,
 	type Pengaturan,
 	type UpdatePengaturanInput

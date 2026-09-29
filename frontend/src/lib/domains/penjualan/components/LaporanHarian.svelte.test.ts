@@ -90,7 +90,7 @@ describe('LaporanHarian', () => {
 		expect(within(totalCard!).getByText('Rp 54.000')).toBeInTheDocument();
 
 		// Every method the API answered, in the till's order — the ones nobody used
-		// read as zero rather than going missing.
+		// read as `—` rather than going missing.
 		for (const label of ['Tunai', 'QRIS', 'Debit', 'Transfer']) {
 			expect(omzetSection().getByText(label)).toBeInTheDocument();
 		}
@@ -162,10 +162,37 @@ describe('LaporanHarian', () => {
 		expect(
 			omzetSection().getByText('Belum ada Penjualan, jadi belum ada yang bisa diatribusikan.')
 		).toBeInTheDocument();
-		// The method breakdown is still complete: four zero rows.
+		// The method breakdown is still complete: four rows, and not one of them
+		// pretends an unused method was worth zero — every cell reads `—`.
 		for (const label of ['Tunai', 'QRIS', 'Debit', 'Transfer']) {
 			expect(omzetSection().getByText(label)).toBeInTheDocument();
 		}
+		expect(omzetSection().getAllByText('—')).toHaveLength(8);
+	});
+
+	it('writes — for a method nobody used, instead of 0', async () => {
+		renderLaporan();
+
+		await omzetSection().findByText('Tunai');
+
+		// `debit` and `transfer` carried no Penjualan in the fixture.
+		const debit = omzetSection().getByRole('row', { name: /Debit/ });
+		expect(within(debit).getAllByText('—')).toHaveLength(2);
+		expect(within(debit).queryByText('0')).not.toBeInTheDocument();
+	});
+
+	it('refuses a broken Tanggal with a message, not a blank screen', async () => {
+		laporanState.tanggal = '2026-02-30';
+
+		renderLaporan();
+
+		expect(await screen.findByRole('alert')).toHaveTextContent(
+			'Tanggal laporan tidak valid. Menampilkan hari ini.'
+		);
+		// The report is not blank: the broken day falls back to today, and the
+		// screen still answers the day it is showing.
+		const totalCard = (await omzetSection().findByText('Total omzet')).closest('div');
+		expect(within(totalCard!).getByText('Rp 54.000')).toBeInTheDocument();
 	});
 
 	it('opens a Penjualan from the list and reprints its Struk', async () => {

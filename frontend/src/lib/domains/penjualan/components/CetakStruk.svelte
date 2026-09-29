@@ -13,7 +13,9 @@
 	 *
 	 * A failed print is shown on the screen with a button that prints again, never
 	 * as a toast that passes: a Kasir whose printer jammed has to be able to fix it
-	 * from here (ADR-0017, keputusan 1).
+	 * from here (ADR-0017, keputusan 1). Pesannya ditulis dengan tinta, bukan abu
+	 * abu dan bukan merah: yang menyatakan keadaannya adalah katanya, dan yang
+	 * membawa tanda merah adalah field yang tidak valid (DESIGN.md, Zero-Grey).
 	 */
 	let { nomorStruk, hasilAwal = null }: { nomorStruk: NomorStruk; hasilAwal?: HasilCetak | null } =
 		$props();
@@ -42,8 +44,14 @@
 	}
 </script>
 
-<div class="space-y-2">
-	<Button variant="outline" onclick={cetakUlang} disabled={cetak.isPending}>
+<div class="border-b border-border px-2 py-1.5">
+	<Button
+		variant="ghost"
+		size="sm"
+		class="h-[26px] border-border bg-card px-2 text-[13px] font-semibold hover:border-foreground focus-visible:border-foreground"
+		onclick={cetakUlang}
+		disabled={cetak.isPending}
+	>
 		{teksTombol}
 	</Button>
 
@@ -52,12 +60,12 @@
 		latest news, and it takes the screen over the print result it never replaced.
 	-->
 	{#if cetak.error}
-		<p class="text-sm text-destructive" role="alert">{cetak.error.message}</p>
+		<p class="mt-1 text-xs font-semibold" role="alert">{cetak.error.message}</p>
 	{:else if hasil?.printed === false}
-		<p class="text-sm text-destructive" role="alert">
+		<p class="mt-1 text-xs font-semibold" role="alert">
 			{hasil.message ?? 'Struk gagal dicetak.'}
 		</p>
 	{:else if hasil?.printed}
-		<p class="text-sm text-muted-foreground" role="status">Struk tercetak.</p>
+		<p class="mt-1 text-xs" role="status">Struk tercetak.</p>
 	{/if}
 </div>

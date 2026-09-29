@@ -18,10 +18,10 @@ export const PAPER_WIDTH_OPTIONS = [
 ] as const;
 
 /**
- * The Struk paper width as a form submits it: the Select's string choice, parsed
- * into the integer the API stores. It is a backstop behind a Select that only
- * offers the two widths — a direct caller sending anything else is refused here
- * with the same rule the Go side enforces.
+ * The Struk paper width as a form submits it: the radio cells' string choice,
+ * parsed into the integer the API stores. It is a backstop behind the two cells
+ * that only offer 58 and 80 mm — a direct caller sending anything else is refused
+ * here with the same rule the Go side enforces.
  */
 const paperWidthInput = z.preprocess(
 	(value) => (typeof value === 'string' ? Number(value) : value),
@@ -69,4 +69,14 @@ export type UpdatePengaturanInput = z.infer<typeof UpdatePengaturanInputSchema>;
 /** Every answer that carries the Pengaturan under `data.settings`. */
 export const PengaturanEnvelopeSchema = z.object({
 	data: z.object({ settings: PengaturanSchema })
+});
+
+/**
+ * The store's name as the public endpoint answers it — the one value the login
+ * screen may read before a session exists (ADR-0019). Go derives it from the
+ * first non-empty line of the Struk header; this schema only mirrors what comes
+ * back, so an unnamed store is the empty string rather than a missing key.
+ */
+export const StoreNameEnvelopeSchema = z.object({
+	data: z.object({ store_name: z.string() })
 });

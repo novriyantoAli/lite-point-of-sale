@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom/vitest';
-import { vi } from 'vitest';
+import { afterEach, vi } from 'vitest';
 
 // jsdom does not implement matchMedia; Svelte 5 components (and the shadcn
 // primitives) expect it to exist.
@@ -27,3 +27,12 @@ Element.prototype.scrollIntoView = vi.fn();
 Element.prototype.hasPointerCapture = vi.fn();
 Element.prototype.setPointerCapture = vi.fn();
 Element.prototype.releasePointerCapture = vi.fn();
+
+// bits-ui's overlays (Dialog, Select) lock the page while they are open, and
+// they hand the body back on a timer rather than on unmount. A test that starts
+// inside that window inherits the lock from the test before it and cannot click
+// anything — a leak in the harness, not in the component under test. Clearing
+// the body's inline style puts every test back on the same footing.
+afterEach(() => {
+	document.body.removeAttribute('style');
+});

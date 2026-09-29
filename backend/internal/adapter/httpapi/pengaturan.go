@@ -62,6 +62,30 @@ type settingsEnvelope struct {
 	Settings settingsResponse `json:"settings"`
 }
 
+// storeNameResponse is the public view of the store's name: the one value the
+// login screen may read before a session exists. It is deliberately not the
+// full settingsResponse — paper width and ambang stay Admin-only.
+type storeNameResponse struct {
+	StoreName string `json:"store_name"`
+}
+
+// storeNameHandler answers the store's name for screens shown before login. It
+// is public by design: the router registers it without a guard, and it returns
+// only the name derived from the Struk header (ADR-0019).
+func storeNameHandler(service SettingsService, logger *slog.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		settings, err := service.Get(r.Context())
+		if err != nil {
+			writeError(w, err, logger)
+			return
+		}
+
+		writeJSON(w, http.StatusOK, dataResponse{Data: storeNameResponse{
+			StoreName: settings.StoreName(),
+		}}, logger)
+	}
+}
+
 // getSettingsHandler answers the store's Pengaturan. It is Admin-only: the
 // router puts the role guard in front of it.
 func getSettingsHandler(service SettingsService, logger *slog.Logger) http.HandlerFunc {

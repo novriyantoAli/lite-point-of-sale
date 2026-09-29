@@ -40,7 +40,11 @@ test('the Admin creates a Kasir who can log in but cannot open the Pengguna page
 	// …and typing the URL does not get around it either.
 	await page.goto('/pengguna');
 	await expect(page).toHaveURL('/');
-	await expect(page.getByText('Pengguna', { exact: true })).toHaveCount(0);
+	// The screen itself did not load: Beranda names the Pengguna entry in its text
+	// ("…lalu Pengguna, Pengaturan, dan Backup"), so the word alone is no longer the
+	// proof — the screen's own heading is.
+	await expect(page.getByRole('heading', { name: 'Pengguna', level: 1 })).toHaveCount(0);
+	await expect(page.getByRole('heading', { name: 'Beranda', level: 1 })).toBeVisible();
 
 	await logOut(page);
 });

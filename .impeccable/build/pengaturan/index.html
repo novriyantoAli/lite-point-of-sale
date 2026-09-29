@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="id">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Pengaturan — Japanese High-Density Grid</title>
+		<link rel="stylesheet" href="../sistem/style.css" />
+	</head>
+	<body>
+		<div class="bar">
+			<p>
+				<b>Prototipe arah</b> — dunia <b>Japanese High-Density Grid</b>, layar Pengaturan. Isi di
+				sini <b>contoh</b>, bukan data toko.
+			</p>
+			<p><a href="../kasir/index.html">layar Kasir</a></p>
+		</div>
+
+		<nav class="rail" aria-label="Navigasi utama">
+			<div class="rail__top">
+				<span class="rail__brand">Lite Point of Sale</span>
+				<span class="rail__who">
+					<span class="tnum">admin</span>
+					<span class="tag tag--quiet">Admin</span>
+					<button class="btn" type="button">Keluar</button>
+				</span>
+			</div>
+			<div class="rail__row">
+				<a class="tab" href="../beranda/index.html">Beranda</a>
+				<a class="tab" href="../kasir/index.html">Kasir</a>
+				<a class="tab" href="../penjualan/index.html">Penjualan</a>
+			</div>
+			<div class="rail__row">
+				<a class="tab" href="../produk/index.html">Produk <span class="tab__n">24</span></a>
+				<a class="tab" href="../stok/index.html">Stok <span class="tab__n">4</span></a>
+				<a class="tab" href="../laporan/index.html">Laporan</a>
+				<a class="tab" href="../pengguna/index.html">Pengguna</a>
+				<a class="tab" href="../pengaturan/index.html" aria-current="page">Pengaturan</a>
+				<a class="tab" href="../backup/index.html">Backup</a>
+			</div>
+		</nav>
+
+		<main class="board board--full">
+			<div class="strip">
+				<h1 class="strip__title">Pengaturan</h1>
+				<p class="strip__desc">Setelan toko: template Struk dan ambang Stok menipis.</p>
+			</div>
+
+			<section class="col" aria-labelledby="setelan-judul">
+				<div class="mod mod--head">
+					<h2 class="mod__title" id="setelan-judul">Setelan toko</h2>
+					<span class="mod__note">satu baris, tersimpan utuh</span>
+				</div>
+				<div class="mod">
+					<div class="field field--full">
+						<label class="field__label" for="p-header">Header Struk</label>
+						<textarea id="p-header" class="textarea">Toko Elektrik Maju
+Jl. Merdeka No. 12
+Telp 0812-3456-7890</textarea>
+						<p class="note" style="margin-top: 3px">
+							Blok teks di atas baris Item pada Struk — misalnya nama dan alamat toko.
+						</p>
+					</div>
+				</div>
+				<div class="mod">
+					<div class="field field--full">
+						<label class="field__label" for="p-footer">Footer Struk</label>
+						<textarea id="p-footer" class="textarea">Terima kasih sudah berbelanja.
+Barang yang sudah dibeli tidak dapat ditukar.</textarea>
+						<p class="note" style="margin-top: 3px">
+							Blok teks di bawah total pada Struk — misalnya ucapan terima kasih.
+						</p>
+					</div>
+				</div>
+				<div class="mod">
+					<div class="formgrid">
+						<div class="field">
+							<span class="field__label">Lebar kertas</span>
+							<div class="methods" style="margin-top: 3px">
+								<label class="method"><input type="radio" name="lebar" value="58" />58 mm</label>
+								<label class="method"><input type="radio" name="lebar" value="80" checked />80 mm</label>
+							</div>
+							<p class="note" style="margin-top: 3px">Lebar kertas thermal: 58 atau 80 mm.</p>
+						</div>
+						<div class="field">
+							<label class="field__label" for="p-ambang">Ambang Stok menipis</label>
+							<input id="p-ambang" class="input tnum" inputmode="numeric" value="5" />
+							<p class="note" style="margin-top: 3px">
+								Produk Aktif dengan Stok di bawah angka ini masuk daftar Stok menipis.
+							</p>
+						</div>
+					</div>
+				</div>
+				<div class="mod">
+					<div class="actions">
+						<button class="btn btn--solid" type="button">Simpan Pengaturan</button>
+					</div>
+				</div>
+			</section>
+		</main>
+	</body>
+</html>

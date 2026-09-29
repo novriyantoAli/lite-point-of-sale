@@ -22,3 +22,6 @@ frontend/playwright-report/
 .DS_Store
 .idea/
 .vscode/
+
+# Alat lokal sesi agen (18 MB, bukan bagian produk)
+.pi/

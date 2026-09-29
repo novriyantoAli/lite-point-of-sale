@@ -1,0 +1,242 @@
+{
+  "title": "Pilih dunia visual — layar Kasir (tangan kedua)",
+  "question": "Semua kandidat ronde pertama sudah dibuang. Satu arah di bawah ini dibangun penuh; ambil yang lain, atau lempar ulang lagi.",
+  "steer": true,
+  "canon": true,
+  "buildPath": {
+    "value": "code",
+    "toggle": false
+  },
+  "reroll": {
+    "registers": [
+      "safer",
+      "bolder"
+    ]
+  },
+  "options": [
+    {
+      "id": "assigned",
+      "label": "The Thermal Tape",
+      "kicker": "THE ROLL",
+      "lineage": "kertas struk termal 58/80 mm dan kepala cetaknya",
+      "thesis": "Layar dan Struk memakai grid yang sama: satu tinta, satu kolom, satu gulungan yang tidak pernah putus.",
+      "palette": [
+        "#ffffff",
+        "#101010",
+        "#2a2a2a",
+        "#c2185b"
+      ],
+      "materials": [
+        "kertas termal 58/80 mm",
+        "cetak satu tinta",
+        "grid karakter 32/48 kolom",
+        "perforasi sobek",
+        "garis peringatan kertas habis"
+      ],
+      "viewport": "Kasir adalah mulut cetak: Penjualan yang sedang dikerjakan ada di titik cetak, tape hari itu menggantung di bawahnya sebagai catatan bernomor, dan setiap kolom jatuh pada sel karakter yang sama dengan yang akan tercetak di Struk.",
+      "risk": "Grid karakter mudah dipakai sebagai alasan memakai monospace sebagai kostum; itu ditolak, karena kepala cetak tidak mencetak huruf monospace, ia hanya menyusun sel.",
+      "raised": [
+        {
+          "from": "challenger-tensegrity",
+          "raise": "The Traced Load — setiap angka bisa ditelusuri lewat jalur yang terlihat ke catatan yang menghasilkannya, dan Nomor Struk adalah jalur itu."
+        },
+        {
+          "from": "challenger-transit",
+          "raise": "The Burning Line — Penjualan yang sedang dikerjakan adalah satu-satunya hal bertinta penuh; sisanya duduk satu langkah di belakang sebagai konteks."
+        },
+        {
+          "from": "challenger-cracktro",
+          "raise": "The Still Front Plane — bidang yang sedang dibaca dan diketik tidak pernah bergerak; hanya yang di belakangnya bergerak."
+        }
+      ]
+    },
+    {
+      "id": "model-pick",
+      "label": "The Catalogue",
+      "kicker": "IMPECCABLE’S PICK",
+      "lineage": "katalog & datasheet distributor komponen elektronik",
+      "thesis": "Produk dicocokkan lewat spesifikasinya, dan tabelnya adalah antarmukanya.",
+      "palette": [
+        "#ffffff",
+        "#14171a",
+        "#17427a",
+        "#b3261e"
+      ],
+      "materials": [
+        "kertas katalog putih",
+        "kolom spesifikasi",
+        "nomor tipe",
+        "tabel padat",
+        "catatan kaki"
+      ],
+      "viewport": "Satu tabel padat sebagai antarmuka: setiap Produk satu baris dengan kolom spesifikasi yang sama, nomor tipe di kolom pertama, dan baris yang cocok ditandai di tepinya.",
+      "risk": "Tabel yang padat bisa terasa dingin dan teknis, dan pemilik yang belum pernah memakai sistem bisa merasa sedang membaca dokumen asing."
+    },
+    {
+      "id": "challenger-cutbench",
+      "label": "The Cutting Bench",
+      "verdict": "competitive",
+      "lineage": "meja potong film: rel perforasi, penanda kertas, bin di bawah",
+      "thesis": "Keadaan adalah tanda, bukan warna, dan strip berhenti hanya pada perforasi.",
+      "palette": [
+        "#0b0b0b",
+        "#f2f0eb",
+        "#e8641c",
+        "#8f8a80"
+      ],
+      "materials": [
+        "rel perforasi",
+        "penanda kertas terlipat",
+        "silang grease",
+        "pin dan bin",
+        "butir film"
+      ],
+      "viewport": "Satu rel melintang di ketinggian tetap; bagian-bagian menggantung di sepanjang rel sebagai bingkai, dan yang disisihkan tetap tergantung di pin di bawahnya.",
+      "case": "Menang di kejelasan: lima tanda fisik yang berbeda untuk selesai, tidak tersedia, tersimpan, tempat berhenti, dan ditunda. Kalah di pengenalan: meja potong film bukan benda di toko ini, sekalipun meja kasirnya memang meja kerja.",
+      "risk": "Keadaan yang disampaikan lewat gerak dan tanda bisa lebih lambat dibaca daripada kata, di depan pembeli yang menunggu.",
+      "hero": "https://impeccable.style/worlds/cards/operate-a-cutting-bench-select-rail-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/operate-a-cutting-bench-select-rail.webp"
+    },
+    {
+      "id": "challenger-hazardquote",
+      "label": "Industrial Quote Grammar",
+      "verdict": "competitive",
+      "lineage": "stensil peti, tanda bahaya listrik, label gudang",
+      "thesis": "Setiap zona memakai namanya sendiri, dan tanda bahaya melintang di bawah apa yang penting.",
+      "palette": [
+        "#ffffff",
+        "#111111",
+        "#f26a1b",
+        "#3a3a3a"
+      ],
+      "materials": [
+        "stensil peti",
+        "garis bahaya 45 derajat",
+        "tag zip-tie",
+        "katun putih dan nilon hitam"
+      ],
+      "viewport": "Setiap zona diberi namanya sendiri seperti peti distensil, dan garis bahaya melintang diagonal di bawah apa pun yang sedang penting.",
+      "case": "Menang di pengenalan: stensil peti dan tanda bahaya listrik memang ada di gudang toko ini. Kalah di kejelasan: tanda kutip mengelilingi setiap label menambah bising di sekitar kata-kata yang justru harus paling polos.",
+      "risk": "Struktur diagonal 45 derajat bersaing dengan kolom angka, dan angka adalah isi sebenarnya layar ini.",
+      "hero": "https://impeccable.style/worlds/cards/textiles-weave-drape-fashion-industrial-quote-grammar-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/textiles-weave-drape-fashion-industrial-quote-grammar.webp"
+    },
+    {
+      "id": "challenger-lineup",
+      "label": "The Lineup Sheet",
+      "verdict": "competitive",
+      "lineage": "poster daftar penampil festival",
+      "thesis": "Tanpa gambar sama sekali: peringkat dibawa ukuran dan pemisah baris saja.",
+      "palette": [
+        "#e8452c",
+        "#f7f3ea",
+        "#1b1b1b",
+        "#c9c2b4"
+      ],
+      "materials": [
+        "satu huruf kondensasi",
+        "delapan ukuran",
+        "blok rata di kaki halaman",
+        "garis coret"
+      ],
+      "viewport": "Baris yang dipilih membentang selebar halaman sebagai headliner, dan sisanya dipadatkan rata ke dalam blok di kaki halaman.",
+      "case": "Menang di kejelasan: hierarki murni dari ukuran, dan yang tidak tersedia dicoret dengan garis, bukan dipudarkan. Kalah di pengenalan: poster festival bukan benda di toko ini.",
+      "risk": "Blok rata yang padat bagus untuk daftar panjang, tapi buruk untuk baris keranjang yang harus bisa diubah satu per satu.",
+      "hero": "https://impeccable.style/worlds/cards/posters-covers-sleeves-festival-lineup-poster-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/posters-covers-sleeves-festival-lineup-poster.webp"
+    },
+    {
+      "id": "challenger-tensegrity",
+      "label": "Tensegrity Column",
+      "verdict": "declined",
+      "lineage": "patung kinetik: batang karbon dan tali merah",
+      "thesis": "Beban dan penopangnya ditampilkan sebagai satu jaringan yang bisa ditelusuri.",
+      "palette": [
+        "#1a1a1a",
+        "#d8d5cf",
+        "#c8321e",
+        "#a9a49b"
+      ],
+      "materials": [
+        "batang karbon matte",
+        "tali merah",
+        "beton pucat",
+        "label teknik monospace"
+      ],
+      "viewport": "Tata letak mengikuti jaringan batang, bukan grid halaman, dengan label teknik dan nilai gaya dipasang pada simpulnya.",
+      "case": "Yang disimpan: The Traced Load — setiap gaya bisa ditelusuri ke penopangnya. Ditolak karena tata letak yang mengikuti jaringan batang justru menghapus grid tetap yang dibutuhkan kolom angka.",
+      "risk": "Patung tensegrity bukan benda di toko ini, dan tata letaknya membuang grid yang justru menyelamatkan kecepatan membaca.",
+      "hero": "https://impeccable.style/worlds/cards/kinetic-sculpture-automata-tensegrity-breathing-column-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/kinetic-sculpture-automata-tensegrity-breathing-column.webp"
+    },
+    {
+      "id": "challenger-transit",
+      "label": "Midnight Transit Diagram",
+      "verdict": "declined",
+      "lineage": "peta jaringan kereta bawah tanah",
+      "thesis": "Perjalanan disusun per jalur, urutan stasiun, dan titik pergantian.",
+      "palette": [
+        "#101c3d",
+        "#ffffff",
+        "#d02231",
+        "#1f6fb2"
+      ],
+      "materials": [
+        "enamel biru tengah malam",
+        "tik stasiun porselen",
+        "garis hanya menikung 45 dan 90 derajat",
+        "lingkaran pergantian"
+      ],
+      "viewport": "Jaringan sebagai mural: jalur menikung hanya pada 45 dan 90 derajat, dan lingkaran pergantian mekar di setiap persimpangan.",
+      "case": "Yang disimpan: The Burning Line — jalur yang dipilih menyala paling terang, sisanya jadi konteks. Ditolak karena peta jaringan adalah metafora yang harus dipelajari dulu, dan itu tepat yang tidak boleh diminta dari pemilik yang belum pernah memakai sistem.",
+      "risk": "Bahasa peta harus dipelajari; kejelasannya baru muncul setelah orang tahu cara membacanya.",
+      "hero": "https://impeccable.style/worlds/cards/wayfinding-cartography-signage-midnight-transit-diagram-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/wayfinding-cartography-signage-midnight-transit-diagram.webp"
+    },
+    {
+      "id": "challenger-cracktro",
+      "label": "Cracktro Scroller Queue",
+      "verdict": "declined",
+      "lineage": "layar judul cracktro: satu baris bitmap di atas kehampaan",
+      "thesis": "Peringkat adalah kedalaman, dan tidak ada apa pun yang dikurung kotak.",
+      "palette": [
+        "#000000",
+        "#f4f1e8",
+        "#e0a33a",
+        "#6f6b62"
+      ],
+      "materials": [
+        "satu huruf bitmap dua ukuran",
+        "debu kelabu berlapis",
+        "karet caret amber",
+        "tanpa garis dan kotak"
+      ],
+      "viewport": "Semua teks menunggang baseline pada satu satuan, tumpang tindih diizinkan, dan tidak ada satu pun garis atau kotak di seluruh layar.",
+      "case": "Yang disimpan: The Still Front Plane — bidang depan diam sempurna selama dibaca, hanya lapisan belakang yang bergerak. Ditolak karena hierarki yang dibawa gerak dan kedalaman justru memperlambat membaca daftar angka.",
+      "risk": "Tanpa satu pun garis pemisah, tabel Produk yang padat kehilangan satu-satunya alat pemisah yang dimilikinya.",
+      "hero": "https://impeccable.style/worlds/cards/operate-c-cracktro-scroller-queue-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/operate-c-cracktro-scroller-queue.webp"
+    }
+  ],
+  "canonCard": {
+    "label": "The Category Standard",
+    "lineage": "keluarga kasir SaaS: majoo, Moka, Pawoon, Olsera, Shopify POS",
+    "thesis": "Yang dikirim setiap aplikasi kasir: sidebar indigo, kartu KPI, tabel berbayang lembut.",
+    "palette": [
+      "#f8fafc",
+      "#ffffff",
+      "#4f46e5",
+      "#0f172a",
+      "#e2e8f0"
+    ],
+    "materials": [
+      "kartu berbayang lembut",
+      "radius 12px",
+      "aksen indigo",
+      "sidebar ikon + label",
+      "thumbnail produk besar"
+    ],
+    "viewport": "Sidebar di kiri, empat kartu KPI di atas, tabel data bersudut bulat di bawahnya.",
+    "risk": "Tidak bisa dibedakan dari pesaing, dan itu memang tujuannya."
+  }
+}

@@ -2,6 +2,7 @@ package e2e
 
 import (
 	"net/http"
+	"strings"
 	"testing"
 )
 
@@ -183,5 +184,42 @@ func TestTheStoredThresholdDrivesTheRestockList(t *testing.T) {
 	if !got[menipis.ID] || !got[aman.ID] {
 		t.Errorf("restock list after raising the ambang: got %+v, want both %d and %d",
 			low.Products, menipis.ID, aman.ID)
+	}
+}
+
+// storeNameEnvelope is the public answer of GET /api/store-name: the store's
+// name and nothing else.
+type storeNameEnvelope struct {
+	StoreName string `json:"store_name"`
+}
+
+// The login screen reads the store's name before a session exists, so this one
+// route has to work anonymously and leak nothing but the name (ADR-0019).
+func TestStoreNameIsPublic(t *testing.T) {
+	baseURL, token := newAdminToken(t)
+
+	// The name is the first non-empty line of the Struk header block.
+	var updated dataEnvelope[pengaturanEnvelope]
+	if status := apiCall(t, http.MethodPut, baseURL+"/api/pengaturan", token, pengaturanPayload{
+		Header:            "Toko Kopi\nJl. Melati 1",
+		Footer:            "Terima kasih",
+		PaperWidth:        80,
+		LowStockThreshold: 5,
+	}, &updated); status != http.StatusOK {
+		t.Fatalf("change Pengaturan: got status %d, want %d", status, http.StatusOK)
+	}
+
+	var storeName dataEnvelope[storeNameEnvelope]
+	if status := apiCall(t, http.MethodGet, baseURL+"/api/store-name", "", nil, &storeName); status != http.StatusOK {
+		t.Fatalf("read store name anonymously: got status %d, want %d", status, http.StatusOK)
+	}
+	if storeName.Data.StoreName != "Toko Kopi" {
+		t.Errorf("store name: got %q, want %q", storeName.Data.StoreName, "Toko Kopi")
+	}
+
+	// Only the name is on the wire: the paper width and the ambang stay Admin-only.
+	_, body := apiCallRaw(t, http.MethodGet, baseURL+"/api/store-name", "")
+	if !strings.Contains(body, `"store_name"`) || strings.Contains(body, `"paper_width"`) {
+		t.Errorf("store name body should carry only store_name, got: %s", body)
 	}
 }

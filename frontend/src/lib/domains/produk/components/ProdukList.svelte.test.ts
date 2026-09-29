@@ -1,22 +1,23 @@
 import { render, screen, waitFor, within } from '@testing-library/svelte';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import QueryClientHarness from '$lib/testing/QueryClientHarness.svelte';
 import ProdukList from './ProdukList.svelte';
 import { produkFilterState } from '../state/produk.state.svelte';
 
-const { list, categories, create, update, setActive, remove } = vi.hoisted(() => ({
+const { list, categories, create, update, setActive, remove, lowStock } = vi.hoisted(() => ({
 	list: vi.fn(),
 	categories: vi.fn(),
 	create: vi.fn(),
 	update: vi.fn(),
 	setActive: vi.fn(),
-	remove: vi.fn()
+	remove: vi.fn(),
+	lowStock: vi.fn()
 }));
 
 // The api layer is the seam: components never see axios (ADR-0007).
 vi.mock('../api/produk.api', () => ({
-	produkApi: { list, categories, create, update, setActive, remove }
+	produkApi: { list, categories, create, update, setActive, remove, lowStock }
 }));
 
 const kopi = {
@@ -42,6 +43,18 @@ const air = {
 	sold: true
 };
 
+/** A Produk the domain's own ambang puts below the line. */
+const teh = {
+	id: 3,
+	name: 'Teh Manis',
+	code: 'TEH-01',
+	price: 5000,
+	category: null,
+	stock: 3,
+	active: true,
+	sold: false
+};
+
 /**
  * The filter bar and the Produk form both have a field labelled "Nama", and both
  * a "Kode" and a "Kategori" — deliberately, because that is what each is to the
@@ -60,6 +73,25 @@ function renderCatalogue() {
 	return render(ProdukList, {}, { wrapper: QueryClientHarness });
 }
 
+/**
+ * Opens the Produk form — adding from the strip, or changing from a row — and
+ * waits for the dialog to have taken focus.
+ *
+ * The dialog is a modal, so it traps focus when it opens, and that trap lands a
+ * tick after the click that opened it. A keystroke issued in between is
+ * delivered to the dialog instead of to the field. Only a test can be that
+ * fast, which is why the wait lives here rather than in the component.
+ */
+async function openForm(user: UserEvent, trigger: 'Tambah Produk' | 'Ubah' = 'Tambah Produk') {
+	await user.click(await screen.findByRole('button', { name: trigger }));
+
+	await waitFor(() =>
+		expect(document.querySelector('[data-slot="dialog-content"]')).toContainElement(
+			document.activeElement as HTMLElement
+		)
+	);
+}
+
 describe('ProdukList', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -67,6 +99,9 @@ describe('ProdukList', () => {
 		// is put back — exactly like the QueryClient the harness rebuilds.
 		produkFilterState.reset();
 		categories.mockResolvedValue([]);
+		// Nothing is menipis unless a test says so: the ambang is the domain's answer,
+		// and the catalogue only ever writes the word it is handed.
+		lowStock.mockResolvedValue({ threshold: 5, products: [] });
 	});
 
 	it('lists the catalogue, writing Harga as money rather than a bare number', async () => {
@@ -124,6 +159,35 @@ describe('ProdukList', () => {
 		expect(await screen.findByText(/Tidak ada Produk yang cocok/)).toBeInTheDocument();
 	});
 
+	it('writes the word for menipis from the ambang the domain gave it, and none other', async () => {
+		list.mockResolvedValue([kopi, teh]);
+		lowStock.mockResolvedValue({ threshold: 5, products: [teh] });
+
+		renderCatalogue();
+
+		// Teh is below the ambang the domain reported, so it carries the word beside
+		// its number — the same word the Stok screen's list uses.
+		expect(await screen.findByText('3 · menipis')).toBeInTheDocument();
+		// Kopi is not on that list, so it is just its number: the catalogue does not
+		// decide menipis for itself and would disagree with the Stok screen if it did.
+		expect(screen.getByText('12')).toBeInTheDocument();
+	});
+
+	it('writes a blank Kode and Kategori as words, not as an absent cell', async () => {
+		list.mockResolvedValue([air]);
+
+		renderCatalogue();
+
+		// A blank Kode column must not read as data that went missing, and "null" is
+		// never a word an Admin should be shown (DESIGN.md, Do's).
+		expect(await screen.findByText('tanpa Kode')).toBeInTheDocument();
+		expect(screen.getByText('—')).toBeInTheDocument();
+
+		// Status carries its word too: the quiet tag's trade dress is not the whole
+		// message, and it is the same vocabulary the kasir tiles use.
+		expect(screen.getByText('Nonaktif')).toBeInTheDocument();
+	});
+
 	it('adds a Produk from the form and reports it', async () => {
 		list.mockResolvedValue([]);
 		create.mockResolvedValue(kopi);
@@ -131,7 +195,7 @@ describe('ProdukList', () => {
 
 		renderCatalogue();
 
-		await user.click(await screen.findByRole('button', { name: 'Tambah Produk' }));
+		await openForm(user);
 		await user.type(form().getByLabelText('Nama'), 'Kopi Susu');
 		await user.type(form().getByLabelText('Harga'), '18000');
 		await user.type(form().getByLabelText('Stok'), '12');
@@ -156,12 +220,15 @@ describe('ProdukList', () => {
 
 		renderCatalogue();
 
-		await user.click(await screen.findByRole('button', { name: 'Tambah Produk' }));
+		await openForm(user);
 		await user.type(form().getByLabelText('Nama'), 'Kopi');
 		await user.type(form().getByLabelText('Stok'), '1');
 		await user.click(screen.getByRole('button', { name: 'Tambah' }));
 
 		expect(await screen.findByText('Harga harus bilangan bulat.')).toBeInTheDocument();
+		// The field error is ink, not utility red; the invalid field keeps the red
+		// border/outline (DESIGN.md, Fields & Inputs).
+		expect(screen.getByText('Harga harus bilangan bulat.')).not.toHaveClass('text-destructive');
 		expect(create).not.toHaveBeenCalled();
 	});
 
@@ -172,13 +239,14 @@ describe('ProdukList', () => {
 
 		renderCatalogue();
 
-		await user.click(await screen.findByRole('button', { name: 'Tambah Produk' }));
+		await openForm(user);
 		await user.type(form().getByLabelText('Nama'), 'Kopi Susu');
 		await user.type(form().getByLabelText('Harga'), '18000');
 		await user.type(form().getByLabelText('Stok'), '1');
 		await user.click(screen.getByRole('button', { name: 'Tambah' }));
 
 		expect(await screen.findByRole('alert')).toHaveTextContent('Kode sudah dipakai Produk lain.');
+		expect(screen.getByRole('alert')).not.toHaveClass('text-destructive');
 	});
 
 	it('opens the row of a Produk pre-filled and saves the change', async () => {
@@ -188,7 +256,7 @@ describe('ProdukList', () => {
 
 		renderCatalogue();
 
-		await user.click(await screen.findByRole('button', { name: 'Ubah' }));
+		await openForm(user, 'Ubah');
 
 		const harga = form().getByLabelText('Harga');
 		expect(harga).toHaveValue('18000');

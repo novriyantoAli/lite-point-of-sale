@@ -1,0 +1,246 @@
+{
+  "title": "Pilih dunia visual — layar Kasir (tangan ketiga)",
+  "question": "Semua kandidat dua ronde sebelumnya sudah dibuang. Satu arah di bawah ini dibangun penuh; ambil yang lain, atau lempar ulang lagi.",
+  "steer": true,
+  "canon": true,
+  "buildPath": {
+    "value": "code",
+    "toggle": false
+  },
+  "reroll": {
+    "registers": [
+      "safer",
+      "bolder"
+    ]
+  },
+  "options": [
+    {
+      "id": "assigned",
+      "label": "The Silkscreen",
+      "kicker": "THE ROLL",
+      "lineage": "silkscreen PCB: legenda di papan, titik pin-1, kode warna komponen",
+      "thesis": "Setiap Produk adalah penempatan di papan: punya sebutan, punya nilai, dan legenda yang selalu dibaca dari arah yang sama.",
+      "palette": [
+        "#ffffff",
+        "#14161a",
+        "#b98a2e",
+        "#0f7a3d"
+      ],
+      "materials": [
+        "solder mask putih",
+        "legenda silkscreen hitam",
+        "pad emas ENIG",
+        "titik pin-1",
+        "bill of materials",
+        "garis polaritas"
+      ],
+      "viewport": "Keranjang adalah bill of materials: setiap baris punya sebutan (Kode), nilai (Nama), dan jumlah, dengan kolom yang sama persis seperti legenda di papan; Penjualan yang sedang dikerjakan ditandai titik pin-1 di tepi barisnya.",
+      "risk": "Legenda papan itu rapat dan kecil; tanpa disiplin kolom ia berubah jadi dinding teks yang tidak terbaca.",
+      "raised": [
+        {
+          "from": "challenger-alphabet",
+          "raise": "The Silver Flash — satu kilau hanya pada saat sesuatu berubah, bukan pada keadaannya; baris yang baru masuk keranjang ditandai sekali lalu tenang."
+        },
+        {
+          "from": "challenger-deepdive",
+          "raise": "The Threshold Colour — warna baru mulai ada saat sebuah ambang dilewati; Stok yang masih cukup tidak berwarna sama sekali."
+        },
+        {
+          "from": "challenger-verticalfeed",
+          "raise": "The In-Place Expansion — label yang terpotong membuka di tempatnya, tidak pernah disembunyikan di balik hover atau lapisan di atas halaman."
+        },
+        {
+          "from": "challenger-labanotation",
+          "raise": "The Length Is The Value — besaran digambar sebagai panjang pada barisnya sendiri, jadi tidak ada grafik terpisah yang harus dibaca."
+        }
+      ]
+    },
+    {
+      "id": "model-pick",
+      "label": "The Etalase",
+      "kicker": "IMPECCABLE’S PICK",
+      "lineage": "etalase kaca toko: rangka aluminium, sekat, pintu geser",
+      "thesis": "Stok ada di balik kaca, dan penjualan adalah saat kacanya dibuka.",
+      "palette": [
+        "#ffffff",
+        "#17181a",
+        "#b9bcc0",
+        "#2f6f6a"
+      ],
+      "materials": [
+        "kaca 5 mm dengan tepi hijau",
+        "rangka aluminium",
+        "sekat kompartemen",
+        "tag harga di dalam",
+        "rel pintu geser"
+      ],
+      "viewport": "Layar adalah etalase: setiap Produk duduk di kompartemennya sendiri dengan tag harga di dalamnya, dan keranjang adalah barang yang sudah dikeluarkan dari balik kaca.",
+      "risk": "Kaca memantulkan ruangan, dan refleksi yang cantik mudah berubah jadi lapisan dekoratif yang justru menutupi data."
+    },
+    {
+      "id": "challenger-sevenseg",
+      "label": "Seven-Segment Display",
+      "verdict": "competitive",
+      "lineage": "keluarga tampilan tujuh segmen: jam, totem harga, papan skor",
+      "thesis": "Satu topeng delapan sel: tempatnya tidak pernah bergeser, hanya segmen yang menyala.",
+      "palette": [
+        "#0e0e0f",
+        "#e0341f",
+        "#5a5a5c",
+        "#f0d9a0"
+      ],
+      "materials": [
+        "topeng delapan sel",
+        "sel mati tetap digambar",
+        "merah LED",
+        "selubung matte"
+      ],
+      "viewport": "Semua angka duduk di slot tetap dengan sel mati tetap terlihat sebagai hantu, dan setiap perubahan adalah pertukaran segmen seketika.",
+      "case": "Menang di pengenalan dan di kejelasan angka: tempat tidak pernah bergeser, dan bagian angka yang belum ada tetap digambar. Kalah untuk seluruh layar karena topeng segmen tidak bisa menyusun kata, sedangkan kata justru mayoritas antarmuka ini.",
+      "risk": "Topeng segmen hanya bisa memiliki angka; kalau dipaksakan ke seluruh layar, kata-katanya jatuh jadi generik.",
+      "hero": "https://impeccable.style/worlds/cards/signals-instruments-seven-segment-alarm-clock-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/signals-instruments-seven-segment-alarm-clock.webp"
+    },
+    {
+      "id": "challenger-exposure",
+      "label": "Exposure Record",
+      "verdict": "competitive",
+      "lineage": "catatan cetak kamar gelap: lembar zona bertumpuk",
+      "thesis": "Beban digambar sebagai kerapatan arsir, dan konflik sebagai dua arsir yang bersilang.",
+      "palette": [
+        "#f4f2ee",
+        "#1c1c1c",
+        "#d02f8a",
+        "#9a978f"
+      ],
+      "materials": [
+        "ramp zona sebelas langkah",
+        "lembar transparan bertumpuk",
+        "arsir sebagai beban",
+        "garis putus-putus sebagai ditahan"
+      ],
+      "viewport": "Lembar transparan bertumpuk sedikit miring di atas ramp nada; setiap wilayah membawa kerapatan arsir dan selisih stopnya sendiri.",
+      "case": "Menang di kejelasan: konflik digambar sebagai dua arsir bersilang, jadi keadaan yang bertabrakan terbaca tanpa warna sama sekali. Kalah di pengenalan: catatan kamar gelap bukan benda di toko ini.",
+      "risk": "Arsir sebagai beban harus diukur betul; kerapatan yang salah membuat berat dan ringan tidak bisa dibedakan.",
+      "hero": "https://impeccable.style/worlds/cards/operate-b-exposure-record-zone-sheets-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/operate-b-exposure-record-zone-sheets.webp"
+    },
+    {
+      "id": "challenger-alphabet",
+      "label": "Alphabet Storm",
+      "verdict": "declined",
+      "lineage": "dunia surealis: huruf yang menjadi cuaca",
+      "thesis": "Huruf adalah materi, dan kata pecah di baris seperti front cuaca.",
+      "palette": [
+        "#ffffff",
+        "#111111",
+        "#c9ccd1",
+        "#8f939a"
+      ],
+      "materials": [
+        "grotesk monumental sebagai materi",
+        "kata pecah sebagai cuaca",
+        "satu kilau perak",
+        "hujan kelabu"
+      ],
+      "viewport": "Satu peristiwa cuaca kata per layar, dengan teks tetap terbaca sepanjang transformasinya.",
+      "case": "Yang disimpan: The Silver Flash — satu kilau hanya pada saat sesuatu berubah. Ditolak karena teks yang berperilaku sebagai cuaca menghancurkan hal pertama yang dibutuhkan kasir: membaca.",
+      "risk": "Gerakan yang mengubah huruf memperlambat membaca, tepat di tempat yang paling butuh cepat.",
+      "hero": "https://impeccable.style/worlds/cards/dream-surreal-impossible-worlds-alphabet-storm-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/dream-surreal-impossible-worlds-alphabet-storm.webp"
+    },
+    {
+      "id": "challenger-deepdive",
+      "label": "Mesophotic Deep Dive",
+      "verdict": "declined",
+      "lineage": "penyelaman teknis: termoklin, dinding mesophotic",
+      "thesis": "Kedalaman sebagai satu sumbu yang mengatur setiap baris.",
+      "palette": [
+        "#0b1a2b",
+        "#4fd0e0",
+        "#e8eef2",
+        "#2a4a63"
+      ],
+      "materials": [
+        "sumbu kedalaman vertikal",
+        "salju laut putih kapur",
+        "pita termoklin cyan",
+        "gas terbatas"
+      ],
+      "viewport": "Profil penyelaman vertikal berdampingan dengan pandangan dekat terpilih, dan setiap pengamatan tetap terpaku pada kedalaman dan fasenya.",
+      "case": "Yang disimpan: The Threshold Colour — warna baru mulai ada saat sebuah ambang dilewati. Ditolak karena metafora kedalaman harus dipelajari dulu, dan paletnya yang gelap berkelahi dengan toko yang terang.",
+      "risk": "Sumbu vertikal yang mengatur semua baris bertabrakan dengan arah baca manusia yang dari atas ke bawah.",
+      "hero": "https://impeccable.style/worlds/cards/rivers-tides-ocean-depths-mesophotic-deep-dive-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/rivers-tides-ocean-depths-mesophotic-deep-dive.webp"
+    },
+    {
+      "id": "challenger-verticalfeed",
+      "label": "Vertical Media Feed",
+      "verdict": "declined",
+      "lineage": "umpan media vertikal layar penuh",
+      "thesis": "Satu benda memiliki seluruh layar, dan berikutnya menunggu satu sentakan lagi.",
+      "palette": [
+        "#000000",
+        "#ffffff",
+        "#3a3a3a",
+        "#c9c9c9"
+      ],
+      "materials": [
+        "media memenuhi bingkai",
+        "rail glif di kanan",
+        "skrim bawah",
+        "snap keras tanpa posisi antara"
+      ],
+      "viewport": "Satu benda memenuhi viewport, empat glif bertumpuk di kanan, dan tidak ada apa pun di tengah.",
+      "case": "Yang disimpan: The In-Place Expansion — label yang terpotong membuka di tempatnya. Ditolak karena satu benda per layar adalah kebalikan dari daftar padat yang harus dipindai kasir, dan rail glif berarti kontrol tanpa kata, yang justru dilarang batasan Anda sendiri.",
+      "risk": "Kontrol berupa glif tanpa kata persis hal yang tidak boleh diminta dari pemilik yang belum pernah memakai sistem.",
+      "hero": "https://impeccable.style/worlds/cards/pop-culture-shelf-vertical-video-feed-surface-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/pop-culture-shelf-vertical-video-feed-surface.webp"
+    },
+    {
+      "id": "challenger-labanotation",
+      "label": "Labanotation Score",
+      "verdict": "declined",
+      "lineage": "notasi tari laban: tongkat tengah dibaca ke atas",
+      "thesis": "Bentuk simbol adalah arah, arsir adalah tingkat, panjang adalah durasi.",
+      "palette": [
+        "#ffffff",
+        "#1a1a1a",
+        "#e2e2e2",
+        "#6f6f6f"
+      ],
+      "materials": [
+        "tongkat tengah vertikal",
+        "blok bersimbol",
+        "arsir dan titik sebagai tingkat",
+        "kolom bilateral"
+      ],
+      "viewport": "Dua kolom mengapit satu garis tengah, waktu mengalir dari bawah ke atas, dan simetri terhadap garis tengah adalah hukumnya.",
+      "case": "Yang disimpan: The Length Is The Value — besaran digambar sebagai panjang pada barisnya sendiri. Ditolak karena label yang hanya menempel di margin bertabrakan langsung dengan kebutuhan pemula yang justru bergantung pada kata.",
+      "risk": "Waktu yang mengalir ke atas adalah kebalikan dari cara semua orang membaca layar.",
+      "hero": "https://impeccable.style/worlds/cards/notation-diagram-systems-labanotation-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/notation-diagram-systems-labanotation.webp"
+    }
+  ],
+  "canonCard": {
+    "label": "The Category Standard",
+    "lineage": "keluarga kasir SaaS: majoo, Moka, Pawoon, Olsera, Shopify POS",
+    "thesis": "Yang dikirim setiap aplikasi kasir: sidebar indigo, kartu KPI, tabel berbayang lembut.",
+    "palette": [
+      "#f8fafc",
+      "#ffffff",
+      "#4f46e5",
+      "#0f172a",
+      "#e2e8f0"
+    ],
+    "materials": [
+      "kartu berbayang lembut",
+      "radius 12px",
+      "aksen indigo",
+      "sidebar ikon + label",
+      "thumbnail produk besar"
+    ],
+    "viewport": "Sidebar di kiri, empat kartu KPI di atas, tabel data bersudut bulat di bawahnya.",
+    "risk": "Tidak bisa dibedakan dari pesaing, dan itu memang tujuannya."
+  }
+}
