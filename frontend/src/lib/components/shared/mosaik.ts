@@ -122,3 +122,36 @@ export const COMMIT_BARIS =
 	'h-[26px] border-foreground bg-primary px-2 text-[13px] font-semibold text-primary-foreground hover:border-foreground hover:bg-primary hover:text-primary-foreground focus-visible:border-foreground disabled:pointer-events-auto disabled:cursor-not-allowed disabled:border-dashed disabled:border-border disabled:bg-card disabled:text-foreground disabled:opacity-100';
 export const COMMIT_KOLOM =
 	'h-10 w-full text-[15px] font-semibold hover:bg-primary disabled:pointer-events-auto disabled:cursor-not-allowed disabled:border-dashed disabled:border-border disabled:bg-card disabled:text-foreground disabled:opacity-100';
+
+/**
+ * Tabel mosaik (DESIGN.md, Typography: kepala tabel 12px/600; "setiap angka …
+ * tabular-nums, tanpa kecuali"). Satu garis rambut dipakai bersama antar baris,
+ * kepala Wash Grey ditutup garis tinta, dan sel angka selalu tabular.
+ *
+ * Kosakata ini dulu disalin ke tiap layar yang punya tabel — Produk, Stok,
+ * Laporan — dan salinannya sempat berbeda sendiri: `TD_NUM` di satu layar
+ * kehilangan `tabular-nums` yang di layar lain masih ada. Sekarang ia ditulis
+ * sekali, jadi aturan "angka tabular" punya satu wujud yang bisa dijaga tes.
+ */
+export const TABEL = 'w-full border-collapse text-[13px] leading-[1.25]';
+/** Kotak tabel: gulir mendatar di dalam modul kalau layarnya sempit. */
+export const TABEL_BUNGKUS = 'overflow-x-auto border-b border-border';
+/** Kepala kolom: Wash Grey, ditutup garis tinta — satu-satunya penanda kepala. */
+export const TH =
+	'border-b border-foreground bg-muted px-2 py-1.5 text-left text-xs font-semibold whitespace-nowrap';
+/** Kepala kolom angka: rata kanan dan tabular. */
+export const TH_NUM = `${TH} text-right tabular-nums`;
+/** Satu baris tabel; garis bawahnya membentuk garis rambut bersama. */
+export const BARIS = 'border-b border-border transition-colors last:border-b-0 hover:bg-muted';
+/** Sel tabel. */
+export const TD = 'px-2 py-1.5 align-top';
+/** Sel angka: rata kanan dan tabular — "tanpa kecuali" (DESIGN.md, Typography). */
+export const TD_NUM = `${TD} text-right tabular-nums`;
+/** Sel keterangan: teks 12px, seperti catatan di luar tabel. */
+export const TD_SUB = `${TD} text-xs`;
+/** Sel aksi: sederet tombol yang tidak boleh membungkus. */
+export const TD_AKSI = `${TD} whitespace-nowrap`;
+/** Sel nama: satu-satunya yang ditebalkan di barisnya. */
+export const TD_NAMA = `${TD} font-medium`;
+/** Sel Harga: merah utilitas dan tabular, tidak pernah monospace (DESIGN.md, Typography). */
+export const TD_HARGA = `${TD_NUM} font-semibold text-destructive`;

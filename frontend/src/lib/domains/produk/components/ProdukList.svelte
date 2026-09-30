@@ -3,6 +3,7 @@
 		AKSI_BARIS,
 		AKSI_MODUL,
 		AKSI_STRIP,
+		BARIS,
 		CATATAN,
 		CATATAN_ANGKA,
 		COMMIT_BARIS,
@@ -16,7 +17,17 @@
 		MODUL_KEPALA,
 		PAPAN,
 		STRIP,
-		TAG
+		TABEL,
+		TABEL_BUNGKUS,
+		TAG,
+		TD,
+		TD_AKSI,
+		TD_HARGA,
+		TD_NAMA,
+		TD_NUM,
+		TD_SUB,
+		TH,
+		TH_NUM
 	} from '$lib/components/shared/mosaik';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -198,18 +209,6 @@
 		INPUT,
 		'w-full data-[size=default]:h-[26px] [&_svg:not([class*=size-])]:size-3'
 	);
-	/** Tabel: satu garis rambut bersama antar baris, kepala Wash Grey + garis tinta. */
-	const TABEL = 'w-full border-collapse text-[13px] leading-[1.25]';
-	const TH =
-		'border-b border-foreground bg-muted px-2 py-1.5 text-left text-xs font-semibold whitespace-nowrap';
-	const TH_NUM = `${TH} text-right tabular-nums`;
-	const BARIS = 'border-b border-border transition-colors last:border-b-0 hover:bg-muted';
-	const TD = 'px-2 py-1.5 align-top';
-	const TD_NUM = `${TD} text-right tabular-nums`;
-	/** Harga merah utilitas dan tabular; tidak pernah monospace (DESIGN.md, Typography). */
-	const TD_HARGA = `${TD_NUM} font-semibold text-destructive`;
-	const TD_SUB = `${TD} text-xs`;
-	const TD_AKSI = `${TD} whitespace-nowrap`;
 	/**
 	 * Quiet tag yang mati: garis coretnya, bukan opasitasnya (DESIGN.md,
 	 * State-Is-Not-Faded).
@@ -363,7 +362,7 @@
 				sama, pada jumlah baris yang masuk akal, jadi kepala tabel di atasnya
 				tidak bergerak saat datanya tiba.
 			-->
-			<div class="overflow-x-auto border-b border-border">
+			<div class={TABEL_BUNGKUS}>
 				<table class={TABEL}>
 					{@render kepalaTabel()}
 					<tbody aria-hidden="true">
@@ -393,13 +392,13 @@
 					: 'Belum ada Produk. Tambahkan yang pertama lewat tombol Tambah Produk.'}
 			</p>
 		{:else}
-			<div class="overflow-x-auto border-b border-border">
+			<div class={TABEL_BUNGKUS}>
 				<table class={TABEL}>
 					{@render kepalaTabel()}
 					<tbody>
 						{#each found as produk (produk.id)}
 							<tr class={BARIS}>
-								<td class={`${TD} font-medium`}>{produk.name}</td>
+								<td class={TD_NAMA}>{produk.name}</td>
 
 								<!--
 									Kode yang kosong tidak boleh terlihat seperti data yang hilang:
