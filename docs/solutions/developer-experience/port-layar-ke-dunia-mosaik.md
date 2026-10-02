@@ -1,14 +1,14 @@
 ---
 title: "Port layar ke dunia mosaik — varian shadcn yang bertabrakan dengan DESIGN.md"
 date: 2026-09-26
-last_updated: 2026-09-29
+last_updated: 2026-09-30
 category: developer-experience
 module: frontend-design
 problem_type: developer_experience
 component: development_workflow
 severity: medium
 applies_when:
-  - "Memport salah satu dari delapan layar yang belum pindah ke dunia mosaik"
+  - "Menambah atau memakai kosakata dunia mosaik di `frontend/src/lib/components/shared/mosaik.ts`"
   - "Memakai varian primitif ui/ yang belum dipakai layar Masuk atau rel navigasi"
   - "Ketika DESIGN.md menyebut angka (tinggi, warna, bayangan) dan hasilnya harus dibuktikan"
 symptoms:
@@ -360,13 +360,19 @@ modul, `frontend/src/lib/components/shared/mosaik.ts`: strip judul (`STRIP`, `JU
 `CATATAN`, `AKSI_STRIP`), kepala modul (`MODUL`, `MODUL_KEPALA`, `MODUL_JUDUL`, `MODUL_BARIS`,
 `MODUL_TEKS`, `DAFTAR`), tag (`TAG`, `TAG_TENANG`, `TAG_TINTA`, `TAG_MERAH`, `CORET`), Commit
 Button (`COMMIT_BARIS`, `COMMIT_KOLOM`), tombol petak (`AKSI_MODUL`, `AKSI_BARIS`), field
-(`FIELD`, `LABEL`, `INPUT`, `INPUT_ANGKA`, `ERROR`, `METODE`, `FIGURE`), dan papan (`PAPAN`).
-Empat belas komponen mengimpor dari sana, dan nilai tiap konstanta diperiksa satu per satu
-sama persis dengan aslinya — jadi port murni tanpa perilaku baru; 408 tes unit dan 53 tes e2e
-tetap hijau.
+(`FIELD`, `LABEL`, `INPUT`, `INPUT_ANGKA`, `ERROR`, `METODE`, `FIGURE`), papan (`PAPAN`), dan
+tabel (`TABEL`, `TABEL_BUNGKUS`, `TH`, `TH_NUM`, `BARIS`, `TD`, `TD_NUM`, `TD_SUB`, `TD_AKSI`,
+`TD_NAMA`, `TD_HARGA`). Dua puluh komponen mengimpor dari sana, dan nilai tiap konstanta
+diperiksa satu per satu sama persis dengan aslinya — jadi port murni tanpa perilaku baru.
 
-Yang tetap lokal, dengan alasan: `TABEL`/`TH`/`TD` (variannya berbeda per layar — kolom,
-keselarasan, tag di dalam sel), `KOLOM` (papan Kasir saja), `SELECT`/`FIELD_SELECT` (turunan
+**Kosakata tabel menyusul (2026-09-30, `ce5d792`).** Semula `TABEL`/`TH`/`TD` sengaja
+dibiarkan lokal dengan alasan variannya berbeda per layar. Alasan itu ternyata bocor: salinan
+`TD_NUM` di `StokList` kehilangan `tabular-nums` yang di `ProdukList`/`LaporanHarian` masih
+ada — pelanggaran DESIGN.md ("tanpa kecuali") yang tak terlihat tes mana pun. Sebelas fakta
+tabel kini tinggal di `mosaik.ts`, dan `tests/e2e/tipografi.spec.ts` mengunci aturan
+`font-variant-numeric: tabular-nums` di sel angka tiga layar. 408 tes unit dan 55 tes e2e hijau.
+
+Yang tetap lokal, dengan alasan: `KOLOM` (papan Kasir saja), `SELECT`/`FIELD_SELECT` (turunan
 `cn(INPUT, …)` per lebar), `LIROW` (tiap daftar punya gap sendiri), `TEXTAREA` (satu pemakai),
 dan `BATAL` (satu pemakai). Semuanya satu-dua salinan, jadi mengekstraknya hanya menambah satu
 lapisan tanpa menghapus apa pun.
