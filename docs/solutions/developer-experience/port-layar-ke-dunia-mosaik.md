@@ -384,7 +384,7 @@ penuh tetap boleh lewat `bg-primary` yang dibawa `variant="default"`. Satu perbe
 disatukan: Commit Button baris di `PencarianPenjualan` tadinya kehilangan kelas `disabled:*`,
 kini memakai `COMMIT_BARIS` yang sama dengan tujuh tombol lain.
 
-- **Kelas quiet tag disalin per komponen.** `TAG`/`TAG_NONAKTIF` hidup di `ProdukList`,
+- **Kelas quiet tag disalin per komponen.** `TAG`/`TAG_CORET` hidup di `ProdukList`,
   `StokList`, dan `PenggunaList` (§1 menoleransi pengulangan di tengah port). Sekarang ketiganya
   mengimpor dari `mosaik.ts`.
 

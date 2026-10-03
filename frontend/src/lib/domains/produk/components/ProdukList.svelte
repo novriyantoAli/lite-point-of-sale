@@ -7,7 +7,6 @@
 		CATATAN,
 		CATATAN_ANGKA,
 		COMMIT_BARIS,
-		CORET,
 		FIELD,
 		INPUT,
 		JUDUL,
@@ -20,14 +19,15 @@
 		TABEL,
 		TABEL_BUNGKUS,
 		TAG,
+		TAG_CORET,
 		TD,
 		TD_AKSI,
 		TD_HARGA,
 		TD_NAMA,
-		TD_NUM,
+		TD_ANGKA,
 		TD_SUB,
 		TH,
-		TH_NUM
+		TH_ANGKA
 	} from '$lib/components/shared/mosaik';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -209,11 +209,6 @@
 		INPUT,
 		'w-full data-[size=default]:h-[26px] [&_svg:not([class*=size-])]:size-3'
 	);
-	/**
-	 * Quiet tag yang mati: garis coretnya, bukan opasitasnya (DESIGN.md,
-	 * State-Is-Not-Faded).
-	 */
-	const TAG_NONAKTIF = `${TAG} ${CORET}`;
 </script>
 
 <!--
@@ -227,8 +222,8 @@
 			<th scope="col" class={TH}>Nama</th>
 			<th scope="col" class={TH}>Kode</th>
 			<th scope="col" class={TH}>Kategori</th>
-			<th scope="col" class={TH_NUM}>Harga</th>
-			<th scope="col" class={TH_NUM}>Stok</th>
+			<th scope="col" class={TH_ANGKA}>Harga</th>
+			<th scope="col" class={TH_ANGKA}>Stok</th>
 			<th scope="col" class={TH}>Status</th>
 			<th scope="col" class={TH}>Aksi</th>
 		</tr>
@@ -367,9 +362,9 @@
 					{@render kepalaTabel()}
 					<tbody aria-hidden="true">
 						{#each BARIS_HANTU as baris (baris)}
-							<tr class="border-b border-border last:border-b-0">
+							<tr class={BARIS}>
 								{#each KOLOM_HANTU as kolom (kolom)}
-									<td class="px-2 py-1.5">
+									<td class={TD}>
 										<span class="block h-[13px] w-full bg-muted"></span>
 									</td>
 								{/each}
@@ -420,10 +415,10 @@
 									Angkanya sendiri, atau kata yang menemani keadaannya — prototipe
 									menulis "4 · menipis" dan "Stok habis" di kolom yang sama.
 								-->
-								<td class={TD_NUM}>{stokCell(produk)}</td>
+								<td class={TD_ANGKA}>{stokCell(produk)}</td>
 
 								<td class={TD}>
-									<span class={produk.active ? TAG : TAG_NONAKTIF}>
+									<span class={produk.active ? TAG : TAG_CORET}>
 										{produk.active ? 'Aktif' : 'Nonaktif'}
 									</span>
 								</td>

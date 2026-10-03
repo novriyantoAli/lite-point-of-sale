@@ -96,6 +96,8 @@ export const TAG_MERAH =
 	'inline-flex h-[15px] items-center bg-destructive px-[5px] text-xs font-semibold text-primary-foreground';
 /** Cara dunia ini menyampaikan keadaan mati: garis coret, bukan `opacity`. */
 export const CORET = 'line-through decoration-1';
+/** Tag mati: `TAG` bergaris coret — kata "Nonaktif" di banyak layar. */
+export const TAG_CORET = `${TAG} ${CORET}`;
 
 /**
  * Empat petak tombol dunia ini; yang membedakan mereka ukurannya, bukan warnanya.
@@ -129,7 +131,7 @@ export const COMMIT_KOLOM =
  * kepala Wash Grey ditutup garis tinta, dan sel angka selalu tabular.
  *
  * Kosakata ini dulu disalin ke tiap layar yang punya tabel — Produk, Stok,
- * Laporan — dan salinannya sempat berbeda sendiri: `TD_NUM` di satu layar
+ * Laporan — dan salinannya sempat berbeda sendiri: `TD_ANGKA` di satu layar
  * kehilangan `tabular-nums` yang di layar lain masih ada. Sekarang ia ditulis
  * sekali, jadi aturan "angka tabular" punya satu wujud yang bisa dijaga tes.
  */
@@ -140,13 +142,13 @@ export const TABEL_BUNGKUS = 'overflow-x-auto border-b border-border';
 export const TH =
 	'border-b border-foreground bg-muted px-2 py-1.5 text-left text-xs font-semibold whitespace-nowrap';
 /** Kepala kolom angka: rata kanan dan tabular. */
-export const TH_NUM = `${TH} text-right tabular-nums`;
+export const TH_ANGKA = `${TH} text-right tabular-nums`;
 /** Satu baris tabel; garis bawahnya membentuk garis rambut bersama. */
 export const BARIS = 'border-b border-border transition-colors last:border-b-0 hover:bg-muted';
 /** Sel tabel. */
 export const TD = 'px-2 py-1.5 align-top';
 /** Sel angka: rata kanan dan tabular — "tanpa kecuali" (DESIGN.md, Typography). */
-export const TD_NUM = `${TD} text-right tabular-nums`;
+export const TD_ANGKA = `${TD} text-right tabular-nums`;
 /** Sel keterangan: teks 12px, seperti catatan di luar tabel. */
 export const TD_SUB = `${TD} text-xs`;
 /** Sel aksi: sederet tombol yang tidak boleh membungkus. */
@@ -154,4 +156,4 @@ export const TD_AKSI = `${TD} whitespace-nowrap`;
 /** Sel nama: satu-satunya yang ditebalkan di barisnya. */
 export const TD_NAMA = `${TD} font-medium`;
 /** Sel Harga: merah utilitas dan tabular, tidak pernah monospace (DESIGN.md, Typography). */
-export const TD_HARGA = `${TD_NUM} font-semibold text-destructive`;
+export const TD_HARGA = `${TD_ANGKA} font-semibold text-destructive`;

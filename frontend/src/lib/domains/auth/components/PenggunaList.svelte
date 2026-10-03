@@ -4,7 +4,6 @@
 		CATATAN,
 		CATATAN_ANGKA,
 		COMMIT_BARIS,
-		CORET,
 		DAFTAR,
 		ERROR,
 		FIELD,
@@ -18,7 +17,7 @@
 		MODUL_TEKS,
 		PAPAN,
 		STRIP,
-		TAG
+		TAG_CORET
 	} from '$lib/components/shared/mosaik';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -128,11 +127,6 @@
 	 */
 	const LIROW_NAMA = 'flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] font-medium';
 	const LIROW_AKSI = 'flex items-center gap-1';
-	/**
-	 * Quiet tag Nonaktif: garis coretnya, bukan opasitasnya (DESIGN.md,
-	 * State-Is-Not-Faded).
-	 */
-	const TAG_NONAKTIF = `${TAG} ${CORET}`;
 </script>
 
 <div class={PAPAN}>
@@ -273,7 +267,7 @@
 								<!-- Peran memakai tag yang sudah ada, bukan bentuk kedua. -->
 								<RoleBadge role={user.role} />
 								{#if !user.active}
-									<span class={TAG_NONAKTIF}>Nonaktif</span>
+									<span class={TAG_CORET}>Nonaktif</span>
 								{/if}
 								{#if user.id === currentUserId}
 									<!--

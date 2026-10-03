@@ -18,12 +18,13 @@
 		TABEL,
 		TABEL_BUNGKUS,
 		TAG,
+		TAG_CORET,
 		TD_AKSI,
 		TD_NAMA,
-		TD_NUM,
+		TD_ANGKA,
 		TD_SUB,
 		TH,
-		TH_NUM
+		TH_ANGKA
 	} from '$lib/components/shared/mosaik';
 	import { Button } from '$lib/components/ui/button';
 	import { cn } from '$lib/utils';
@@ -82,8 +83,6 @@
 	const LIROW_KODE = 'text-xs';
 	const LIROW_META = 'flex flex-wrap items-center gap-x-2 gap-y-1 text-xs';
 	const LIROW_AKSI = 'flex items-center gap-1';
-	/** Quiet tag yang mati: garis coretnya, bukan opasitasnya (State-Is-Not-Faded). */
-	const TAG_CORET = `${TAG} ${CORET}`;
 	/** Kata keadaan yang tenang, 12px/600, tanpa kotak: Aman dan angka telanjang. */
 	const KEADAAN = 'text-xs font-semibold';
 
@@ -256,7 +255,7 @@
 						<tr>
 							<th scope="col" class={TH}>Nama</th>
 							<th scope="col" class={TH}>Kode</th>
-							<th scope="col" class={TH_NUM}>Stok</th>
+							<th scope="col" class={TH_ANGKA}>Stok</th>
 							<th scope="col" class={TH}>Aksi</th>
 						</tr>
 					</thead>
@@ -283,7 +282,7 @@
 									diukur dari angka, bukan dari kata. `tabular-nums` menahan
 									lebarnya saat Stok berubah (DESIGN.md, Typography).
 								-->
-								<td class={TD_NUM}>
+								<td class={TD_ANGKA}>
 									<span class="inline-flex items-center justify-end gap-1.5">
 										{produk.stock}
 										{#if !produk.active}

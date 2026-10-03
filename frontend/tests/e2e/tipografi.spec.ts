@@ -8,7 +8,7 @@ import { createProduk, logIn, produkRow } from './helpers';
  * Aturan itu tidak terlihat oleh tes teks, `getByRole`, maupun kontras — hanya
  * `getComputedStyle` yang membacanya. Sebelum spec ini ada, tidak satu pun
  * perintah §12 membacanya: kosakata tabel dulu disalin ke tiap layar, dan
- * `TD_NUM` di satu salinan kehilangan `tabular-nums` yang di salinan lain masih
+ * `TD_ANGKA` di satu salinan kehilangan `tabular-nums` yang di salinan lain masih
  * ada, tanpa ada sinyal yang merah. Spec ini membaca aturannya kembali dari DOM
  * yang berjalan, seperti `permukaan-peramban.spec.ts` membaca permukaan lain.
  */

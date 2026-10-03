@@ -21,9 +21,9 @@
 		TABEL,
 		TABEL_BUNGKUS,
 		TD,
-		TD_NUM,
+		TD_ANGKA,
 		TH,
-		TH_NUM
+		TH_ANGKA
 	} from '$lib/components/shared/mosaik';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -238,8 +238,8 @@
 					<thead>
 						<tr>
 							<th scope="col" class={TH}>Metode</th>
-							<th scope="col" class={TH_NUM}>Transaksi</th>
-							<th scope="col" class={TH_NUM}>Omzet</th>
+							<th scope="col" class={TH_ANGKA}>Transaksi</th>
+							<th scope="col" class={TH_ANGKA}>Omzet</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -248,10 +248,10 @@
 								<td class={TD}>{METODE_LABEL[metode.method]}</td>
 								<!-- A method nobody used shows `—`, not `0`: there was no
 								     number to answer with (DESIGN.md, Figures). -->
-								<td class={TD_NUM}>
+								<td class={TD_ANGKA}>
 									{tanpaTransaksi(metode.transactions) ? '—' : metode.transactions}
 								</td>
-								<td class={TD_NUM}>
+								<td class={TD_ANGKA}>
 									{tanpaTransaksi(metode.transactions) ? '—' : formatRupiah(metode.total)}
 								</td>
 							</tr>
@@ -276,16 +276,16 @@
 						<thead>
 							<tr>
 								<th scope="col" class={TH}>Kasir</th>
-								<th scope="col" class={TH_NUM}>Transaksi</th>
-								<th scope="col" class={TH_NUM}>Omzet</th>
+								<th scope="col" class={TH_ANGKA}>Transaksi</th>
+								<th scope="col" class={TH_ANGKA}>Omzet</th>
 							</tr>
 						</thead>
 						<tbody>
 							{#each omzet.data.by_cashier as kasir (kasir.cashier_id)}
 								<tr class={BARIS}>
 									<td class={TD}>{kasir.cashier_name}</td>
-									<td class={TD_NUM}>{kasir.transactions}</td>
-									<td class={TD_NUM}>{formatRupiah(kasir.total)}</td>
+									<td class={TD_ANGKA}>{kasir.transactions}</td>
+									<td class={TD_ANGKA}>{formatRupiah(kasir.total)}</td>
 								</tr>
 							{/each}
 						</tbody>
