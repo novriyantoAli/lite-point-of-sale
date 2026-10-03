@@ -1,6 +1,7 @@
 <script lang="ts">
 	import {
 		AKSI_MODUL,
+		BARIS,
 		CATATAN,
 		CATATAN_ANGKA,
 		DAFTAR,
@@ -16,7 +17,13 @@
 		MODUL_KEPALA,
 		MODUL_TEKS,
 		PAPAN,
-		STRIP
+		STRIP,
+		TABEL,
+		TABEL_BUNGKUS,
+		TD,
+		TD_ANGKA,
+		TH,
+		TH_ANGKA
 	} from '$lib/components/shared/mosaik';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -135,16 +142,6 @@
 	const STAT_KEDUA = `${STAT} border-l border-border`;
 	const STAT_LABEL = LABEL;
 	const STAT_NILAI = FIGURE;
-	/** Tabel: satu garis rambut bersama antar baris, kepala Wash Grey + garis tinta. */
-	const TABEL = 'w-full border-collapse text-[13px] leading-[1.25]';
-	const TH =
-		'border-b border-foreground bg-muted px-2 py-1.5 text-left text-xs font-semibold whitespace-nowrap';
-	const TH_NUM = `${TH} text-right tabular-nums`;
-	const BARIS = 'border-b border-border transition-colors last:border-b-0 hover:bg-muted';
-	const TD = 'px-2 py-1.5 align-top';
-	const TD_NUM = `${TD} text-right tabular-nums`;
-	/** Kotak tabel: gulir mendatar di dalam modul kalau layarnya sempit. */
-	const TABEL_BUNGKUS = 'overflow-x-auto border-b border-border';
 	/** Daftar Penjualan: baris nama + keterangan + aksi, satu garis rambut bersama. */
 	const LIROW = 'flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 px-2 py-1.5';
 	const LIROW_NAMA = 'text-[13px] font-medium';
@@ -241,8 +238,8 @@
 					<thead>
 						<tr>
 							<th scope="col" class={TH}>Metode</th>
-							<th scope="col" class={TH_NUM}>Transaksi</th>
-							<th scope="col" class={TH_NUM}>Omzet</th>
+							<th scope="col" class={TH_ANGKA}>Transaksi</th>
+							<th scope="col" class={TH_ANGKA}>Omzet</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -251,10 +248,10 @@
 								<td class={TD}>{METODE_LABEL[metode.method]}</td>
 								<!-- A method nobody used shows `—`, not `0`: there was no
 								     number to answer with (DESIGN.md, Figures). -->
-								<td class={TD_NUM}>
+								<td class={TD_ANGKA}>
 									{tanpaTransaksi(metode.transactions) ? '—' : metode.transactions}
 								</td>
-								<td class={TD_NUM}>
+								<td class={TD_ANGKA}>
 									{tanpaTransaksi(metode.transactions) ? '—' : formatRupiah(metode.total)}
 								</td>
 							</tr>
@@ -279,16 +276,16 @@
 						<thead>
 							<tr>
 								<th scope="col" class={TH}>Kasir</th>
-								<th scope="col" class={TH_NUM}>Transaksi</th>
-								<th scope="col" class={TH_NUM}>Omzet</th>
+								<th scope="col" class={TH_ANGKA}>Transaksi</th>
+								<th scope="col" class={TH_ANGKA}>Omzet</th>
 							</tr>
 						</thead>
 						<tbody>
 							{#each omzet.data.by_cashier as kasir (kasir.cashier_id)}
 								<tr class={BARIS}>
 									<td class={TD}>{kasir.cashier_name}</td>
-									<td class={TD_NUM}>{kasir.transactions}</td>
-									<td class={TD_NUM}>{formatRupiah(kasir.total)}</td>
+									<td class={TD_ANGKA}>{kasir.transactions}</td>
+									<td class={TD_ANGKA}>{formatRupiah(kasir.total)}</td>
 								</tr>
 							{/each}
 						</tbody>

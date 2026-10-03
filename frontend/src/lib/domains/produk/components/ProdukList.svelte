@@ -3,10 +3,10 @@
 		AKSI_BARIS,
 		AKSI_MODUL,
 		AKSI_STRIP,
+		BARIS,
 		CATATAN,
 		CATATAN_ANGKA,
 		COMMIT_BARIS,
-		CORET,
 		FIELD,
 		INPUT,
 		JUDUL,
@@ -16,7 +16,18 @@
 		MODUL_KEPALA,
 		PAPAN,
 		STRIP,
-		TAG
+		TABEL,
+		TABEL_BUNGKUS,
+		TAG,
+		TAG_CORET,
+		TD,
+		TD_AKSI,
+		TD_HARGA,
+		TD_NAMA,
+		TD_ANGKA,
+		TD_SUB,
+		TH,
+		TH_ANGKA
 	} from '$lib/components/shared/mosaik';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -198,23 +209,6 @@
 		INPUT,
 		'w-full data-[size=default]:h-[26px] [&_svg:not([class*=size-])]:size-3'
 	);
-	/** Tabel: satu garis rambut bersama antar baris, kepala Wash Grey + garis tinta. */
-	const TABEL = 'w-full border-collapse text-[13px] leading-[1.25]';
-	const TH =
-		'border-b border-foreground bg-muted px-2 py-1.5 text-left text-xs font-semibold whitespace-nowrap';
-	const TH_NUM = `${TH} text-right tabular-nums`;
-	const BARIS = 'border-b border-border transition-colors last:border-b-0 hover:bg-muted';
-	const TD = 'px-2 py-1.5 align-top';
-	const TD_NUM = `${TD} text-right tabular-nums`;
-	/** Harga merah utilitas dan tabular; tidak pernah monospace (DESIGN.md, Typography). */
-	const TD_HARGA = `${TD_NUM} font-semibold text-destructive`;
-	const TD_SUB = `${TD} text-xs`;
-	const TD_AKSI = `${TD} whitespace-nowrap`;
-	/**
-	 * Quiet tag yang mati: garis coretnya, bukan opasitasnya (DESIGN.md,
-	 * State-Is-Not-Faded).
-	 */
-	const TAG_NONAKTIF = `${TAG} ${CORET}`;
 </script>
 
 <!--
@@ -228,8 +222,8 @@
 			<th scope="col" class={TH}>Nama</th>
 			<th scope="col" class={TH}>Kode</th>
 			<th scope="col" class={TH}>Kategori</th>
-			<th scope="col" class={TH_NUM}>Harga</th>
-			<th scope="col" class={TH_NUM}>Stok</th>
+			<th scope="col" class={TH_ANGKA}>Harga</th>
+			<th scope="col" class={TH_ANGKA}>Stok</th>
 			<th scope="col" class={TH}>Status</th>
 			<th scope="col" class={TH}>Aksi</th>
 		</tr>
@@ -363,14 +357,14 @@
 				sama, pada jumlah baris yang masuk akal, jadi kepala tabel di atasnya
 				tidak bergerak saat datanya tiba.
 			-->
-			<div class="overflow-x-auto border-b border-border">
+			<div class={TABEL_BUNGKUS}>
 				<table class={TABEL}>
 					{@render kepalaTabel()}
 					<tbody aria-hidden="true">
 						{#each BARIS_HANTU as baris (baris)}
-							<tr class="border-b border-border last:border-b-0">
+							<tr class={BARIS}>
 								{#each KOLOM_HANTU as kolom (kolom)}
-									<td class="px-2 py-1.5">
+									<td class={TD}>
 										<span class="block h-[13px] w-full bg-muted"></span>
 									</td>
 								{/each}
@@ -393,13 +387,13 @@
 					: 'Belum ada Produk. Tambahkan yang pertama lewat tombol Tambah Produk.'}
 			</p>
 		{:else}
-			<div class="overflow-x-auto border-b border-border">
+			<div class={TABEL_BUNGKUS}>
 				<table class={TABEL}>
 					{@render kepalaTabel()}
 					<tbody>
 						{#each found as produk (produk.id)}
 							<tr class={BARIS}>
-								<td class={`${TD} font-medium`}>{produk.name}</td>
+								<td class={TD_NAMA}>{produk.name}</td>
 
 								<!--
 									Kode yang kosong tidak boleh terlihat seperti data yang hilang:
@@ -421,10 +415,10 @@
 									Angkanya sendiri, atau kata yang menemani keadaannya — prototipe
 									menulis "4 · menipis" dan "Stok habis" di kolom yang sama.
 								-->
-								<td class={TD_NUM}>{stokCell(produk)}</td>
+								<td class={TD_ANGKA}>{stokCell(produk)}</td>
 
 								<td class={TD}>
-									<span class={produk.active ? TAG : TAG_NONAKTIF}>
+									<span class={produk.active ? TAG : TAG_CORET}>
 										{produk.active ? 'Aktif' : 'Nonaktif'}
 									</span>
 								</td>

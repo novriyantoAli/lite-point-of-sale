@@ -105,8 +105,6 @@ Batas yang mengikat:
 - **Keputusan terbuka:** apakah toko akan punya pegawai Kasir yang login sendiri;
   aset visual toko (logo/warna) belum ada; tidak ada kebutuhan aksesibilitas spesifik
   yang ditetapkan pemilik.
-- **Cacat yang diketahui:** `src/app.html` masih `lang="en"` padahal seluruh UI
-  berbahasa Indonesia.
 
 ## Brand Commitments
 

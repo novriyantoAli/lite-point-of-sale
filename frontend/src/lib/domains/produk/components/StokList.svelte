@@ -2,6 +2,7 @@
 	import {
 		AKSI_BARIS,
 		AKSI_MODUL,
+		BARIS,
 		CATATAN,
 		CATATAN_ANGKA,
 		CORET,
@@ -14,7 +15,16 @@
 		MODUL_TEKS,
 		PAPAN,
 		STRIP,
-		TAG
+		TABEL,
+		TABEL_BUNGKUS,
+		TAG,
+		TAG_CORET,
+		TD_AKSI,
+		TD_NAMA,
+		TD_ANGKA,
+		TD_SUB,
+		TH,
+		TH_ANGKA
 	} from '$lib/components/shared/mosaik';
 	import { Button } from '$lib/components/ui/button';
 	import { cn } from '$lib/utils';
@@ -73,19 +83,6 @@
 	const LIROW_KODE = 'text-xs';
 	const LIROW_META = 'flex flex-wrap items-center gap-x-2 gap-y-1 text-xs';
 	const LIROW_AKSI = 'flex items-center gap-1';
-	/** Tabel: satu garis rambut bersama antar baris, kepala Wash Grey + garis tinta. */
-	const TABEL = 'w-full border-collapse text-[13px] leading-[1.25]';
-	const TH =
-		'border-b border-foreground bg-muted px-2 py-1.5 text-left text-xs font-semibold whitespace-nowrap';
-	const TH_NUM = `${TH} text-right tabular-nums`;
-	const BARIS = 'border-b border-border transition-colors last:border-b-0 hover:bg-muted';
-	const TD = 'px-2 py-1.5 align-top';
-	const TD_NUM = `${TD} text-right`;
-	const TD_SUB = `${TD} text-xs`;
-	const TD_AKSI = `${TD} whitespace-nowrap`;
-	const TD_NAMA = `${TD} font-medium`;
-	/** Quiet tag yang mati: garis coretnya, bukan opasitasnya (State-Is-Not-Faded). */
-	const TAG_CORET = `${TAG} ${CORET}`;
 	/** Kata keadaan yang tenang, 12px/600, tanpa kotak: Aman dan angka telanjang. */
 	const KEADAAN = 'text-xs font-semibold';
 
@@ -252,13 +249,13 @@
 		{:else if catalogue.data?.length === 0}
 			<p class={MODUL_TEKS}>Belum ada Produk. Tambahkan yang pertama di layar Produk.</p>
 		{:else}
-			<div class="overflow-x-auto border-b border-border">
+			<div class={TABEL_BUNGKUS}>
 				<table class={TABEL}>
 					<thead>
 						<tr>
 							<th scope="col" class={TH}>Nama</th>
 							<th scope="col" class={TH}>Kode</th>
-							<th scope="col" class={TH_NUM}>Stok</th>
+							<th scope="col" class={TH_ANGKA}>Stok</th>
 							<th scope="col" class={TH}>Aksi</th>
 						</tr>
 					</thead>
@@ -285,9 +282,9 @@
 									diukur dari angka, bukan dari kata. `tabular-nums` menahan
 									lebarnya saat Stok berubah (DESIGN.md, Typography).
 								-->
-								<td class={TD_NUM}>
+								<td class={TD_ANGKA}>
 									<span class="inline-flex items-center justify-end gap-1.5">
-										<span class="tabular-nums">{produk.stock}</span>
+										{produk.stock}
 										{#if !produk.active}
 											<!--
 												Produk yang tidak dijual bukan Produk yang habis, jadi
